@@ -1,0 +1,5 @@
+# List of Modules to be left out by the createMain.py script
+
+EmpiricPhyNic
+MinParamAddressing
+StaticLocation

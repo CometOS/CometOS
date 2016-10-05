@@ -1,0 +1,11 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'DataDisseminationExperiment.cc',
+'RAMSegmentedFile.cc'
+])
+
+#if env.conf.bool('inet'):
+#	SConscript("inet/SConscript")

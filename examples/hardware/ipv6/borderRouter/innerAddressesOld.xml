@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<node>
+	<address>64:29:30:31:0:0:0:8498</address>
+</node>
+
+<node basestation="true">
+	<address>64:29:30:31:0:0:0:81A4</address>
+</node>
+
+
+

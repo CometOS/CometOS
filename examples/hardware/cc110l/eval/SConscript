@@ -1,0 +1,7 @@
+Import('env')
+
+env.add_sources([
+'main.cc'
+])
+
+SConscript("../../src/lora/SConscript")

@@ -1,0 +1,11 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.conf_to_str_define(["serial_comm_port"])
+
+if env.conf.bool("use_default_stack"):
+	env.add_sources([
+	'default.cc'
+	])
+

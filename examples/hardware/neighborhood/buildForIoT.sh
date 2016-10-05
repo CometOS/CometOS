@@ -1,0 +1,1 @@
+cob platform=M3OpenNode mac_default_nwk_id=12 cout_provider=serial_printf

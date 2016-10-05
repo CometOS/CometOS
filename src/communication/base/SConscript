@@ -1,0 +1,22 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.bool('pal_mac'):
+#if True:
+	env.add_sources([
+	'Airframe.cc',
+	'DataIndication.cc',
+	'DataRequestResponse.cc',
+	'Demux.cc',
+	'Dispatcher.cc',
+	'Endpoint.cc',
+	'Layer.cc',
+	'LowerEndpoint.cc',
+	'RemoteAccess.cc',
+	'RemoteEvent.cc',
+	'Selector.cc',
+	'DummyEndpoint.cc',
+	'DummyLowerEndpoint.cc'
+	])
+

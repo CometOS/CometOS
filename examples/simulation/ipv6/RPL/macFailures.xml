@@ -1,0 +1,8 @@
+<root>
+	<node id="0">
+		<failure simTime="1000" />
+		<resume simTime="3000" />
+		<failure simTime="6000" />
+		<resume simTime="10000" />		
+	</node>
+</root>

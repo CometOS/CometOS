@@ -1,0 +1,15 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+# Specific firmware PAL
+firmware = env.conf.str('firmware', valid_values = ['async','blocking'])
+if firmware == 'async' and not env.bootloader:
+	env.add_sources(['s25fl_async.cc'])
+
+if firmware == 'blocking' or env.bootloader or env.conf.bool('cfs'):
+	env.add_sources(['s25fl_blocking.cc'])
+
+env.add_sources([
+    #'modules/S25FlAccess.cc',
+    's25fl_common.cc'])

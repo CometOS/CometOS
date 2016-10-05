@@ -1,0 +1,23 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'RFA1DriverLayer.cc',
+'RadioAlarm.cc',
+'tasklet.cc',
+'tosUtil.cc'
+])
+
+if env.conf.str('mac') == 'tos':
+    env.add_sources([
+    '802154CsmaLayer.cc',
+    #'TosRandomCollisionLayer.cc',
+    'TosAdaptionLayer.cc',
+    'UniqueLayer.cc',
+    'PacketLinkLayer.cc',
+    'MessageBufferLayer.cc',
+    'SoftwareAckLayer.cc',
+    'CcaLayer.cc'
+    ])
+

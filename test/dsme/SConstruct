@@ -1,0 +1,78 @@
+import os
+import glob
+
+class TestEnvironment(Environment):
+    def __init__(self):
+        Environment.__init__(self,ENV = os.environ)
+        self.objs = []
+
+    def add_sources(self,sources,additional_flags=''):
+        for source in sources:
+            self.objs.append(self.Object(source,CPPFLAGS=additional_flags))
+
+    def get_objs(self):
+        return self.objs
+
+env = TestEnvironment()
+
+Export('env')
+
+###############################
+# Include SConscripts
+###############################
+dsmeroot = '../../src/communication/dsme/openDSME'
+for dir in ['dsmeLayer','mac_services/dataStructures']:
+    env.Append(CPPPATH=[Dir(dsmeroot+'/'+dir)])
+env.Append(CPPPATH=[Dir('platform')])
+
+env.add_sources(map(lambda x: dsmeroot+'/'+x, [
+'mac_services/dataStructures/BeaconBitmap.cc',
+'mac_services/dataStructures/DSMEBitVector.cc',
+'mac_services/dataStructures/BitVectorIterator.cc',
+'mac_services/dataStructures/IEEE802154MacAddress.cc'
+]))
+
+###############################
+# Generate main
+###############################
+gtestroot = '../gtest/gmock/gtest'
+env.Append(CPPPATH=[Dir(gtestroot+'/include')])
+env.Append(CPPPATH=[Dir(gtestroot+'')])
+testcc = '#include "gtest/gtest.h"\n'
+
+for name in glob.glob('*_unittest.h'):
+    testcc += '#include "'+name+'"\n'
+
+testcc += """
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
+""" 
+with open('test.cc','w') as myfile:
+    myfile.write(testcc)
+env.Append(CPPPATH=[Dir('.')])
+env.add_sources(['test.cc'])
+#SConscript(gtestroot+"gtest/SConscript",variant_dir='build')
+env.add_sources([gtestroot+"/src/gtest-all.cc"])
+
+###############################
+# Compile and run
+###############################
+env.Append(CXXFLAGS='-std=c++11 -g')
+env.Append(CXXFLAGS='-Wfatal-errors')
+env.Append(CXXFLAGS='-D\'DSME_ASSERT(x)=assert(x)\'')
+env.Append(CXXFLAGS='-Wall')
+env.Append(CXXFLAGS='-Wextra')
+env.Append(CXXFLAGS='-fprofile-arcs -ftest-coverage')
+env.Append(_LIBFLAGS=' -fprofile-arcs -coverage')
+main = env.Program('test',env.get_objs(),LIBS=['pthread', 'gcov'])
+
+# Remove 'build' directory
+#run = Command( target = "testoutput.txt", source = "./test", action = "./test | tee $TARGET; rm -r test.cc build")
+
+# Keep 'build' directory
+run = Command( target = "testoutput.txt", source = "./test", action = "./test | tee $TARGET; rm test.cc")
+
+Depends(run,main)
+env.AlwaysBuild(run)

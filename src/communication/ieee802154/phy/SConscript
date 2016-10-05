@@ -1,0 +1,15 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'EmpiricDecider.cc',
+'EmpiricDeciderBase.cc',
+'EmpiricModel.cc',
+'EmpiricModelPhy.cc',
+'StaticConnectionManager.cc',
+'StaticLocation.cc'
+])
+
+
+    

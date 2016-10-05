@@ -1,0 +1,13 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'MacAbstractionLayer.cc',
+'StaticConcentricMobility.cc',
+'ExtendedWorldUtility.cc',
+'MacInterfTest.cc',
+'AtmelRF230SnrLqiProvider.cc',
+'MacPacket.cc'
+])
+

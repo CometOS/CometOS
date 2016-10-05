@@ -1,0 +1,42 @@
+Import('env')
+
+SConscript('addressing/SConscript')
+SConscript('association/SConscript')
+SConscript('base/SConscript')
+SConscript('bounce/SConscript')
+SConscript('bridge/SConscript')
+SConscript('configurator/SConscript')
+SConscript('counter/SConscript')
+SConscript('crc/SConscript')
+SConscript('http/SConscript')
+SConscript('injector/SConscript')
+SConscript('linkquality/SConscript')
+SConscript('power/SConscript')
+SConscript('print/SConscript')
+SConscript('reliability/SConscript')
+SConscript('serialize/SConscript')
+SConscript('systemmonitor/SConscript')
+SConscript('tcp/SConscript')
+SConscript('time/SConscript')
+SConscript('traffic/SConscript')
+SConscript('topology/SConscript')
+
+if env.conf.bool('otap'):
+    SConscript('otap/SConscript')
+
+if env.conf.bool('pal_mac'):
+    SConscript('ieee802154/mac/SConscript')
+    SConscript('routing/SConscript')
+    if env.conf.has_key('neighborhood') and env.conf.bool('neighborhood'):
+        SConscript('neighborhood/SConscript')
+
+    if env.conf.str('mac', valid_values=['original','tos','dsme']) == 'dsme':
+        SConscript('dsme/SConscript')
+    
+    
+if env.get_platform() == 'omnet' and env.conf.bool('mixim'):
+    SConscript('ieee802154/phy/SConscript')
+
+if env.conf.has_key('v6') and env.conf.bool('v6'):
+    SConscript('ipv6/SConscript')
+

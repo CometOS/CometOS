@@ -1,0 +1,4 @@
+Merge hex file with bootloader hex file if flashing the first
+time (remove last line of firmware hex and directly append
+bootloader hex file)
+Activate boot reset fuse. 

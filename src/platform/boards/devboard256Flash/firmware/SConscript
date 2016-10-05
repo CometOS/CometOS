@@ -1,0 +1,15 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+# Convert firmware specific defines
+env.conf_to_str_define(['p_firmware_valid','p_firmware_opcode'])
+
+# Specific firmware PAL
+if env.conf.bool('pal_firmware'):
+    firmware = env.conf.str('firmware', valid_values = ['async','blocking'])
+    if firmware == 'async':
+        env.add_sources(['palFirmwareAsyncS25FL.cc'])
+    else:
+        env.add_sources(['palFirmwareS25FL.cc'])
+

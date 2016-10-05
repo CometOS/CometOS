@@ -1,0 +1,14 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+    'TrafficGen.cc',
+    'TrafficGenCoapPolling.cc',
+])
+
+if env.get_platform() == 'omnet':
+    env.add.sources([
+        'TrafficGenSim.cc',
+        'TrafficGenCoapPollingSim.cc'
+    ])

@@ -1,0 +1,9 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+
+if env.get_platform() == 'omnet' or env.get_platform() == 'local' or env.get_platform() == 'python':
+	env.add_sources([
+	'BsBridge.cc',
+	])

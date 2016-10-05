@@ -1,0 +1,9 @@
+#ifndef _LOG_LEVELS_H_
+#define _LOG_LEVELS_H_
+
+enum {
+    LOG_LEVEL_DEBUG = 0, LOG_LEVEL_INFO, LOG_LEVEL_WARN, LOG_LEVEL_ERROR, LOG_LEVEL_FATAL
+};
+
+
+#endif

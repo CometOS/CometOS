@@ -1,0 +1,12 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'ColorAlgo.cc',
+'ColorData.cc',
+'ColorHeader.cc',
+'ColorAnalysis.cc'
+
+])
+

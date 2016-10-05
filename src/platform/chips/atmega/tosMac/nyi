@@ -1,0 +1,25 @@
+palExec_atomicBegin();
+bool bufAvailable = rxBuf != NULL;
+palExec_atomicEnd();
+
+if (bufAvailable) {
+    node_t dst, src;
+    mac_networkId_t dstNwkId, srcNwkId;
+    uint8_t len;
+    uint8_t buf = rxBuf;
+    rxBuf = NULL;
+    msgToCometos(buf, &len, &dst, &src, &srcNwkId, &dstNwkId, msg);
+    mac_cbReceive(buf, length, dst, src, srcNwkId, dstNwkId, info);
+}
+
+mac_result_t mac_setReceiveBuffer(uint8_t* buf) {
+    palExec_atomicBegin();
+    if (rxBuf == NULL) {
+        rxBuf = buf;
+        palExec_atomicEnd();
+        return MAC_SUCCESS;
+    } else {
+        palExec_atomicEnd();
+        return MAC_ERROR_ALREADY;
+    }
+}

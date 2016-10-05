@@ -1,0 +1,9 @@
+Import('env')
+
+if env.conf.str('target') == 'master':
+	env.Append(CPPDEFINES=['MASTER'])
+
+env.add_sources([
+	'main.cc',
+])
+

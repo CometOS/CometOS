@@ -1,0 +1,9 @@
+Import('env')
+
+# Collect hardware sources
+env.add_sources(['main.cc'])
+
+# Build
+program = env.Image('Device.hex',env.get_objs())
+
+Return('program')

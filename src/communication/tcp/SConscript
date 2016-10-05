@@ -1,0 +1,19 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.get_platform() == 'omnet' or env.get_platform() == 'local' or env.get_platform() == 'python':
+	env.add_sources([
+	'AsyncTcpAgent.cc',
+	'AsyncTcpComm.cc',
+	'TcpAgent.cc',
+	'TcpComm.cc',
+	'TcpForwarder.cc'
+	])
+	
+	
+if env.get_platform() == 'frdm_k64f' and env.conf.bool('fnet'):
+	env.add_sources([
+	'TcpAgent.cc',
+	'TcpComm.cc'
+	])

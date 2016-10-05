@@ -1,0 +1,15 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.get_platform() == 'omnet':
+	SConscript("omnetpp/SConscript")
+else:
+	SConscript("platform/SConscript")
+
+env.add_sources([
+'Arbiter.cc',
+'TaskScheduler.cc',
+'Callback.cc',
+'Event.cc'
+])

@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<root>
+	<node id="0" x="200" y="50">
+	   <link dest="1" rssiMean="88" rssiVar="5" per="0"/>
+	   <link dest="4" rssiMean="88" rssiVar="5" per="0"/>
+	</node>
+	<node id="1" x="100" y="120">
+      <link dest="0" rssiMean="88" rssiVar="5" per="0"/>
+      <link dest="2" rssiMean="88" rssiVar="5" per="0"/>
+      <link dest="3" rssiMean="88" rssiVar="5" per="0"/>
+      <link dest="4" rssiMean="88" rssiVar="5" per="0"/>
+      <link dest="5" rssiMean="88" rssiVar="5" per="0"/>
+    </node>
+	<node id="2" x="50" y="200">
+        <link dest="1" rssiMean="88" rssiVar="5" per="0"/>
+        <link dest="3" rssiMean="88" rssiVar="5" per="0"/>
+    </node>
+    <node id="3" x="150" y="200">
+        <link dest="1" rssiMean="88" rssiVar="5" per="0"/>
+        <link dest="2" rssiMean="88" rssiVar="5" per="0"/>
+        <link dest="4" rssiMean="88" rssiVar="5" per="0"/>
+        <link dest="5" rssiMean="88" rssiVar="5" per="0"/>
+    </node>
+	<node id="4" x="300" y="120">
+      <link dest="0" rssiMean="88" rssiVar="5" per="0"/>
+      <link dest="5" rssiMean="88" rssiVar="5" per="0"/>
+      <link dest="6" rssiMean="88" rssiVar="5" per="0"/>
+      <link dest="1" rssiMean="88" rssiVar="5" per="0"/>
+      <link dest="3" rssiMean="88" rssiVar="5" per="0"/>
+    </node>
+    <node id="5" x="250" y="200">
+        <link dest="1" rssiMean="88" rssiVar="5" per="0"/>
+        <link dest="3" rssiMean="88" rssiVar="5" per="0"/>
+        <link dest="4" rssiMean="88" rssiVar="5" per="0"/>
+        <link dest="6" rssiMean="88" rssiVar="5" per="0"/>
+    </node>
+	<node id="6" x="350" y="200">
+        <link dest="4" rssiMean="88" rssiVar="5" per="0"/>
+        <link dest="5" rssiMean="88" rssiVar="5" per="0"/>
+    </node>
+
+</root>

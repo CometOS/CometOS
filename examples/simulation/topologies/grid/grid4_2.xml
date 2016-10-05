@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<network n="4" range="40.0" west="0.0" east="20.0" north="0.0" south="20.0" degreeMean="3.0" degreeMax="3" degreeMin="3" diaAvg="0.75" diaMax="1">
+<node id="0" x="0.000" y="0.000">
+</node>
+<node id="1" x="20.000" y="0.000">
+</node>
+<node id="2" x="0.000" y="20.000">
+</node>
+<node id="3" x="20.000" y="20.000">
+</node>
+</network>

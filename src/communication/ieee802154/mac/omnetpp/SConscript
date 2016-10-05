@@ -1,0 +1,12 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+])
+
+if env.conf.bool('mixim'):
+	SConscript('mixim/SConscript')
+
+#if env.conf.bool('inet'):
+#	SConscript('inet/SConscript')

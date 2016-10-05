@@ -1,0 +1,10 @@
+01: square grid
+02: line
+03: cross
+04: square
+05: random 1
+06: random 2
+07: random 3
+08: part-circle
+09: square grid switch ID 1
+10: square grid switch ID 2

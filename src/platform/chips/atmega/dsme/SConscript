@@ -1,0 +1,13 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'DSMEPlatform.cc',
+#'DSMEPlatform_up.cc',
+'DSMEPlatform_down.cc',
+'DSMECcaLayer.cc',
+#'DSMEMessage.cc',
+'MacDummy.cc'
+])
+

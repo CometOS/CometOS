@@ -1,0 +1,7 @@
+Import('env')
+
+env.add_sources([
+    'main.cc'
+])
+
+env.add_sources(['BeaconApp.cc'],'-DBEACON_AES_KEY="'+env.conf.str('beacon_aes_key')+'"')

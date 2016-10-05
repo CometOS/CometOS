@@ -1,0 +1,34 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'palLed.cc',
+'pal.cc'
+])
+
+SConscript("../../chips/atmega_rf/SConscript")
+
+if env.conf.bool('pal_firmware') or env.conf.bool('cfs'):
+        SConscript("../../chips/s25fl/SConscript")
+        if env.conf.bool('pal_firmware'):
+            SConscript("../devboard256Flash/firmware/SConscript")
+
+SConscript("../../chips/cc110l/SConscript")
+
+
+if env.conf.bool('pal_mac'):
+	SConscript("mac/SConscript")
+
+if env.conf.bool('pal_rs485'):
+	env.add_sources([
+	'palRS485.cc',
+	])
+
+if env.conf.bool('pal_rs485_slave'):
+	env.add_sources(['palRS485Slave.cc'],'-DRS485_BAUDRATE='+env.conf.str('rs485_baudrate'))
+
+if env.bootloader:
+	SConscript("bootloader/SConscript")
+
+

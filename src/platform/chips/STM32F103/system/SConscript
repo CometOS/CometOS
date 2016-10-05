@@ -1,0 +1,28 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.'),Dir('include/cmsis/'),Dir('include/cortexm/'), Dir('include/arm/'), Dir('include/stm32f1-stdperiph/'), Dir('include')])
+
+env.add_sources([
+	'src/stm32f1-stdperiph/stm32f10x_gpio.c',
+	'src/stm32f1-stdperiph/stm32f10x_tim.c',
+	'src/stm32f1-stdperiph/stm32f10x_rcc.c',
+	'src/stm32f1-stdperiph/stm32f10x_dma.c',
+	'src/stm32f1-stdperiph/misc.c',
+	'src/stm32f1-stdperiph/stm32f10x_usart.c',
+	'src/stm32f1-stdperiph/stm32f10x_spi.c',
+	'src/stm32f1-stdperiph/stm32f10x_exti.c',
+	'src/stm32f1-stdperiph/stm32f10x_wwdg.c',
+	'src/newlib/assert.c',
+	'src/newlib/_startup.c',
+	'src/newlib/_exit.c',
+	'src/newlib/_cxx.cpp',
+	'src/newlib/_syscalls.c',
+	'src/newlib/_sbrk.c',
+	'src/cortexm/_initialize_hardware.c',
+	'src/cortexm/_reset_hardware.c',
+	'src/cortexm/exception_handlers.c',
+	'src/cmsis/system_stm32f10x.c',
+	'src/cmsis/vectors_stm32f10x.c'
+])
+
+

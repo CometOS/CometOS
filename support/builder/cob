@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+import subprocess
+import sys
+import os
+
+while True:
+    mainconf = os.path.join(os.getcwd(),'cometos.conf')
+    if not os.path.isfile(mainconf):
+        print mainconf+" not found"
+
+        if os.getcwd() == '/':
+            exit(1)
+
+        os.chdir("..")
+    else:
+        sconstruct = os.path.join(os.environ['COMETOS_PATH'], 'support/builder', 'SConstruct')
+        cmd = ['scons','-f'+sconstruct]
+        cmd += sys.argv[1:]
+        print cmd
+        sys.exit(subprocess.call(cmd))
+        break

@@ -1,0 +1,70 @@
+Import('env')
+import time
+import subprocess
+import re
+import traceback
+import os
+from messages import *
+
+# for FNET
+if env.cometos_externals_path == '':
+    error_no_externals()
+    exit(1) 
+
+env.conf_to_bool_define(['fnet'])
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.str('cout_provider') == 'serial_printf':
+	baud = env.conf.str('serial_baudrate')
+	env.Append(CPPDEFINES=['SERIAL_PRINTF='+str(baud)])
+
+# Set timestamp / firmware version
+timestamp = str(int(time.time()))
+version = '0'
+try:
+	git_commit_hash = subprocess.check_output(['git','rev-parse','HEAD']).strip()
+	version = str(int(git_commit_hash[:4],16)) # take only the four first hex digit (for 16 bit version)
+except:
+	for i in range(100):
+		try:
+			path = [".."] * i
+			path = os.path.join(*path)
+			svn_info = subprocess.check_output(['svn','info',path])
+			success = False
+			for line in svn_info.splitlines():
+				m = re.search('Revision: (.*)',line)
+				if m:
+					svn_revision = m.group(1).strip()
+					version = svn_revision
+					success = True
+			if success:
+				break
+					
+		except:
+			pass
+
+define = '-DPAL_FIRMWARE_TIMESTAMP='+timestamp+' -DPAL_FIRMWARE_VERSION='+version;
+env.add_sources(['firmwareVersion.cc'],define)
+
+
+env.add_sources([
+'palExec.cc',
+'timer2.cc',
+'palSerial.cc',
+'cometosAssert.cc',
+'palGPIOPin.cc'
+])
+
+if env.conf.bool('pal_pers'):
+    env.add_sources([
+    'palPers.cc'
+    ])
+
+if env.conf.bool('pal_rand'):
+    env.add_sources([
+    'palRand.cc'
+    ])
+
+if env.bootloader:
+	SConscript("bootloader/SConscript")

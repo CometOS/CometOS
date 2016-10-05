@@ -1,0 +1,55 @@
+Import('env')
+import glob
+
+SConscript("helper/SConscript")
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources(
+['DSMEMessage.cc',
+'DSMEPlatformBase.cc']);
+
+if env.get_platform() != 'omnet':
+    env.Append(CPPPATH=[Dir('platform')])
+
+env.add_sources(map(lambda x: 'openDSME/'+x, [    
+'mac_services/mlme_sap/POLL.cc',
+'mac_services/mlme_sap/START.cc',
+'mac_services/mlme_sap/MLME_SAP.cc',
+'mac_services/mlme_sap/DSME_GTS.cc',
+'mac_services/mlme_sap/DISASSOCIATE.cc',
+'mac_services/mlme_sap/SCAN.cc',
+'mac_services/mlme_sap/ASSOCIATE.cc',
+'mac_services/mcps_sap/MCPS_SAP.cc',
+'mac_services/mcps_sap/DATA.cc',
+'mac_services/mcps_sap/PURGE.cc',
+'mac_services/dataStructures/DSMESlotAllocationBitmap.cc',
+'mac_services/dataStructures/IEEE802154MacAddress.cc',
+'mac_services/dataStructures/GTS.cc',
+'mac_services/dataStructures/BeaconBitmap.cc',
+'mac_services/dataStructures/DSMEAllocationCounterTable.cc',
+'mac_services/dataStructures/DSMESuperframeSpecification.cc',
+'mac_services/dataStructures/BitVectorIterator.cc',
+'mac_services/dataStructures/DSMEBitVector.cc',
+'mac_services/dataStructures/DSMEMessageElement.cc',
+'mac_services/pib/PIBHelper.cc',
+'mac_services/pib/PHY_PIB.cc',
+'mac_services/pib/MAC_PIB.cc',
+'dsmeAdaptionLayer/GTSHelper.cc',
+'dsmeAdaptionLayer/ScanHelper.cc',
+'dsmeAdaptionLayer/GTSController.cc',
+'dsmeAdaptionLayer/AssociationHelper.cc',
+'dsmeAdaptionLayer/DSMEAdaptionLayer.cc',
+'dsmeLayer/messageDispatcher/MessageDispatcher.cc',
+'dsmeLayer/beaconManager/BeaconManager.cc',
+'dsmeLayer/DSMELayer.cc',
+'dsmeLayer/messages/GTSManagement.cc',
+'dsmeLayer/messages/IEEE802154eMACHeader.cc',
+'dsmeLayer/capLayer/CAPLayer.cc',
+'dsmeLayer/ackLayer/AckLayer.cc',
+'dsmeLayer/associationManager/AssociationManager.cc',
+'dsmeLayer/DSMEEventDispatcher.cc',
+'dsmeLayer/gtsManager/GTSData.cc',
+'dsmeLayer/gtsManager/GTSManager.cc',
+'dsmeLayer/gtsManager/ACTUpdater.cc'
+]))

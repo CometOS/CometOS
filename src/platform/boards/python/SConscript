@@ -1,0 +1,11 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+	'helper.cc',
+	'Sniffer.cc'])
+
+SConscript("../local/SConscript")
+
+	

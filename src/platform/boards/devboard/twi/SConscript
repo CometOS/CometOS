@@ -1,0 +1,19 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+# Specific twi PAL
+sources = []
+twi = env.get_conf('twi', valid_values = ['none', 'blocking', 'async', 'eeprom'])
+if twi == 'blocking':
+	sources = ['twi.cc']
+elif twi == 'async':
+	sources = ['twiAsync.cc']
+elif twi == 'eeprom':
+	sources = ['eepromAsync.cc','twi_eeprom.cc']
+
+
+# Build objects from sources
+objs = map(lambda o: env.Object(o), sources)
+
+Return('objs')

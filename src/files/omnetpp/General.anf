@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="results/General-*.vec"/>
+    <inputs name="results/General-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Reliability">
+      <items xsi:type="scave:Add" filterPattern="bytesNotNull"/>
+      <items xsi:type="scave:BarChart" name="Reliability">
+        <properties name="Graph.Title" value="Reliability"/>
+        <properties name="X.Axis.Title" value="Node"/>
+        <properties name="Y.Axis.Title" value="BytesNotNull"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.1"/>
+  </chartSheets>
+</scave:Analysis>

@@ -1,0 +1,11 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'IPv6DestinationOptionsHeader.cc',
+'IPv6FragmentHeader.cc',
+'IPv6HopByHopOptionsHeader.cc',
+'IPv6RoutingHeader.cc'
+])
+

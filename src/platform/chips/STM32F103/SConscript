@@ -1,0 +1,33 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+env.Append(CPPPATH=[Dir('./ldscripts')])
+env.Append(CPPDEFINES=['USE_STDPERIPH_DRIVER'])
+env.Append(CPPDEFINES=['HSE_VALUE=16000000'])
+env.Append(CPPDEFINES=['STM32F10X_HD'])
+env.Append(CPPDEFINES=['__CM3_REV=0x0201'])
+#env.Append(CPPDEFINES=['ENABLE_LOGGING'])
+
+if env.conf.str('cout_provider') == 'serial_printf':
+	baud = env.conf.str('serial_baudrate')
+	env.Append(CPPDEFINES=['SERIAL_PRINTF='+str(baud)])
+
+serialType = env.conf.str('serial', valid_values=['simple','dma'])
+if serialType == 'simple':
+    env.add_sources(['palSerialSimple.cc'])
+elif serialType == 'dma':
+    env.add_sources(['palSerialDma.cc'])
+
+env.add_sources([
+'palExec.cc',
+'palSpi.cc',
+'palSpiArbiter.cc',
+'palPin.cc',
+'palId.cc',
+'palWdt.cc',
+'palGPIOPin.cc',
+'palTimer.cc',
+'cometosAssert.cc'
+])
+
+SConscript("./system/SConscript")

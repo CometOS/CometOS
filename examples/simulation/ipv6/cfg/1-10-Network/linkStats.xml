@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<root>
+	<node id="0" x="50" y="75">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="1" x="150" y="75">
+	   <link dest="0" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="2" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="2" x="250" y="75">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="3" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="3" x="350" y="75">
+	   <link dest="2" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="4" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="4" x="450" y="75">
+	   <link dest="3" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="5" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="5" x="550" y="75">
+	   <link dest="4" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="6" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="6" x="650" y="75">
+	   <link dest="5" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="7" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="7" x="750" y="75">
+	   <link dest="6" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="8" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="8" x="850" y="75">
+	   <link dest="7" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="9" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="9" x="950" y="75">
+	   <link dest="8" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+</root>

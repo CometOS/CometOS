@@ -1,0 +1,12 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+SConscript('resources/SConscript')
+SConscript('messages/SConscript')
+
+env.add_sources([
+'CoAPLayer.cc',
+'CoAPTest.cc'
+])
+

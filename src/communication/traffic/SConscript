@@ -1,0 +1,13 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+
+if env.get_platform() == 'omnet':
+    env.add_sources(['PoissonTraffic.cc',])
+
+if env.conf.bool('pal_mac'):
+    env.add_sources([
+    'PeriodicTraffic.cc',
+    ])
+

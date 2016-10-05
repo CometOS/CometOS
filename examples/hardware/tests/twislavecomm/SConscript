@@ -1,0 +1,3 @@
+Import('env')
+
+env.add_sources(['main.cc','DummyModule.cc'])

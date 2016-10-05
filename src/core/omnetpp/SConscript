@@ -1,0 +1,17 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'Delegate.cc',
+'Message.cc',
+'Module.cc',
+'palExec.cc',
+'palLed.cc',
+'palLocalTime.cc',
+'palId.cc',
+'logging.cc',
+'simUtil.cc',
+'SchedulerModule.cc'
+])
+

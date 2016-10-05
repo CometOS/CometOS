@@ -1,0 +1,35 @@
+Import('env')
+
+if env.conf.has_key('rf_spi_port'):
+	env.conf_to_str_define(['rf_spi_port'])
+	
+if env.conf.has_key('external_flash'):
+	env.conf_to_bool_define(['external_flash'])
+	
+if env.conf.has_key('serial_baudrate'):
+	env.conf_to_str_define(['serial_baudrate'])
+	
+if env.conf.has_key('serial_comm_baudrate'):
+	env.conf_to_str_define(["serial_comm_baudrate"])
+	
+env.conf_to_str_define(['mac_default_tx_power_lvl'])
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'palLed.cc',
+'pal.cc',
+'palFirmwareDummy.cc',
+'palExecUtils.cc',
+'palRand.cc'
+])
+
+
+SConscript("../../chips/STM32F103/SConscript")
+SConscript("../../chips/AT86RF231/SConscript")
+SConscript("../../chips/N25Q128A/SConscript")
+
+if env.conf.bool('pal_mac'):
+	mc = env.conf.str('mac', valid_values=['tos'])
+	SConscript("tosMac/SConscript")
+	SConscript("mac_common/SConscript")

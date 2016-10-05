@@ -1,0 +1,24 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'../devboard/pal.cc',
+'../devboard/palLed.cc'
+])
+
+SConscript("../../chips/atmega_rf/SConscript")
+
+if env.conf.bool('cfs') or env.bootloader or env.conf.bool('pal_firmware'):
+    SConscript("../../chips/s25fl/SConscript")
+
+if env.conf.bool('pal_firmware'):
+        SConscript("firmware/SConscript")
+
+SConscript("bootloader/SConscript")
+
+if env.conf.bool('pal_mac'):
+    SConscript("../devboard/mac_impl/SConscript")
+
+if env.conf.has_key('serial_comm_baudrate'):
+    env.conf_to_str_define(["serial_comm_baudrate"])

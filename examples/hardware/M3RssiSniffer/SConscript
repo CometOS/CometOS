@@ -1,0 +1,14 @@
+Import('env')
+
+env.conf_to_str_define(['mac_default_nwk_id'])
+
+env.conf_to_str_define(['LOWPAN_DEFAULT_POWER'])
+env.conf_to_bool_define(['manual_mac_init'])
+
+env.conf_to_bool_define(['channel_test'])
+env.conf_to_str_define(['sniff_channel'])
+env.conf_to_str_define(['own_pan_id'])
+
+env.add_sources(['main.cc'])
+
+

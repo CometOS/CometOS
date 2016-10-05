@@ -1,0 +1,32 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.bool('pal_mac') and env.get_platform() != 'omnet':
+	env.add_sources([
+	'TrickleModule.cc',
+    'Heartbeat.cc'
+	])
+
+if env.conf.bool('pal_mac'):
+	env.add_sources([
+    'LongScheduleModule.cc'
+    ])
+
+env.add_sources([
+'OutputStream.cc'
+])
+
+if env.get_platform() == 'omnet' or env.get_platform() == 'local' or env.get_platform() == 'python':
+	env.add_sources([
+	'Logger.cc',
+	'netutils.cc',
+	'threadutils.cc',
+	'stringparser.cc'
+	])
+
+if env.get_platform() == 'frdm_k64f' and env.conf.bool('fnet'):
+	env.add_sources([
+	'netutils.cc'
+	])
+

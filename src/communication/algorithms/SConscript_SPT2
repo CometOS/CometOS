@@ -1,0 +1,11 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'SPT2Algo.cc',
+'SPT2Data.cc',
+'SPT2Header.cc',
+'SPT2Analysis.cc'
+])
+

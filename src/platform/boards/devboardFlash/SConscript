@@ -1,0 +1,16 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'../devboard/pal.cc',
+'../devboard/palLed.cc'
+])
+
+SConscript("../../chips/atmega_rf/SConscript")
+SConscript("../../chips/s25fl/SConscript")
+
+#SConscript("firmware/SConscript")
+#SConscript("bootloader/SConscript")
+if env.conf.bool('pal_mac'):
+    SConscript("../devboard/mac_impl/SConscript")

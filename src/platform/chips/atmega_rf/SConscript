@@ -1,0 +1,9 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+SConscript("../atmega/SConscript")
+	
+env.add_sources([
+	'palGPIOPin.cc'
+])

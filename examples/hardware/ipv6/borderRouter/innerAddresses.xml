@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<node basestation="true">
+	<address>64:29:30:31:0:0:0:2FE7</address>
+</node>
+<node>
+	<address>64:29:30:31:0:0:0:010F</address>
+</node>
+<node>
+	<address>64:29:30:31:0:0:0:3011</address>
+</node>
+<node>
+	<address>64:29:30:31:0:0:0:2FF8</address>
+</node>
+<node>
+	<address>64:29:30:31:0:0:0:2FDE</address>
+</node>
+<node>
+	<address>64:29:30:31:0:0:0:81A4</address>
+</node>
+<node>
+	<address>64:29:30:31:0:0:0:8498</address>
+</node>

@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<root>
+	<node id="0" x="50" y="150">
+	   <link dest="2217" rssiMean="95" rssiVar="0" per="0"/>
+	</node>
+	<node id="2217" x="50" y="150">
+	   <link dest="0" rssiMean="95" rssiVar="0" per="0"/>
+	   <link dest="2218" rssiMean="95" rssiVar="0" per="0"/>
+	   <link dest="2219" rssiMean="95" rssiVar="0" per="0"/>
+	   <link dest="221A" rssiMean="95" rssiVar="0" per="0"/>
+	</node>
+	<node id="2218" x="150" y="150">
+      <link dest="2217" rssiMean="95" rssiVar="0" per="0"/>
+      <link dest="2219" rssiMean="95" rssiVar="0" per="0"/>
+  </node>
+	<node id="2219" x="221" y="80">
+        <link dest="2217" rssiMean="95" rssiVar="0" per="0"/>
+        <link dest="2218" rssiMean="95" rssiVar="0" per="0"/>
+        <link dest="221A" rssiMean="95" rssiVar="0" per="0"/>
+    </node>
+    <node id="221A" x="221" y="220">
+    	<link dest="2217" rssiMean="95" rssiVar="0" per="0"/>
+        <link dest="2219" rssiMean="95" rssiVar="0" per="0"/>
+    </node>
+</root>

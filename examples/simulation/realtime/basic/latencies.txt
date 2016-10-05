@@ -1,0 +1,21 @@
+---------------------------
+Latencies
+
+base -(tcp)- sim node -(mixim)- sim node -(tcp)- forwarder -(serial)- real node -(csma)- real nNode
+
+sim node - sim node
+5.558 MiXiM MAC (payload 0)
+8.750 MiXiM MAC (payload 0)
+
+real node - real node
+6.737	 802.15.4 MAC (payload  0)
+10.068   802.15.4 MAC (payload  50)
+Packet loss was very high in the experiment
+
+real - sim node
+22.161 (payload 0)
+38.248 (payload 50)
+
+base - sim node
+14.514 (payload 0)
+14.459 (payload 0)

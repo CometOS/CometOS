@@ -1,0 +1,3 @@
+[submodule "src/communication/dsme/openDSME"]
+	path = src/communication/dsme/openDSME
+	url = https://github.com/openDSME/openDSME

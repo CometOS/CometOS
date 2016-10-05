@@ -1,0 +1,6 @@
+Import('env')
+
+env.add_sources(['main.cc'])
+env.add_sources(['CFSFormat.cc'])
+
+env.conf_to_str_define(['LOWPAN_DEFAULT_POWER'])

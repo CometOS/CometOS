@@ -1,0 +1,10 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'IpForward.cc',
+'IPv6InterfaceTable.cc',
+'UnknownProtocol.cc'
+])
+

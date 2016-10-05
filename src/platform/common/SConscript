@@ -1,0 +1,15 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'Lock.cc',
+])
+
+if env.conf.bool('pal_firmware'):
+    env.add_sources([
+    'palFirmwareAsync.cc'
+    ])
+    
+if env.conf.bool('pal_mac'):
+    SConscript('mac/SConscript')

@@ -1,0 +1,6 @@
+Import('env')
+
+env.add_sources(['main.cc'])
+
+env.Append(CPPDEFINES=['MAC_ENABLE_STATS'])
+

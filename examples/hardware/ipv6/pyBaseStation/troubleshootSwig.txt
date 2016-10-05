@@ -1,0 +1,50 @@
+Linker errors
+--------------
+At python startup, when importing the created library
+ImportError: ../_cometos.so: undefined symbol: _ZNxy<class-name>
+
+Possible Causes:
+1. Object File not created by compilation and still wrapped in the .i file, while
+it is never used elsewhere
+2. Unimplemented and unused method which is only made visible by the wrapper code 
+and never referenced elsewhere
+
+Template Namespace conflicts
+----------------------------
+Templates are not correctly recognized.
+Symptom: At python startup, 
+	AttributeError: 'SwigPyObject' object has no attribute 'connectTo'
+is thrown.
+
+SWIG can't match a construct like cometos::OutputGate<cometos::DataRequest> to
+the corresponding %template declaration in cometos_core.i
+	%template(DataRequestOutputGate) cometos::OutputGate<DataRequest>;
+--- there, the namespace is omitted because standard modules are in the cometos
+namespace anyway. Explicitly putting the cometos:: namespace tag in front of 
+the DataRequest does not lead to SWIG recognizing the template pattern. 
+
+Workaround: for template pattern recognition to work, put some using directives
+in your file: e.g.
+
+using cometos::DataIndication;
+using cometos::DataRequest;
+...
+cometos::OutputGate<DataIndication> gateIndOut;
+cometos::OutputGate<DataRequest> gateReqOut;
+
+
+terminate called after throwing an instance of 'Swig::DirectorMethodException'
+------------------------------------------------------------------------------
+While totally unhelpful, the occurence of this message hints at an exception 
+in python code, which is called by means of cross-language polymorphism, i.e.,
+code which is written in python, while the call originates in C++. 
+
+Put python code in question into try blocks to get a description of the 
+actual exception:
+import traceback
+
+try:
+	# offending code here
+except e:
+	traceback.print_exception()
+	raise

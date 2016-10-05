@@ -1,0 +1,4 @@
+# List of Modules to be exchanged in the created C++ File
+# <Exchange Module>, <With Module>
+
+TcpComm, SerialComm

@@ -1,0 +1,28 @@
+import wildcard
+from messages import *
+
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+env.Append(CPPPATH=[Dir('./assembly')])
+env.Append(CPPPATH=[Dir('./direct')])
+env.Append(CPPPATH=[Dir('./headerCompression')])
+env.Append(CPPPATH=[Dir('./specifications')])
+
+if env.cometos_externals_path == '':
+    error_no_externals()
+    exit(1) 
+
+## if we just try to get wildcard on '.', this will pass the temporary build 
+## directory of SCons, which at this point in time only seems to contain header files
+## (and therefore, no lowpan files is build at all); therefore we work around that by
+## passing an absolute path, which is not so very nice
+env.add_sources(wildcard.all_files('{0}/src/communication/ipv6/lowpan'.format(env.cometos_path), "*.cc"))
+
+env.optional_conf_to_str_define([
+'LOWPAN_SET_BUFFER_SIZE',
+])
+
+env.conf_to_bool_define([
+'LOWPAN_ENABLE_BIGBUFFER',
+])

@@ -1,0 +1,4 @@
+Import('env')
+
+
+env.Append(CPPDEFINES=['BASESTATION_ADDR=0'])

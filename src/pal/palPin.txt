@@ -1,0 +1,34 @@
+/**
+ * Low-level abstraction for GPIOs
+ *
+ * @author Andreas Weigel
+ */
+
+/*
+Each platform shall provide a header file called "palPin.h" which includes
+macros to define output, inverse output and input pins, providing the 
+following inline functions when included: 
+
+#define DEFINE_OUTPUT_PIN(NAME,PORT,P)    \
+    static inline void NAME##_on()      {<platform-dependent implementation>} \
+    static inline void NAME##_off()     {<platform-dependent implementation>} \
+    static inline void NAME##_toggle()  {<platform-dependent implementation>} \
+    static inline void NAME##_init()    {<platform-dependent implementation>} \
+    static inline bool NAME##_get()     {<platform-dependent implementation>}
+
+/** same as DEFINE_OUTPUT_PIN, but low active*/
+#define DEFINE_OUTPUT_PIN_INV(NAME,PORT,P)    \
+    static inline void NAME##_on()      {<platform-dependent implementation>}\
+    static inline void NAME##_off()   	{<platform-dependent implementation>} \
+    static inline void NAME##_toggle()  {<platform-dependent implementation>} \
+    static inline void NAME##_init()    {<platform-dependent implementation>} \
+    static inline bool NAME##_get()     {<platform-dependent implementation>}
+
+// defines an input pin
+#define DEFINE_INPUT_PIN(NAME,PORT,P)    \
+    static inline bool NAME##_read()    {<platform-dependent implementation>} \
+    static inline void NAME##_init()    {<platform-dependent implementation>} \
+    static inline void NAME##_pullUp()  {<platform-dependent implementation>} 
+
+*/
+

@@ -1,0 +1,12 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.bool('pal_mac'):
+    env.add_sources([
+        'EndpointExample.cc',
+        'LayerExample.cc',
+        'LowerEndpointExample.cc',
+        'SelectorExample.cc',
+    ])
+

@@ -1,0 +1,24 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'OtapBase.cc',
+'OtapBlockTransfer.cc',
+'OtapTaskDone.cc',
+'gf_math.cc'
+])
+
+env.conf_to_bool_define([
+'OTAP_SINK_CODE'
+])
+
+
+# Specific firmware PAL
+firmware = env.conf.str('firmware', valid_values = ['async','blocking'])
+if firmware == 'async':
+    env.Append(CPPDEFINES=['PAL_FIRMWARE_ASYNC'])
+    env.add_sources(['OtapAsync.cc'])
+else:
+	env.add_sources(['Otap.cc'])
+

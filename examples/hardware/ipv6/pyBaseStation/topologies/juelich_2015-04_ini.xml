@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <node id="0x1000" ledset="6"/>
+  <node id="0x1001" ledset="6"/>
+  <node id="0x1002" ledset="6"/>
+  <node id="0x1003" ledset="6"/>
+  <node id="0x1004" ledset="6"/>
+  <node id="0x1005" ledset="6"/>
+  <node id="0x1006" ledset="6"/>
+  <node id="0x1007" ledset="6"/>
+  <node id="0x1008" ledset="6"/>
+  <node id="0x1009" ledset="6"/>
+  <node id="0x100A" ledset="6"/>
+  <node id="0x100B" ledset="6"/>
+  <node id="0x100C" ledset="6"/>
+  <node id="0x100D" ledset="6"/>
+  <node id="0x100E" ledset="6"/>
+  <node id="0x100F" ledset="6"/>
+  <node id="0x1010" ledset="6"/>
+  <node id="0x1011" ledset="6"/>
+  <node id="0x1012" ledset="6"/>
+  <node id="0x1013" ledset="6"/>
+  <node id="0x1014" ledset="6"/>
+  <node id="0x1015" ledset="6"/>
+  <node id="0x1016" ledset="6"/>
+</root>

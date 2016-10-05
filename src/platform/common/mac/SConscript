@@ -1,0 +1,8 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.get_platform() == 'local' or env.get_platform() == 'frdm_k64f' or env.get_platform() == 'python':
+	SConscript("local/SConscript")
+elif env.get_platform() != 'omnet':
+	SConscript("hardware/SConscript")

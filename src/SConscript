@@ -1,0 +1,46 @@
+import glob
+import os
+
+Import('env')
+
+env.conf_to_str_define(['BASESTATION_ADDR'])
+
+if env.conf.has_key('node_id'):
+    env.conf_to_str_define(['node_id'])
+
+asserting = env.conf.str('asserting', valid_values = ['short','long'])
+if asserting == 'short':
+    env.Append(CPPDEFINES=['ASSERT_SHORT'])
+elif asserting == 'long':
+    env.Append(CPPDEFINES=['ASSERT_LONG'])
+env.conf_to_bool_define(['serial_assert'])
+
+log_level = env.conf.str('log_level', valid_values = ['none', 'debug', 'info', 'warn', 'error', 'fatal'])
+if log_level != 'none':
+    env.Append(CPPDEFINES=['ENABLE_LOGGING'])
+    if log_level == 'debug':
+        env.Append(CPPDEFINES=['LOGGING_DEBUG'])
+    elif log_level == 'info':
+        env.Append(CPPDEFINES=['LOGGING_INFO'])
+    elif log_level == 'warn':
+        env.Append(CPPDEFINES=['LOGGING_WARN'])
+    elif log_level == 'error':
+        env.Append(CPPDEFINES=['LOGGING_ERROR'])
+    elif log_level == 'fatal':
+        env.Append(CPPDEFINES=['LOGGING_FATAL'])  
+
+SConscript('communication/SConscript')
+SConscript('auxiliary/SConscript')
+SConscript('core/SConscript')
+SConscript('pal/SConscript')
+SConscript('templates/SConscript')
+
+if env.conf.bool('filemanager') or env.conf.bool('cfs'):
+    SConscript('files/SConscript')
+
+if env.get_platform() == 'omnet':
+    SConscript('omnetpp/SConscript')
+else:
+	SConscript('platform/SConscript')
+
+

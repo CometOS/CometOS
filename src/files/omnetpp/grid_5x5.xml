@@ -1,0 +1,132 @@
+<?xml version="1.0" ?><network n="25" west="140.0" east="0.0" north="0.0" south="140.0" degreeMean="3.2" degreeMax="4" degreeMin="2" degreeCDSMean="NaN" cds_size="0" dia_avg="2.4" dia_max="4" diacds_avg="0.0" diacds_max="0">
+<node id="0" x="70.000" y="70.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="12" dist="1.000"/>
+<link id="3" dist="1.000"/>
+<link id="5" dist="1.000"/>
+<link id="7" dist="1.000"/>
+</node>
+<node id="1" x="140.000" y="0.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="e" dist="1.000"/>
+<link id="f" dist="1.000"/>
+</node>
+<node id="2" x="0.000" y="70.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="3" dist="1.000"/>
+<link id="b" dist="1.000"/>
+<link id="d" dist="1.000"/>
+</node>
+<node id="3" x="35.000" y="70.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="0" dist="1.000"/>
+<link id="2" dist="1.000"/>
+<link id="8" dist="1.000"/>
+<link id="c" dist="1.000"/>
+</node>
+<node id="4" x="105.000" y="140.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="16" dist="1.000"/>
+<link id="18" dist="1.000"/>
+<link id="a" dist="1.000"/>
+</node>
+<node id="5" x="105.000" y="70.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="11" dist="1.000"/>
+<link id="0" dist="1.000"/>
+<link id="15" dist="1.000"/>
+<link id="18" dist="1.000"/>
+</node>
+<node id="6" x="35.000" y="0.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="10" dist="1.000"/>
+<link id="9" dist="1.000"/>
+<link id="c" dist="1.000"/>
+</node>
+<node id="7" x="70.000" y="35.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="0" dist="1.000"/>
+<link id="11" dist="1.000"/>
+<link id="9" dist="1.000"/>
+<link id="c" dist="1.000"/>
+</node>
+<node id="8" x="35.000" y="105.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="13" dist="1.000"/>
+<link id="3" dist="1.000"/>
+<link id="12" dist="1.000"/>
+<link id="b" dist="1.000"/>
+</node>
+<node id="9" x="70.000" y="0.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="6" dist="1.000"/>
+<link id="7" dist="1.000"/>
+<link id="f" dist="1.000"/>
+</node>
+<node id="a" x="140.000" y="140.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="4" dist="1.000"/>
+<link id="17" dist="1.000"/>
+</node>
+<node id="b" x="0.000" y="105.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="2" dist="1.000"/>
+<link id="14" dist="1.000"/>
+<link id="8" dist="1.000"/>
+</node>
+<node id="c" x="35.000" y="35.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="3" dist="1.000"/>
+<link id="6" dist="1.000"/>
+<link id="7" dist="1.000"/>
+<link id="d" dist="1.000"/>
+</node>
+<node id="d" x="0.000" y="35.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="10" dist="1.000"/>
+<link id="2" dist="1.000"/>
+<link id="c" dist="1.000"/>
+</node>
+<node id="e" x="140.000" y="35.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="11" dist="1.000"/>
+<link id="1" dist="1.000"/>
+<link id="15" dist="1.000"/>
+</node>
+<node id="f" x="105.000" y="0.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="11" dist="1.000"/>
+<link id="1" dist="1.000"/>
+<link id="9" dist="1.000"/>
+</node>
+<node id="11" x="105.000" y="35.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="5" dist="1.000"/>
+<link id="7" dist="1.000"/>
+<link id="e" dist="1.000"/>
+<link id="f" dist="1.000"/>
+</node>
+<node id="10" x="0.000" y="0.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="6" dist="1.000"/>
+<link id="d" dist="1.000"/>
+</node>
+<node id="13" x="35.000" y="140.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="14" dist="1.000"/>
+<link id="16" dist="1.000"/>
+<link id="8" dist="1.000"/>
+</node>
+<node id="12" x="70.000" y="105.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="0" dist="1.000"/>
+<link id="16" dist="1.000"/>
+<link id="8" dist="1.000"/>
+<link id="18" dist="1.000"/>
+</node>
+<node id="15" x="140.000" y="70.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="5" dist="1.000"/>
+<link id="17" dist="1.000"/>
+<link id="e" dist="1.000"/>
+</node>
+<node id="14" x="0.000" y="140.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="13" dist="1.000"/>
+<link id="b" dist="1.000"/>
+</node>
+<node id="17" x="140.000" y="105.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="15" dist="1.000"/>
+<link id="18" dist="1.000"/>
+<link id="a" dist="1.000"/>
+</node>
+<node id="16" x="70.000" y="140.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="13" dist="1.000"/>
+<link id="12" dist="1.000"/>
+<link id="4" dist="1.000"/>
+</node>
+<node id="18" x="105.000" y="105.000" isSink="0" parent="ffffffff" isDominator="0">
+<link id="12" dist="1.000"/>
+<link id="4" dist="1.000"/>
+<link id="5" dist="1.000"/>
+<link id="17" dist="1.000"/>
+</node>
+</network>

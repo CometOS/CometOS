@@ -1,0 +1,9 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'UDPLayer.cc',
+'UDPPacket.cc'
+])
+

@@ -1,0 +1,12 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'NetworkTime.cc'
+])
+
+if env.conf.bool('pal_mac') and env.get_platform() != 'omnet':
+	env.add_sources([
+	'TimeSyncService.cc'
+	])

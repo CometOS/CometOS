@@ -1,0 +1,14 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+SConscript('aggregation/SConscript')
+SConscript('comm/SConscript')
+SConscript('mp/SConscript')
+SConscript('timesync/SConscript')
+
+if env.get_platform() == 'omnet':
+    SConscript('sniffer/SConscript')
+
+if env.conf.bool("pal_mac"):
+    SConscript('mac/SConscript')

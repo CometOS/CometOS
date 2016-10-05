@@ -1,0 +1,26 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'Routing.cc',
+'SimpleRouting.cc',
+'PredefinedTreeRouting.cc'
+])
+
+if env.get_platform() == 'omnet':
+	env.add_sources([
+	'AODV.cc',
+	'ClusterBasedFlooding.cc',
+	'CounterBasedFlooding.cc',
+	'DHRouting.cc',
+#	'GreedyLocationBasedRouting.cc',  ## removed due to multiple warnings
+#	'LocationBasedRouting.cc',        ## removed due to multiple warnings
+	'ProbabilisticFlooding.cc',
+	'SectorLocationBasedRouting.cc',
+	'ShortCuttingTreeRouting.cc',
+	'SourceTreeRouting.cc',
+	'TransmissionDelayMonitor.cc',
+	'TreeRouting.cc'
+	])
+

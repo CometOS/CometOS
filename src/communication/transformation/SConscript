@@ -1,0 +1,14 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'LWT.cc',
+'Transformation.cc',
+'DistAlgorithm.cc',
+'DistAlgoData.cc',
+'DistAlgoHeader.cc',
+'DistAlgoAnalysis.cc'
+
+])
+

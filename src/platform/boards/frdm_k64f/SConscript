@@ -1,0 +1,31 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.'),Dir('startup_mk64fn1/CMSIS/Include'),Dir('startup_mk64fn1/startup/MK64F12')])
+env.Append(CPPDEFINES=['CPU_MK64FN1M0VLL12'])
+env.Append(CPPDEFINES=['F_CPU=120000000UL'])
+
+if env.conf.bool('bootloader') and not env.bootloader:
+    env.Append(CPPDEFINES=['__NO_SYSTEM_INIT'])
+
+env.add_sources([
+'palLed.cc',
+'palRS485.cc',
+'pal.cc',
+'startup_mk64fn1/startup/startup.c',
+'startup_mk64fn1/startup/MK64F12/system_MK64F12.c',
+'startup_mk64fn1/startup/MK64F12/gcc/startup_MK64F12.S'
+])
+
+if env.conf.bool('pal_rs485'):
+    env.add_sources(['palRS485Slave.cc','palRS485Master.cc'],'-DRS485_BAUDRATE='+env.conf.str('rs485_baudrate'))
+
+SConscript("../../chips/k64f/SConscript")
+SConscript("mac_impl/SConscript")
+
+SConscript("bootloader/SConscript")
+
+# Convert firmware specific defines
+env.conf_to_str_define(['p_firmware_valid','p_firmware_opcode'])
+
+if env.conf.bool('pal_firmware'):
+    SConscript("firmware/SConscript")

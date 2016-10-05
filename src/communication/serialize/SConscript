@@ -1,0 +1,17 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.bool('pal_mac'):
+	env.add_sources([
+	'NwkHeader.cc',
+	'NwkStruct.cc',
+	])
+
+env.add_sources([
+'AirString.cc',
+'Serializable.cc',
+'PersistableConfig.cc',
+'primitives.cc'
+])
+

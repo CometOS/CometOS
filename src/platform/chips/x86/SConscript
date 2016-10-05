@@ -1,0 +1,11 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'logging.cc',
+'palExec.cc',
+'cometosAssert.cc',
+'mac_dummy.cc'
+])
+

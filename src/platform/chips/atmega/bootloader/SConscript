@@ -1,0 +1,11 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+env.Append(CPPPATH=[Dir('../../s25fl/')])
+env.Append(CPPPATH=[Dir('../../../common/')])
+
+env.add_sources([
+'bootloader.cc',
+'main.cc',
+])
+

@@ -1,0 +1,37 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.bool('pal_mac'):
+	env.add_sources([
+	'EndpointWrap.cc',
+	'LowerEndpointWrap.cc',
+	'SerialComm.cc',
+	'TwiComm.cc',
+	'RS485Comm.cc',
+    'SerialMac.cc'
+	])
+
+	env.conf_to_bool_define(['serial_enable_stats'])
+	env.optional_conf_to_str_define(['serial_frame_timeout'])
+
+if (env.get_platform() == 'frdm_k64f' and env.conf.bool('fnet')) or (env.get_platform() == 'local'):
+	env.add_sources([
+        'UDPComm.cc'
+        ])
+
+if (env.get_platform() == 'local') or (env.get_platform() == 'python'):
+    env.add_sources([
+        'SerialDispatch.cc',
+        'SerialDispatchCpp.cc'
+        ])
+
+env.add_sources([
+'ModuleWrap.cc'
+])
+
+if env.conf.str('cout_provider') == 'PrintfApp':
+	env.add_sources(['PrintfApp.cc'])
+
+if env.conf.bool('pal_aes') and env.conf.str('aes') == 'software':
+        SConscript("aes/SConscript")

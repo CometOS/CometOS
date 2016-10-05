@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<network n="25" range="40.0" west="0.0" east="166.0" north="0.0" south="164.0" degreeMean="3.0" degreeMax="4" degreeMin="2" diaAvg="3.0" diaMax="6">
+<node id="a" x="121.000" y="77.000">
+</node>
+<node id="b" x="100.000" y="97.000">
+</node>
+<node id="c" x="163.000" y="33.000">
+</node>
+<node id="d" x="51.000" y="144.000">
+</node>
+<node id="e" x="142.000" y="22.000">
+</node>
+<node id="f" x="31.000" y="139.000">
+</node>
+<node id="10" x="93.000" y="41.000">
+</node>
+<node id="11" x="55.000" y="120.000">
+</node>
+<node id="12" x="59.000" y="118.000">
+</node>
+<node id="13" x="89.000" y="23.000">
+</node>
+<node id="14" x="103.000" y="66.000">
+</node>
+<node id="15" x="118.000" y="59.000">
+</node>
+<node id="16" x="41.000" y="40.000">
+</node>
+<node id="17" x="82.000" y="68.000">
+</node>
+<node id="18" x="22.000" y="164.000">
+</node>
+<node id="19" x="35.000" y="21.000">
+</node>
+<node id="1a" x="162.000" y="90.000">
+</node>
+<node id="1b" x="58.000" y="88.000">
+</node>
+<node id="1c" x="59.000" y="21.000">
+</node>
+<node id="1d" x="145.000" y="55.000">
+</node>
+<node id="1e" x="81.000" y="153.000">
+</node>
+<node id="1f" x="157.000" y="74.000">
+</node>
+<node id="20" x="166.000" y="79.000">
+</node>
+<node id="21" x="21.000" y="134.000">
+</node>
+<node id="22" x="159.000" y="103.000">
+</node>
+</network>

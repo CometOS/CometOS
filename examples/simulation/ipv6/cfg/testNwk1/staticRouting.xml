@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <!-- dont need nextHop for sink <node id="0" nextHop="64:29:30:31:32:33:0:0"/> -->
+  <node id="1" nextHop="64:29:30:31:32:33:0:0"/>
+  <node id="2" nextHop="64:29:30:31:32:33:0:1"/>
+  <node id="3" nextHop="64:29:30:31:32:33:0:2"/>
+</root>

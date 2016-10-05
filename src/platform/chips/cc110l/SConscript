@@ -1,0 +1,11 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.bool('pal_cc110l'):
+	env.add_sources([
+	'CC110lApi.cc',
+	'CC110lApi_settings.cc',
+	'CC1190Api.cc',
+	'CCSpi.cc'
+	])

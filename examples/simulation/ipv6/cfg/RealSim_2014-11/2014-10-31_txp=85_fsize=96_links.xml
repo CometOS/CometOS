@@ -1,0 +1,182 @@
+<?xml version="1.0" ?>
+<root>
+	<node id="0x0">
+		<link dest="0x100" per="0" rssiMean="50" rssiVar="0"/>
+	</node>
+	<node id="0x104">
+		<link dest="0x105" per="0" rssiMean="105.089261055" rssiVar="3.08489148058"/>
+		<link dest="0x107" per="0" rssiMean="97.3774146555" rssiVar="9.20718894533"/>
+		<link dest="0x106" per="0" rssiMean="100.735208207" rssiVar="1.58151796121"/>
+		<link dest="0x102" per="0" rssiMean="107.120202992" rssiVar="103.592631169"/>
+		<link dest="0x103" per="0" rssiMean="76.3873437349" rssiVar="0.483503304106"/>
+		<link dest="0x10b" per="0" rssiMean="82.8983549098" rssiVar="46.3836452796"/>
+		<link dest="0x10a" per="0" rssiMean="84.5014109038" rssiVar="31.8919554371"/>
+		<link dest="0x109" per="0" rssiMean="84.8946637557" rssiVar="53.2507526147"/>
+		<link dest="0x108" per="0" rssiMean="95.9337062475" rssiVar="15.6291063677"/>
+		<link dest="0x10c" per="0" rssiMean="103.846108316" rssiVar="2.59044796063"/>
+		<link dest="0x100" per="0" rssiMean="100.253573236" rssiVar="1.41391939014"/>
+		<link dest="0x101" per="0" rssiMean="83.3515346292" rssiVar="53.9223758001"/>
+	</node>
+	<node id="0x105">
+		<link dest="0x104" per="0" rssiMean="105.909454718" rssiVar="3.43016164389"/>
+		<link dest="0x107" per="0" rssiMean="81.0379036937" rssiVar="0.0875294219204"/>
+		<link dest="0x106" per="0" rssiMean="78.0311985361" rssiVar="0.180470427228"/>
+		<link dest="0x102" per="0" rssiMean="98.8172949073" rssiVar="5.63177721699"/>
+		<link dest="0x103" per="0" rssiMean="100.462420918" rssiVar="1.48361107579"/>
+		<link dest="0x10b" per="0" rssiMean="103.699488779" rssiVar="2.566082362"/>
+		<link dest="0x10a" per="0" rssiMean="105.797065344" rssiVar="3.3164631485"/>
+		<link dest="0x109" per="0" rssiMean="100.478437734" rssiVar="1.48816866668"/>
+		<link dest="0x108" per="0" rssiMean="91.2781025981" rssiVar="28.8919483442"/>
+		<link dest="0x10c" per="0" rssiMean="105.054534555" rssiVar="3.06503464413"/>
+		<link dest="0x100" per="0" rssiMean="82.3634610468" rssiVar="32.8336139073"/>
+		<link dest="0x101" per="0" rssiMean="89.2982420491" rssiVar="34.4119483632"/>
+	</node>
+	<node id="0x107">
+		<link dest="0x104" per="0" rssiMean="93.0535751844" rssiVar="23.25516412"/>
+		<link dest="0x102" per="0" rssiMean="98.4050278629" rssiVar="9.9659224045"/>
+		<link dest="0x106" per="0" rssiMean="81.0343442074" rssiVar="0.0572780740091"/>
+		<link dest="0x105" per="0" rssiMean="81.039907461" rssiVar="0.110428835551"/>
+		<link dest="0x103" per="0" rssiMean="100.204653646" rssiVar="1.42139212435"/>
+		<link dest="0x10b" per="0" rssiMean="98.2654923751" rssiVar="6.16638812289"/>
+		<link dest="0x10a" per="0" rssiMean="92.9886107062" rssiVar="26.7379674465"/>
+		<link dest="0x109" per="0" rssiMean="96.869850328" rssiVar="19.3712558207"/>
+		<link dest="0x108" per="0" rssiMean="75.942872787" rssiVar="0.159189409936"/>
+		<link dest="0x10c" per="0" rssiMean="101.97328073" rssiVar="1.9586582611"/>
+		<link dest="0x100" per="0" rssiMean="95.5810874206" rssiVar="16.8264754763"/>
+		<link dest="0x101" per="0" rssiMean="75.4653302961" rssiVar="0.965970309612"/>
+	</node>
+	<node id="0x106">
+		<link dest="0x104" per="0" rssiMean="100.775304079" rssiVar="1.57703925748"/>
+		<link dest="0x102" per="0" rssiMean="100.910270712" rssiVar="1.58333022577"/>
+		<link dest="0x107" per="0" rssiMean="82.4414128794" rssiVar="39.220905374"/>
+		<link dest="0x105" per="0" rssiMean="77.9840380048" rssiVar="0.134674875028"/>
+		<link dest="0x103" per="0" rssiMean="107.669680787" rssiVar="4.15307836807"/>
+		<link dest="0x10b" per="0" rssiMean="108.084512905" rssiVar="4.47054095884"/>
+		<link dest="0x10a" per="0" rssiMean="102.558381178" rssiVar="2.11920942906"/>
+		<link dest="0x109" per="0" rssiMean="88.3556023293" rssiVar="28.919335417"/>
+		<link dest="0x108" per="0" rssiMean="100.507504706" rssiVar="1.51753783429"/>
+		<link dest="0x100" per="0" rssiMean="76.8941047034" rssiVar="0.314385744767"/>
+		<link dest="0x101" per="0" rssiMean="84.3966598287" rssiVar="43.2132502799"/>
+	</node>
+	<node id="0x102">
+		<link dest="0x103" per="0" rssiMean="83.1320101355" rssiVar="44.3333091896"/>
+		<link dest="0x107" per="0" rssiMean="98.5709927524" rssiVar="10.0074815957"/>
+		<link dest="0x106" per="0" rssiMean="100.952770524" rssiVar="1.61945740406"/>
+		<link dest="0x105" per="0" rssiMean="100.38814915" rssiVar="1.44566991981"/>
+		<link dest="0x104" per="0" rssiMean="106.439869266" rssiVar="106.813242986"/>
+		<link dest="0x10b" per="0" rssiMean="96.9005858546" rssiVar="12.8254913047"/>
+		<link dest="0x10a" per="0" rssiMean="96.1479248088" rssiVar="15.8503789495"/>
+		<link dest="0x109" per="0" rssiMean="81.1443684405" rssiVar="54.696668584"/>
+		<link dest="0x108" per="0" rssiMean="80.3323147441" rssiVar="0.304989465248"/>
+		<link dest="0x10c" per="0" rssiMean="100.221907392" rssiVar="1.40863413577"/>
+		<link dest="0x100" per="0" rssiMean="96.5691664014" rssiVar="13.7632453993"/>
+		<link dest="0x101" per="0" rssiMean="80.1206615412" rssiVar="32.4236514439"/>
+	</node>
+	<node id="0x103">
+		<link dest="0x105" per="0" rssiMean="100.595464928" rssiVar="1.52004476461"/>
+		<link dest="0x107" per="0" rssiMean="98.3767860962" rssiVar="5.76557605766"/>
+		<link dest="0x106" per="0" rssiMean="107.438399965" rssiVar="4.1140484958"/>
+		<link dest="0x102" per="0" rssiMean="81.3216817167" rssiVar="0.47011735023"/>
+		<link dest="0x104" per="0" rssiMean="76.0645412131" rssiVar="0.466330770343"/>
+		<link dest="0x10b" per="0" rssiMean="94.4367493157" rssiVar="32.000390148"/>
+		<link dest="0x10a" per="0" rssiMean="75.1417779825" rssiVar="0.211608963049"/>
+		<link dest="0x109" per="0" rssiMean="78.7406687403" rssiVar="0.445232254211"/>
+		<link dest="0x108" per="0" rssiMean="87.8751737897" rssiVar="28.8463931346"/>
+		<link dest="0x10c" per="0" rssiMean="96.2157158102" rssiVar="14.7176887141"/>
+		<link dest="0x100" per="0" rssiMean="103.96928041" rssiVar="2.60475444297"/>
+		<link dest="0x101" per="0" rssiMean="88.7692305723" rssiVar="31.3330688176"/>
+	</node>
+	<node id="0x10b">
+		<link dest="0x104" per="0" rssiMean="82.3608849283" rssiVar="43.5258362832"/>
+		<link dest="0x105" per="0" rssiMean="104.795513706" rssiVar="3.00011650484"/>
+		<link dest="0x107" per="0" rssiMean="98.0898472785" rssiVar="7.05161785764"/>
+		<link dest="0x106" per="0" rssiMean="108.236511318" rssiVar="4.43376786456"/>
+		<link dest="0x102" per="0" rssiMean="96.1959682845" rssiVar="15.6849072415"/>
+		<link dest="0x103" per="0" rssiMean="94.6080929864" rssiVar="29.0263320488"/>
+		<link dest="0x10a" per="0" rssiMean="79.0364174138" rssiVar="3.4658579718"/>
+		<link dest="0x109" per="0" rssiMean="86.5983400228" rssiVar="48.7542268082"/>
+		<link dest="0x108" per="0" rssiMean="96.4915684435" rssiVar="13.8724787783"/>
+		<link dest="0x10c" per="0" rssiMean="84.4669780842" rssiVar="38.1586379016"/>
+		<link dest="0x101" per="0" rssiMean="101.280974115" rssiVar="1.72352017056"/>
+	</node>
+	<node id="0x10a">
+		<link dest="0x104" per="0" rssiMean="81.2905733722" rssiVar="0.913906659258"/>
+		<link dest="0x105" per="0" rssiMean="105.87152133" rssiVar="3.42895279806"/>
+		<link dest="0x107" per="0" rssiMean="89.6473868201" rssiVar="28.4004539633"/>
+		<link dest="0x106" per="0" rssiMean="102.487975" rssiVar="2.11287567183"/>
+		<link dest="0x102" per="0" rssiMean="94.390564332" rssiVar="23.8784078617"/>
+		<link dest="0x103" per="0" rssiMean="74.9146341463" rssiVar="0.122612265713"/>
+		<link dest="0x10b" per="0" rssiMean="77.7068932039" rssiVar="4.59832125279"/>
+		<link dest="0x109" per="0" rssiMean="72.7343420801" rssiVar="0.359071442399"/>
+		<link dest="0x108" per="0" rssiMean="89.6882997009" rssiVar="31.5797873142"/>
+		<link dest="0x10c" per="0" rssiMean="85.2473322456" rssiVar="38.6891390541"/>
+		<link dest="0x101" per="0" rssiMean="95.6256583272" rssiVar="21.356437156"/>
+	</node>
+	<node id="0x109">
+		<link dest="0x104" per="0" rssiMean="83.9807799296" rssiVar="55.6761681173"/>
+		<link dest="0x102" per="0" rssiMean="80.7740949322" rssiVar="50.0935350016"/>
+		<link dest="0x107" per="0" rssiMean="96.6373616738" rssiVar="19.1767848568"/>
+		<link dest="0x106" per="0" rssiMean="88.8164833869" rssiVar="26.3842616369"/>
+		<link dest="0x105" per="0" rssiMean="100.484391625" rssiVar="1.50224843906"/>
+		<link dest="0x103" per="0" rssiMean="78.6445952496" rssiVar="0.44493757855"/>
+		<link dest="0x10b" per="0" rssiMean="86.0694519435" rssiVar="49.0513043217"/>
+		<link dest="0x10a" per="0" rssiMean="73.8304602971" rssiVar="0.355389370867"/>
+		<link dest="0x108" per="0" rssiMean="79.1146502836" rssiVar="0.944316968149"/>
+		<link dest="0x10c" per="0" rssiMean="93.6712125773" rssiVar="28.26206143"/>
+		<link dest="0x100" per="0" rssiMean="100.945594636" rssiVar="1.60833525595"/>
+		<link dest="0x101" per="0" rssiMean="84.0314495789" rssiVar="38.6380040224"/>
+	</node>
+	<node id="0x108">
+		<link dest="0x104" per="0" rssiMean="88.3902611507" rssiVar="27.7750412466"/>
+		<link dest="0x102" per="0" rssiMean="78.8387190402" rssiVar="0.216946747953"/>
+		<link dest="0x107" per="0" rssiMean="75.7251591475" rssiVar="0.222573270019"/>
+		<link dest="0x106" per="0" rssiMean="100.83360029" rssiVar="1.58418329926"/>
+		<link dest="0x105" per="0" rssiMean="88.255348506" rssiVar="27.2865832245"/>
+		<link dest="0x103" per="0" rssiMean="86.5757946437" rssiVar="31.6806369417"/>
+		<link dest="0x10b" per="0" rssiMean="94.5312389865" rssiVar="22.6099143431"/>
+		<link dest="0x10a" per="0" rssiMean="88.5021219714" rssiVar="31.6243458018"/>
+		<link dest="0x109" per="0" rssiMean="80.1716921856" rssiVar="50.2256873625"/>
+		<link dest="0x10c" per="0" rssiMean="96.7854243427" rssiVar="11.6681426501"/>
+		<link dest="0x100" per="0" rssiMean="100.423632141" rssiVar="1.48694141789"/>
+		<link dest="0x101" per="0" rssiMean="94.4788554005" rssiVar="22.5127492693"/>
+	</node>
+	<node id="0x10c">
+		<link dest="0x104" per="0" rssiMean="109.605807639" rssiVar="37.9825905224"/>
+		<link dest="0x105" per="0" rssiMean="104.371768364" rssiVar="2.75531237871"/>
+		<link dest="0x107" per="0" rssiMean="101.850992517" rssiVar="1.87775064945"/>
+		<link dest="0x102" per="0" rssiMean="97.5368249997" rssiVar="9.8168678763"/>
+		<link dest="0x103" per="0" rssiMean="96.1445108874" rssiVar="16.0701145712"/>
+		<link dest="0x10b" per="0" rssiMean="83.3727118065" rssiVar="45.4204511978"/>
+		<link dest="0x10a" per="0" rssiMean="85.0909624427" rssiVar="37.8630899418"/>
+		<link dest="0x109" per="0" rssiMean="91.1995448353" rssiVar="37.7941947732"/>
+		<link dest="0x108" per="0" rssiMean="97.6772020612" rssiVar="8.68490876544"/>
+		<link dest="0x101" per="0" rssiMean="109.749829576" rssiVar="5.21050308448"/>
+	</node>
+	<node id="0x100">
+		<link dest="0x0" per="0" rssiMean="50" rssiVar="0"/>
+		<link dest="0x104" per="0" rssiMean="97.9701865623" rssiVar="7.64168697118"/>
+		<link dest="0x105" per="0" rssiMean="81.5245420373" rssiVar="44.9513844594"/>
+		<link dest="0x107" per="0" rssiMean="90.3208085616" rssiVar="30.4105140689"/>
+		<link dest="0x106" per="0" rssiMean="75.1624476416" rssiVar="0.321846225972"/>
+		<link dest="0x102" per="0" rssiMean="90.4352149712" rssiVar="29.9771333016"/>
+		<link dest="0x103" per="0" rssiMean="103.995351529" rssiVar="2.66611386691"/>
+		<link dest="0x10a" per="0" rssiMean="110.033748183" rssiVar="5.34148053547"/>
+		<link dest="0x109" per="0" rssiMean="100.923993038" rssiVar="1.6204830458"/>
+		<link dest="0x108" per="0" rssiMean="100.369363362" rssiVar="1.4688633186"/>
+		<link dest="0x101" per="0" rssiMean="85.426732983" rssiVar="39.2627478304"/>
+	</node>
+	<node id="0x101">
+		<link dest="0x104" per="0" rssiMean="82.8473816448" rssiVar="56.0961776062"/>
+		<link dest="0x105" per="0" rssiMean="89.2829364992" rssiVar="35.4173442746"/>
+		<link dest="0x107" per="0" rssiMean="75.6927049709" rssiVar="0.8548324076"/>
+		<link dest="0x106" per="0" rssiMean="84.4182171903" rssiVar="42.0732016185"/>
+		<link dest="0x102" per="0" rssiMean="81.0563751039" rssiVar="52.6756095842"/>
+		<link dest="0x103" per="0" rssiMean="89.6399337128" rssiVar="29.4827950093"/>
+		<link dest="0x10b" per="0" rssiMean="100.941829183" rssiVar="1.57005596781"/>
+		<link dest="0x10a" per="0" rssiMean="98.0285405227" rssiVar="9.02330499318"/>
+		<link dest="0x109" per="0" rssiMean="84.2620861173" rssiVar="39.6945305815"/>
+		<link dest="0x108" per="0" rssiMean="96.0705460902" rssiVar="16.4747528728"/>
+		<link dest="0x10c" per="0" rssiMean="109.534309353" rssiVar="5.06757915821"/>
+		<link dest="0x100" per="0" rssiMean="86.8586036458" rssiVar="35.3272107719"/>
+	</node>
+</root>

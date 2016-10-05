@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+<root>
+	<node id="0" x="50" y="250">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="1" x="150" y="250">
+	   <link dest="0" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="100" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="200" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="300" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="400" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="500" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="600" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="700" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="100" x="50" y="250">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="101" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="101" x="50" y="250">
+	   <link dest="100" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="200" x="100" y="250">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="201" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="201" x="100" y="250">
+	   <link dest="200" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="300" x="150" y="250">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="301" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="301" x="150" y="250">
+	   <link dest="300" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="400" x="200" y="250">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="401" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="401" x="200" y="250">
+	   <link dest="400" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="500" x="250" y="250">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="501" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="501" x="250" y="250">
+	   <link dest="500" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="600" x="300" y="250">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="601" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="601" x="300" y="250">
+	   <link dest="600" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="700" x="350" y="250">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	   <link dest="701" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+	<node id="701" x="350" y="250">
+	   <link dest="700" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+
+</root>

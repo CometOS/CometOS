@@ -1,0 +1,14 @@
+import swig.cometos as cometos
+
+USE_TCP_CLIENT=True
+TCP_CLIENT_CFG={"server":"localhost", "port":20001}
+USE_TCP_SERVER=True
+TCP_SERVER_PORT= 20000
+
+IPV6_WSN_PREFIX = "64:29:30:31:0:0:0:"
+
+BASESTATION_ADDR = 0
+# BS_ATTACHED = 0x0100
+
+SEP = "|"
+REMOTE_RETRIES = 2

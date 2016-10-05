@@ -1,0 +1,8 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.bool('pal_mac') and env.get_platform() != 'omnet':
+	env.add_sources([
+	'TopologyMonitor.cc'
+	])

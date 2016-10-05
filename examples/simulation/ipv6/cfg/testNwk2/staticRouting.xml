@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <!-- dont need nextHop for sink <node id="0" nextHop="64:29:30:31:32:33:0:0"/> -->
+  <node id="0" prefix="64:29:30:31:32:33:0:0" 
+  			   prefixLength="112" 
+  			   nextHop="64:29:30:31:32:33:0:2" />
+  <node id="0" prefix="64:29:30:31:32:33:0:1" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:1" />
+  <node id="0" prefix="64:29:30:31:32:33:0:3" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:1" />
+  			   
+  <node id="1" prefix="64:29:30:31:32:33:0:0" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:0" />
+  <node id="1" prefix="64:29:30:31:32:33:0:2" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:0" />
+  <node id="1" prefix="64:29:30:31:32:33:0:3" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:3" />
+  <node id="1" prefix="64:29:30:31:32:33:0:4" 
+  			   prefixLength="127" 
+  			   nextHop="64:29:30:31:32:33:0:4" />
+  <node id="2" prefix="64:29:30:31:32:33:0:0" 
+  			   prefixLength="127" 
+  			   nextHop="64:29:30:31:32:33:0:0" />
+  <node id="2" prefix="64:29:30:31:32:33:0:0" 
+  			   prefixLength="112" 
+  			   nextHop="64:29:30:31:32:33:0:4" />
+  <node id="2" prefix="64:29:30:31:32:33:0:5" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:5" />
+  <node id="3" prefix="64:29:30:31:32:33:0:0" 
+  			   prefixLength="127" 
+  			   nextHop="64:29:30:31:32:33:0:1" />
+  <node id="3" prefix="64:29:30:31:32:33:0:0" 
+  			   prefixLength="112" 
+  			   nextHop="64:29:30:31:32:33:0:4" />
+  <node id="4" prefix="64:29:30:31:32:33:0:0" 
+  			   prefixLength="127" 
+  			   nextHop="64:29:30:31:32:33:0:1" />
+  <node id="4" prefix="64:29:30:31:32:33:0:2" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:2" />
+  <node id="4" prefix="64:29:30:31:32:33:0:3" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:3" />
+  <node id="4" prefix="64:29:30:31:32:33:0:5" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:5" />
+  <node id="5" prefix="64:29:30:31:32:33:0:0" 
+  			   prefixLength="112" 
+  			   nextHop="64:29:30:31:32:33:0:4" />
+  <node id="5" prefix="64:29:30:31:32:33:0:2" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:2" />
+  <node id="5" prefix="64:29:30:31:32:33:0:0" 
+  			   prefixLength="128" 
+  			   nextHop="64:29:30:31:32:33:0:2" />
+</root>

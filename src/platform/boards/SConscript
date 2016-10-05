@@ -1,0 +1,4 @@
+Import('env')
+
+if env.get_platform() != 'omnet':
+    SConscript(env.conf.str('platform')+"/SConscript")

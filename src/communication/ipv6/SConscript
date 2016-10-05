@@ -1,0 +1,13 @@
+Import('env')
+
+SConscript('addressing//SConscript')
+SConscript('coap/SConscript')
+SConscript('icmp/SConscript')
+SConscript('ipFwd/SConscript')
+SConscript('ipHeaders/SConscript')
+SConscript('lowpan/SConscript')
+SConscript('nd/SConscript')
+SConscript('routing/SConscript')
+SConscript('traffic/SConscript')
+SConscript('udp/SConscript')
+SConscript('messages/SConscript')

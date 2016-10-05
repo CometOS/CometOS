@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <node id="0x2FDE" ledset="6">
+  	<rtentry length="112" nextHop="64:29:30:31:0:0:0:0" prefix="64:29:30:31:0:0:0:0"/>
+  	<rtentry length="128" nextHop="64:29:30:31:0:0:0:0101"
+  	prefix="64:29:30:31:0:0:0:0101"/>
+  </node>
+  <node id="0x3011" ledset="6">
+  	<rtentry length="112" nextHop="64:29:30:31:0:0:0:21FD" prefix="64:29:30:31:0:0:0:0"/>
+  </node>
+  
+</root>

@@ -1,0 +1,20 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'CachedSegmentedFile.cc',
+'SimpleFileTransfer.cc',
+'Verifier.cc',
+'RandomFileGenerator.cc',
+'FileProperties.cc',
+'UncompressOTAP.cc'
+])
+
+if env.conf.bool('cfs'):
+	SConscript('platform/SConscript')
+	SConscript('platform/cfs/SConscript')
+	SConscript('deluge/SConscript')
+
+if env.conf.str('platform') == 'omnet':
+    SConscript('omnetpp/SConscript')

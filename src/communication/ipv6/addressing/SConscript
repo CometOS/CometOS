@@ -1,0 +1,10 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'Ieee802154MacAddress.cc',
+'IPv6Address.cc',
+'URL.cc',
+])
+

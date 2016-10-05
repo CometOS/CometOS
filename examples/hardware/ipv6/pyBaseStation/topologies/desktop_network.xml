@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <node id="0x10F" ledset="6">
+  	<rtentry length="112" nextHop="64:29:30:31:0:0:0:0" prefix="64:29:30:31:0:0:0:0"/>
+  	<rtentry length="128" nextHop="64:29:30:31:0:0:0:010D" prefix="64:29:30:31:0:0:0:010D"/>
+  	<rtentry length="128" nextHop="64:29:30:31:0:0:0:010D" prefix="64:29:30:31:0:0:0:010E"/>
+  	<rtentry length="126" nextHop="64:29:30:31:0:0:0:010D" prefix="64:29:30:31:0:0:0:0105"/>
+  </node>
+  <node id="0x010D" ledset="6">
+  	<rtentry length="112" nextHop="64:29:30:31:0:0:0:010F" prefix="64:29:30:31:0:0:0:0"/>
+  	<rtentry length="128" nextHop="64:29:30:31:0:0:0:010E" prefix="64:29:30:31:0:0:0:010E"/>
+  	<rtentry length="128" nextHop="64:29:30:31:0:0:0:010E" prefix="64:29:30:31:0:0:0:0105"/>
+  </node>
+  <node id="0x010E" ledset="6">
+  	<rtentry length="112" nextHop="64:29:30:31:0:0:0:010D" prefix="64:29:30:31:0:0:0:0"/>
+  	<rtentry length="128" nextHop="64:29:30:31:0:0:0:0105" prefix="64:29:30:31:0:0:0:0105"/>
+  </node>
+  <node id="0x0105" ledset="6">
+  	<rtentry length="112" nextHop="64:29:30:31:0:0:0:010E" prefix="64:29:30:31:0:0:0:0"/>
+  </node>
+</root>

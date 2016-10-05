@@ -1,0 +1,3 @@
+Import('env')
+
+env.add_sources(['mac_power.cc'])

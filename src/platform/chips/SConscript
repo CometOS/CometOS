@@ -1,0 +1,3 @@
+Import('env')
+
+# This directory is handled by the SConscript files inside the board directories

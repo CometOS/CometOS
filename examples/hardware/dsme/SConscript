@@ -1,0 +1,8 @@
+Import('env')
+
+SConscript('../../../common/SConcript')
+
+env.add_sources(['main.cc'])
+
+env.conf_to_bool_define(['pan_coordinator'])
+

@@ -1,0 +1,115 @@
+Import('env')
+import time
+import subprocess
+import re
+import traceback
+import os
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.str('cout_provider') == 'serial_printf':
+	baud = env.conf.str('serial_baudrate')
+	env.Append(CPPDEFINES=['SERIAL_PRINTF='+str(baud)])
+
+
+env.add_sources([
+'cometosAssert.cc',
+'palExec.cc',
+'timer2.cc',
+])
+
+# Set timestamp / firmware version
+timestamp = str(int(time.time()))
+version = '0'
+try:
+	git_commit_hash = subprocess.check_output(['git','rev-parse','HEAD']).strip()
+	version = str(int(git_commit_hash[:4],16)) # take only the four first hex digit (for 16 bit version)
+except:
+	for i in range(100):
+		try:
+			path = [".."] * i
+			path = os.path.join(*path)
+			svn_info = subprocess.check_output(['svn','info',path])
+			success = False
+			for line in svn_info.splitlines():
+				m = re.search('Revision: (.*)',line)
+				if m:
+					svn_revision = m.group(1).strip()
+					version = svn_revision
+					success = True
+			if success:
+				break
+					
+		except:
+			pass
+
+define = '-DPAL_FIRMWARE_TIMESTAMP='+timestamp+' -DPAL_FIRMWARE_VERSION='+version;
+env.add_sources(['firmwareVersion.cc'],define)
+
+# Defines
+atmega_pc_width = env.conf.str('atmega_pc_width', valid_values = [2,3])
+env.Append(CPPDEFINES=['ATMEGA_PC_WIDTH='+str(atmega_pc_width)])
+env.conf_to_str_define(['pm_watchdog_reset_flag','pm_watchdog_pc','eeprom_log_assert_address','p_mac_address_0'])
+
+SConscript("arbiter/SConscript")
+
+# Specific mac
+if env.conf.bool('pal_timer1'):
+	env.add_sources(['timer1.cc'])
+
+if env.conf.bool('pal_timer3'):
+	env.add_sources(['timer3.cc'])
+
+if env.conf.bool('pal_twi_slave'):
+	env.add_sources(['palTwiSlave.cc'])
+
+if env.conf.bool('pal_mac'):
+	mc = env.conf.str('mac', valid_values=['original','tos','dsme'])
+	if mc == 'original':
+		SConscript("mac/SConscript")
+	elif mc == 'tos':
+		SConscript("tosMac/SConscript")
+		env.add_sources(['timer1.cc'])
+	elif mc == 'dsme':
+		SConscript("dsme/SConscript")
+		SConscript("tosMac/SConscript")
+		env.add_sources(['timer1.cc'])
+	SConscript("mac_common/SConscript")
+
+if env.bootloader:
+	SConscript("bootloader/SConscript")
+
+if env.conf.bool('pal_twi_master'):
+    env.add_sources(['palTwiMaster.cc'])
+
+if env.conf.bool('pal_id'):
+    env.add_sources(['palId.cc'])
+
+if env.conf.bool('pal_spi_master'):
+    env.add_sources(['palSpi.cc'])
+    env.add_sources(['palSpiArbiter.cc'])
+
+if env.conf.bool('pal_rand'):
+    env.add_sources(['palRand.cc'])
+
+if env.conf.bool('pal_pers'):
+    env.add_sources(['palPers.cc'])
+
+if env.conf.bool('pal_wdt'):
+    env.add_sources(['palWdt.cc'])
+
+if env.conf.bool('pal_serial'):
+    env.add_sources(['palSerial.cc'],'-DSERIAL_BUFFER_SIZE='+env.conf.str('serial_buffer_size'))
+
+if env.conf.bool('pal_exec_util'):
+    env.add_sources(['palExec_util.cc'])
+
+if env.conf.bool('pal_adc'):
+    env.add_sources(['adc.cc'])
+
+if env.conf.bool('cfs'):
+	SConscript("cfs/SConscript")
+
+if env.conf.bool('pal_aes') and env.conf.str('aes') == 'hardware':
+        SConscript("aes/SConscript")
+

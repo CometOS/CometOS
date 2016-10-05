@@ -1,0 +1,17 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'palLed.cc',
+'pal.cc'
+])
+
+SConscript("../../chips/atmega_rf/SConscript")
+
+if env.conf.bool('pal_mac'):
+    SConscript("mac_impl/SConscript")
+
+if env.conf.has_key('serial_comm_baudrate'):
+    env.conf_to_str_define(["serial_comm_baudrate"])
+

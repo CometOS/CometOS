@@ -1,0 +1,15 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+# Get configuration value
+allocator = env.conf.str('allocator', valid_values = ['block','malloc','surm','none'])
+
+# Get corresponding source
+if allocator == 'block':
+	env.add_sources(['BlockAllocator.cc'])
+elif allocator == 'malloc':
+	env.add_sources(['MallocAllocator.cc'])
+elif allocator == 'surm':
+	env.add_sources(['SurmAllocator.cc'])
+

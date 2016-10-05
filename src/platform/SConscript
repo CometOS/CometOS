@@ -1,0 +1,19 @@
+Import('env')
+
+SConscript("boards/SConscript")
+SConscript("chips/SConscript")
+SConscript("common/SConscript")
+SConscript("modules/SConscript")
+SConscript("stacks/SConscript")
+	
+env.conf_to_bool_define(['cfs'])
+
+if env.conf.bool('pal_exec_util'):
+    env.Append(CPPDEFINES='PAL_EXEC_UTIL')
+    
+if env.conf.bool('pal_firmware'):
+    firmware = env.conf.str('firmware', valid_values = ['async','blocking'])
+    if firmware == 'async':
+        env.Append(CPPDEFINES='PAL_FIRMWARE_ASYNC')
+    else:
+        env.Append(CPPDEFINES='PAL_FIRMWARE')

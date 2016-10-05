@@ -1,0 +1,13 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+env.add_sources([
+'TCPWY.cc',
+'TZTCAlgo.cc',
+'TZTCAElement.cc',
+'TCPWYHeader.cc',
+'TCPWYControlHeader.cc'
+
+])
+

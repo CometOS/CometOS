@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<root>
+	<node id="0" x="25" y="25">
+	   <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+	</node>
+	<node id="1" x="100" y="100">
+        <link dest="0" rssiMean="50" rssiVar="0" per="0"/>
+        <link dest="2" rssiMean="50" rssiVar="0" per="0"/>
+    </node>
+    <node id="2" x="175" y="175">
+        <link dest="1" rssiMean="50" rssiVar="0" per="0"/>
+        <link dest="3" rssiMean="50" rssiVar="0" per="0"/>
+    </node>
+    <node id="3" x="250" y="250">
+        <link dest="2" rssiMean="50" rssiVar="0" per="0"/>
+    </node>
+</root>

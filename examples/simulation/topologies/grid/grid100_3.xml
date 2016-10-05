@@ -1,0 +1,203 @@
+<?xml version="1.0" ?>
+<network n="100" range="40.0" west="0.0" east="120.0" north="0.0" south="120.0" degreeMean="21.16" degreeMax="28" degreeMin="10" diaAvg="2.93" diaMax="5">
+<node id="0" x="0.000" y="0.000">
+</node>
+<node id="1" x="13.333" y="0.000">
+</node>
+<node id="2" x="26.667" y="0.000">
+</node>
+<node id="3" x="40.000" y="0.000">
+</node>
+<node id="4" x="53.333" y="0.000">
+</node>
+<node id="5" x="66.667" y="0.000">
+</node>
+<node id="6" x="80.000" y="0.000">
+</node>
+<node id="7" x="93.333" y="0.000">
+</node>
+<node id="8" x="106.667" y="0.000">
+</node>
+<node id="9" x="120.000" y="0.000">
+</node>
+<node id="a" x="0.000" y="13.333">
+</node>
+<node id="b" x="13.333" y="13.333">
+</node>
+<node id="c" x="26.667" y="13.333">
+</node>
+<node id="d" x="40.000" y="13.333">
+</node>
+<node id="e" x="53.333" y="13.333">
+</node>
+<node id="f" x="66.667" y="13.333">
+</node>
+<node id="10" x="80.000" y="13.333">
+</node>
+<node id="11" x="93.333" y="13.333">
+</node>
+<node id="12" x="106.667" y="13.333">
+</node>
+<node id="13" x="120.000" y="13.333">
+</node>
+<node id="14" x="0.000" y="26.667">
+</node>
+<node id="15" x="13.333" y="26.667">
+</node>
+<node id="16" x="26.667" y="26.667">
+</node>
+<node id="17" x="40.000" y="26.667">
+</node>
+<node id="18" x="53.333" y="26.667">
+</node>
+<node id="19" x="66.667" y="26.667">
+</node>
+<node id="1a" x="80.000" y="26.667">
+</node>
+<node id="1b" x="93.333" y="26.667">
+</node>
+<node id="1c" x="106.667" y="26.667">
+</node>
+<node id="1d" x="120.000" y="26.667">
+</node>
+<node id="1e" x="0.000" y="40.000">
+</node>
+<node id="1f" x="13.333" y="40.000">
+</node>
+<node id="20" x="26.667" y="40.000">
+</node>
+<node id="21" x="40.000" y="40.000">
+</node>
+<node id="22" x="53.333" y="40.000">
+</node>
+<node id="23" x="66.667" y="40.000">
+</node>
+<node id="24" x="80.000" y="40.000">
+</node>
+<node id="25" x="93.333" y="40.000">
+</node>
+<node id="26" x="106.667" y="40.000">
+</node>
+<node id="27" x="120.000" y="40.000">
+</node>
+<node id="28" x="0.000" y="53.333">
+</node>
+<node id="29" x="13.333" y="53.333">
+</node>
+<node id="2a" x="26.667" y="53.333">
+</node>
+<node id="2b" x="40.000" y="53.333">
+</node>
+<node id="2c" x="53.333" y="53.333">
+</node>
+<node id="2d" x="66.667" y="53.333">
+</node>
+<node id="2e" x="80.000" y="53.333">
+</node>
+<node id="2f" x="93.333" y="53.333">
+</node>
+<node id="30" x="106.667" y="53.333">
+</node>
+<node id="31" x="120.000" y="53.333">
+</node>
+<node id="32" x="0.000" y="66.667">
+</node>
+<node id="33" x="13.333" y="66.667">
+</node>
+<node id="34" x="26.667" y="66.667">
+</node>
+<node id="35" x="40.000" y="66.667">
+</node>
+<node id="36" x="53.333" y="66.667">
+</node>
+<node id="37" x="66.667" y="66.667">
+</node>
+<node id="38" x="80.000" y="66.667">
+</node>
+<node id="39" x="93.333" y="66.667">
+</node>
+<node id="3a" x="106.667" y="66.667">
+</node>
+<node id="3b" x="120.000" y="66.667">
+</node>
+<node id="3c" x="0.000" y="80.000">
+</node>
+<node id="3d" x="13.333" y="80.000">
+</node>
+<node id="3e" x="26.667" y="80.000">
+</node>
+<node id="3f" x="40.000" y="80.000">
+</node>
+<node id="40" x="53.333" y="80.000">
+</node>
+<node id="41" x="66.667" y="80.000">
+</node>
+<node id="42" x="80.000" y="80.000">
+</node>
+<node id="43" x="93.333" y="80.000">
+</node>
+<node id="44" x="106.667" y="80.000">
+</node>
+<node id="45" x="120.000" y="80.000">
+</node>
+<node id="46" x="0.000" y="93.333">
+</node>
+<node id="47" x="13.333" y="93.333">
+</node>
+<node id="48" x="26.667" y="93.333">
+</node>
+<node id="49" x="40.000" y="93.333">
+</node>
+<node id="4a" x="53.333" y="93.333">
+</node>
+<node id="4b" x="66.667" y="93.333">
+</node>
+<node id="4c" x="80.000" y="93.333">
+</node>
+<node id="4d" x="93.333" y="93.333">
+</node>
+<node id="4e" x="106.667" y="93.333">
+</node>
+<node id="4f" x="120.000" y="93.333">
+</node>
+<node id="50" x="0.000" y="106.667">
+</node>
+<node id="51" x="13.333" y="106.667">
+</node>
+<node id="52" x="26.667" y="106.667">
+</node>
+<node id="53" x="40.000" y="106.667">
+</node>
+<node id="54" x="53.333" y="106.667">
+</node>
+<node id="55" x="66.667" y="106.667">
+</node>
+<node id="56" x="80.000" y="106.667">
+</node>
+<node id="57" x="93.333" y="106.667">
+</node>
+<node id="58" x="106.667" y="106.667">
+</node>
+<node id="59" x="120.000" y="106.667">
+</node>
+<node id="5a" x="0.000" y="120.000">
+</node>
+<node id="5b" x="13.333" y="120.000">
+</node>
+<node id="5c" x="26.667" y="120.000">
+</node>
+<node id="5d" x="40.000" y="120.000">
+</node>
+<node id="5e" x="53.333" y="120.000">
+</node>
+<node id="5f" x="66.667" y="120.000">
+</node>
+<node id="60" x="80.000" y="120.000">
+</node>
+<node id="61" x="93.333" y="120.000">
+</node>
+<node id="62" x="106.667" y="120.000">
+</node>
+<node id="63" x="120.000" y="120.000">
+</node>
+</network>

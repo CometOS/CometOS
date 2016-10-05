@@ -1,0 +1,9 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.bool('pal_mac'):
+	env.add_sources([
+	'MacCompileAddressing.cc',
+	'MinCompileAddressing.cc'
+	])
