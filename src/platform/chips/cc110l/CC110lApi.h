@@ -117,7 +117,8 @@ public:
     enum class Modulation : uint8_t {
         FSK2,
         GFSK,
-        OOK
+        OOK,
+        FSK4
     };
 
     enum class Coding : uint8_t {
@@ -183,8 +184,6 @@ public:
 
     uint8_t getMode();
 
-    int8_t read8BitRssi(void);
-
     void enterRx(void);
     void enterIdle(void);
     void enterSleep(void);
@@ -210,6 +209,10 @@ public:
     cometos_error_t setChannel(uint8_t channel);
     cometos_error_t setRXAttenuation(uint8_t attenuation);
     uint8_t getChannel();
+    int16_t getRSSI(bool raw = false);
+    void sendInfinite();
+    void fillFIFO(uint8_t* data, uint8_t len);
+    uint8_t getBytesInTxFIFO();
 
     void sendStatic();
     void printLastReceptionParameters();
@@ -226,7 +229,6 @@ private:
 
     void rxIdle(void);
     void idleRx(void);
-    int8_t convert8BitRssi(uint8_t rawRssi);
 
     void enableInt(void);
     void disableInt(void);
@@ -239,6 +241,8 @@ private:
     void callStateChangeCallback(ccStatus_t newState);
 
     void pinInterrupt(void);
+
+    int16_t convertRSSI(uint8_t registerValue);
 
     /**************************************************************************
      * Private members

@@ -333,6 +333,22 @@ cometos_error_t CC110lApi::preparePacket(uint8_t len, const uint8_t *pData, Call
     }
 }
 
+void CC110lApi::sendInfinite() {
+    uint8_t data;
+
+	// Infinite packet length mode and CRC off
+	readAccess(CC110L_PKTCTRL0,&data,1);
+	data = (data & ~0x7) | 0x2;
+	writeAccess(CC110L_PKTCTRL0,&data,1);
+
+    changeState(CC110L_STATE_TX);
+    cmdStrobe(CC110L_STX);
+}
+
+void CC110lApi::fillFIFO(uint8_t* data, uint8_t len) {
+    writeAccess(CC11xL_FIFO, data, len);
+}
+
 cometos_error_t CC110lApi::send()
 {
     if(packetPending) {
@@ -441,6 +457,29 @@ void CC110lApi::setPacketEndCallback(packetEndCallback_t endCallback)
     packetEndCallback = endCallback;
 }
 
+int16_t CC110lApi::getRSSI(bool raw) {
+    uint8_t RSSI;
+    readAccess(CC110L_RSSI,(uint8_t*)&RSSI,1);
+    if(raw) {
+        return RSSI;
+    }
+    else {
+        return convertRSSI(RSSI);
+    }
+}
+
+int16_t CC110lApi::convertRSSI(uint8_t registerValue) {
+    int16_t dezi_rssi = ((int16_t)((int8_t)registerValue))*(10/2)-cc11xLRssiOffset*10;
+    return dezi_rssi;
+}
+
+uint8_t CC110lApi::getBytesInTxFIFO() {
+    uint8_t bytes;
+    readAccess(CC110L_TXBYTES,(uint8_t*)&bytes,1);
+    bytes &= ~(1<<7); // ignore underflow bit
+    return bytes;
+}
+
 void CC110lApi::readPacket()
 {
     uint8_t fifo_length;
@@ -448,7 +487,7 @@ void CC110lApi::readPacket()
 
     // TODO error handling
     if(getState() == CC110L_STATE_RX) {
-	return;
+	    return;
     }
 
     // read offset compensation
@@ -468,7 +507,7 @@ void CC110lApi::readPacket()
     //cometos::getCout() << "Received: " << dec << (uint16_t)fifo_length << " Bytes; " << (const char*) pData+1 << endl;
 
     // Only valid if APPEND_STATUS bit set
-    int16_t dezi_rssi = ((int16_t)((int8_t)pData[fifo_length-2]))*(10/2)-cc11xLRssiOffset*10;
+    int16_t dezi_rssi = convertRSSI(pData[fifo_length-2]);
     lastRSSI = dezi_rssi;
     
     uint8_t crc_ok = pData[fifo_length-1];
@@ -533,12 +572,12 @@ void CC110lApi::enterSleep(void)
 }
 
 void CC110lApi::readoutFIFOWhileContinous() {
-	uint8_t fifo_length;
-	uint8_t pData[255];
-	readAccess(CC110L_RXBYTES,&fifo_length,1);
+    uint8_t fifo_length;
+    uint8_t pData[255];
+    readAccess(CC110L_RXBYTES,&fifo_length,1);
 
-        cmdStrobe(CC11xL_SNOP | READ_ACCESS);
-        readAccess(CC11xL_FIFO, pData, fifo_length);
+    cmdStrobe(CC11xL_SNOP | READ_ACCESS);
+    readAccess(CC11xL_FIFO, pData, fifo_length);
 
 	if(fifo_length > 0) {
 	    dataAvailableCallback(fifo_length, pData, 0xFF, 0xFF);

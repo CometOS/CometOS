@@ -390,6 +390,9 @@ cometos_error_t CC110lApi::setModulation(Modulation modulation)
     else if(modulation == Modulation::OOK) {
         mdmcfg2 |= 3 << 4;
     }
+    else if(modulation == Modulation::FSK4) {
+        mdmcfg2 |= 4 << 4;
+    }
     else {
         return COMETOS_ERROR_INVALID;
     }
