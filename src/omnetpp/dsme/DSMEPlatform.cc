@@ -102,7 +102,7 @@ void DSMEPlatform::initialize() {
         this->dsmeAdaptionLayer.settings.allocationScheme = DSMEAdaptionLayerSettings::ALLOC_CONTIGUOUS_SLOT;
     }
 
-    this->dsmeAdaptionLayer.setReceiveMessage(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
+    this->dsmeAdaptionLayer.setIndicationCallback(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
 }
 
 void DSMEPlatform::finish() {
