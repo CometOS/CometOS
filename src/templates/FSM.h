@@ -103,7 +103,8 @@ public:
 
         while (r == FSM_TRANSITION) {
             /* call the exit action from last state */
-		    ASSERT((((C*)this)->*s)(exitEvent) != FSM_TRANSITION);
+            fsmReturnStatus exitResult = (((C*)this)->*s)(exitEvent);
+		    ASSERT(exitResult != FSM_TRANSITION);
 		    s = state;
 
             /* call entry action of new state */
