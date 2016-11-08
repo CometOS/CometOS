@@ -44,7 +44,7 @@ using namespace omnetpp;
 
 DelugeDataDisseminationExperiment::DelugeDataDisseminationExperiment(const char * service_name)
 : Module(service_name), file(), runTransferTask(*this), findPropertiesTask(*this), initiator(false),
-  filename("ddexp"), fileSize(128000), finalTask(CALLBACK(&DelugeDataDisseminationExperiment::finalize,*this))
+  filename("ddexp"), fileSize(128000), finalTask(CALLBACK_MET(&DelugeDataDisseminationExperiment::finalize,*this))
 {
 }
 
@@ -61,7 +61,7 @@ void DelugeDataDisseminationExperiment::initialize()
     Deluge* deluge = dynamic_cast<Deluge*>(getParentModule()->getSubmodule("deluge"));
     ASSERT(deluge);
     delugeHandler.setDeluge(deluge);
-    deluge->setFileCompleteCallback(CALLBACK(&DelugeDataDisseminationExperiment::fileIsLoaded, *this));
+    deluge->setFileCompleteCallback(CALLBACK_MET(&DelugeDataDisseminationExperiment::fileIsLoaded, *this));
 
     verifier = dynamic_cast<Verifier*>(getParentModule()->getSubmodule("verifier"));
     ASSERT(verifier);
@@ -94,7 +94,7 @@ void DelugeDataDisseminationExperiment::run(Message* msg)
     delete msg;
 
     ASSERT(fileGenerator.getArbiter()->requestImmediately() == COMETOS_SUCCESS); // we own fileGenerator
-    fileGenerator.generateRandomFile(filename, &file, fileSize, false, CALLBACK(&DelugeDataDisseminationExperiment::fileGenerated,*this));
+    fileGenerator.generateRandomFile(filename, &file, fileSize, false, CALLBACK_MET(&DelugeDataDisseminationExperiment::fileGenerated,*this));
 }
 
 void DelugeDataDisseminationExperiment::fileGenerated(cometos_error_t result)
@@ -112,7 +112,7 @@ void DelugeDataDisseminationExperiment::fileGenerated(cometos_error_t result)
 void DelugeDataDisseminationExperiment::findProperties()
 {
     ASSERT(verifier->getArbiter()->requestImmediately() == COMETOS_SUCCESS); // we own verifier
-    verifier->getLocalFileProperties(filename, CALLBACK(&DelugeDataDisseminationExperiment::localPropertiesFound,*this));
+    verifier->getLocalFileProperties(filename, CALLBACK_MET(&DelugeDataDisseminationExperiment::localPropertiesFound,*this));
 }
 
 void DelugeDataDisseminationExperiment::localPropertiesFound(FileProperties properties)
@@ -131,8 +131,8 @@ void DelugeDataDisseminationExperiment::runTransfer()
     node_t receiver = 0xffff;
 
 //    ASSERT(simpleFileTransfer->getArbiter()->requestImmediately() == COMETOS_SUCCESS); // we own simpleFileTransfer
-//    simpleFileTransfer->run(receiver, filename, CALLBACK(&DelugeDataDisseminationExperiment::transferFinished,*this));
-    delugeHandler.setFile(filename, CALLBACK(&DelugeDataDisseminationExperiment::transferFinished,*this));
+//    simpleFileTransfer->run(receiver, filename, CALLBACK_MET(&DelugeDataDisseminationExperiment::transferFinished,*this));
+    delugeHandler.setFile(filename, CALLBACK_MET(&DelugeDataDisseminationExperiment::transferFinished,*this));
 }
 
 void DelugeDataDisseminationExperiment::transferFinished(cometos_error_t result) //, node_t node)
@@ -147,7 +147,7 @@ void DelugeDataDisseminationExperiment::transferFinished(cometos_error_t result)
     nodeIdx = 0;
 
     if(nodeIdx < nodes.size()) {
-        verifier->getRemoteFileProperties(nodes[nodeIdx], filename, CALLBACK(&DelugeDataDisseminationExperiment::verify,*this));
+        verifier->getRemoteFileProperties(nodes[nodeIdx], filename, CALLBACK_MET(&DelugeDataDisseminationExperiment::verify,*this));
         nodeIdx++;
     }
 }
@@ -160,7 +160,7 @@ void DelugeDataDisseminationExperiment::verify(node_t remote, FileProperties pro
     std::cout << "----------------------------------------------" << std::endl;
 
     if(nodeIdx < nodes.size()) {
-        verifier->getRemoteFileProperties(nodes[nodeIdx], filename, CALLBACK(&DelugeDataDisseminationExperiment::verify,*this));
+        verifier->getRemoteFileProperties(nodes[nodeIdx], filename, CALLBACK_MET(&DelugeDataDisseminationExperiment::verify,*this));
         nodeIdx++;
     }
     else {

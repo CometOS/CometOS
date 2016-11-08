@@ -57,7 +57,7 @@ void DelugeInfoFile::getInfo(Callback<void(cometos_error_t,DelugeInfo*)> callbac
     this->mBufferByteIndex = 0;
     this->pFile->setMaxSegmentSize(DELUGE_INFOFILE_SEGMENT_SIZE);
     ASSERT(this->pFile->getArbiter()->requestImmediately() == COMETOS_SUCCESS);
-    this->pFile->open(this->mFilename, DELUGE_MAX_INFOFILE_SIZE, CALLBACK(&DelugeInfoFile::readSegment, *this));
+    this->pFile->open(this->mFilename, DELUGE_MAX_INFOFILE_SIZE, CALLBACK_MET(&DelugeInfoFile::readSegment, *this));
 }
 
 void DelugeInfoFile::writeInfo(DelugeInfo *pInfo, Callback<void(cometos_error_t,DelugeInfo*)> callback) {
@@ -92,7 +92,7 @@ void DelugeInfoFile::writeInfo(DelugeInfo *pInfo, Callback<void(cometos_error_t,
     this->mBufferByteIndex = 0;
     this->pFile->setMaxSegmentSize(DELUGE_INFOFILE_SEGMENT_SIZE);
     ASSERT(this->pFile->getArbiter()->requestImmediately() == COMETOS_SUCCESS);
-    this->pFile->open(this->mFilename, DELUGE_MAX_INFOFILE_SIZE, CALLBACK(&DelugeInfoFile::writeSegment, *this));
+    this->pFile->open(this->mFilename, DELUGE_MAX_INFOFILE_SIZE, CALLBACK_MET(&DelugeInfoFile::writeSegment, *this));
 }
 
 void DelugeInfoFile::readSegment(cometos_error_t result) {
@@ -103,7 +103,7 @@ void DelugeInfoFile::readSegment(cometos_error_t result) {
         return this->parseBuffer();
 
     // Read next segment
-    this->pFile->read(&mBuffer[this->mBufferByteIndex], this->pFile->getSegmentSize(this->mSegmentIndex), this->mSegmentIndex, CALLBACK(&DelugeInfoFile::readSegment, *this));
+    this->pFile->read(&mBuffer[this->mBufferByteIndex], this->pFile->getSegmentSize(this->mSegmentIndex), this->mSegmentIndex, CALLBACK_MET(&DelugeInfoFile::readSegment, *this));
     this->mBufferByteIndex += this->pFile->getSegmentSize(this->mSegmentIndex);
     this->mSegmentIndex++;
 }
@@ -113,10 +113,10 @@ void DelugeInfoFile::writeSegment(cometos_error_t result) {
 
     // Check if all segments are written
     if (this->mSegmentIndex >= this->pFile->getNumSegments())
-        return this->pFile->close(CALLBACK(&DelugeInfoFile::finalize, *this));
+        return this->pFile->close(CALLBACK_MET(&DelugeInfoFile::finalize, *this));
 
     // Write next segment
-    this->pFile->write(&mBuffer[this->mBufferByteIndex], this->pFile->getSegmentSize(this->mSegmentIndex), this->mSegmentIndex, CALLBACK(&DelugeInfoFile::writeSegment, *this));
+    this->pFile->write(&mBuffer[this->mBufferByteIndex], this->pFile->getSegmentSize(this->mSegmentIndex), this->mSegmentIndex, CALLBACK_MET(&DelugeInfoFile::writeSegment, *this));
     this->mBufferByteIndex += this->pFile->getSegmentSize(this->mSegmentIndex);
     this->mSegmentIndex++;
 }
@@ -177,17 +177,17 @@ void DelugeInfoFile::parseBuffer() {
     // Check if we have to write last segment in order to reserve space
     if (versionNumber == 0) {
         memset(mBuffer, 0x12, DELUGE_INFOFILE_SEGMENT_SIZE);
-        return this->pFile->write(mBuffer, this->pFile->getSegmentSize(this->pFile->getNumSegments()-1), this->pFile->getNumSegments()-1, CALLBACK(&DelugeInfoFile::lastSegmentWritten, *this));
+        return this->pFile->write(mBuffer, this->pFile->getSegmentSize(this->pFile->getNumSegments()-1), this->pFile->getNumSegments()-1, CALLBACK_MET(&DelugeInfoFile::lastSegmentWritten, *this));
     }
 
-    this->pFile->close(CALLBACK(&DelugeInfoFile::finalize, *this));
+    this->pFile->close(CALLBACK_MET(&DelugeInfoFile::finalize, *this));
 }
 
 void DelugeInfoFile::lastSegmentWritten(cometos_error_t result) {
     ASSERT(result == COMETOS_SUCCESS);
 
     // Close file
-    this->pFile->close(CALLBACK(&DelugeInfoFile::finalize, *this));
+    this->pFile->close(CALLBACK_MET(&DelugeInfoFile::finalize, *this));
 }
 
 

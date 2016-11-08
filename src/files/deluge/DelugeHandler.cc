@@ -73,7 +73,7 @@ cometos_error_t DelugeHandler::setFile(AirString& filename, Callback<void(cometo
 void DelugeHandler::invoke() {
     // Open origin file
     this->pOriginFile->setMaxSegmentSize(DELUGE_PACKET_SEGMENT_SIZE);
-    this->pOriginFile->open(this->mFilename, -1, CALLBACK(&DelugeHandler::fileOriginOpened,*this));
+    this->pOriginFile->open(this->mFilename, -1, CALLBACK_MET(&DelugeHandler::fileOriginOpened,*this));
 }
 
 void DelugeHandler::fileOriginOpened(cometos_error_t result) {
@@ -81,7 +81,7 @@ void DelugeHandler::fileOriginOpened(cometos_error_t result) {
 
     // Open destination file
     this->pDestinationFile->setMaxSegmentSize(DELUGE_PACKET_SEGMENT_SIZE);
-    this->pDestinationFile->open(this->mDatafilename, DELUGE_MAX_DATAFILE_SIZE, CALLBACK(&DelugeHandler::fileDestinationOpened,*this));
+    this->pDestinationFile->open(this->mDatafilename, DELUGE_MAX_DATAFILE_SIZE, CALLBACK_MET(&DelugeHandler::fileDestinationOpened,*this));
 }
 
 void DelugeHandler::fileDestinationOpened(cometos_error_t result) {
@@ -102,12 +102,12 @@ void DelugeHandler::fileDestinationOpened(cometos_error_t result) {
 void DelugeHandler::readSegment() {
     // Check if origin file is completly processed
     if (this->mCurrentSegment >= this->pOriginFile->getNumSegments()) {
-            this->pOriginFile->close(CALLBACK(&DelugeHandler::fileOriginClosed, *this));
+            this->pOriginFile->close(CALLBACK_MET(&DelugeHandler::fileOriginClosed, *this));
             return;
     }
 
     // Read next segment from origin file
-    this->pOriginFile->read(this->mBuffer.getBuffer(), this->pOriginFile->getSegmentSize(this->mCurrentSegment), this->mCurrentSegment, CALLBACK(&DelugeHandler::segmentRead,*this));
+    this->pOriginFile->read(this->mBuffer.getBuffer(), this->pOriginFile->getSegmentSize(this->mCurrentSegment), this->mCurrentSegment, CALLBACK_MET(&DelugeHandler::segmentRead,*this));
 }
 
 void DelugeHandler::segmentRead(cometos_error_t result) {
@@ -130,7 +130,7 @@ void DelugeHandler::segmentRead(cometos_error_t result) {
     }
 
     // Write segment
-    this->pDestinationFile->write(this->mBuffer.getBuffer(), this->pDestinationFile->getSegmentSize(this->mCurrentSegment), this->mCurrentSegment, CALLBACK(&DelugeHandler::segmentWritten, *this));
+    this->pDestinationFile->write(this->mBuffer.getBuffer(), this->pDestinationFile->getSegmentSize(this->mCurrentSegment), this->mCurrentSegment, CALLBACK_MET(&DelugeHandler::segmentWritten, *this));
 }
 
 void DelugeHandler::segmentWritten(cometos_error_t result) {
@@ -147,7 +147,7 @@ void DelugeHandler::fileOriginClosed(cometos_error_t result) {
     ASSERT(result == COMETOS_SUCCESS);
 
     // Close destination file
-    this->pDestinationFile->close(CALLBACK(&DelugeHandler::finalize, *this));
+    this->pDestinationFile->close(CALLBACK_MET(&DelugeHandler::finalize, *this));
 }
 
 void DelugeHandler::finalize(cometos_error_t result) {
@@ -157,7 +157,7 @@ void DelugeHandler::finalize(cometos_error_t result) {
     this->pDestinationFile->getArbiter()->release();
     this->pOriginFile->getArbiter()->release();
 
-    mInfoFile.getInfo(CALLBACK(&DelugeHandler::infoFileOpened, *this));
+    mInfoFile.getInfo(CALLBACK_MET(&DelugeHandler::infoFileOpened, *this));
 }
 
 void DelugeHandler::infoFileOpened(cometos_error_t result, DelugeInfo *pInfo) {

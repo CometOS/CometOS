@@ -98,7 +98,7 @@ static FileManager fm;
 int main() {
 	palLed_init();
 
-    //protocolstack_nwkConnect(fm.getGateIndIn(),fm.getGateReqOut());
+    protocolstack_nwkConnect(fm.getGateIndIn(),fm.getGateReqOut());
 	protocolstack_init();
 	cometos::initialize();
 

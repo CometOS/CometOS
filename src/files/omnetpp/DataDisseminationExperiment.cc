@@ -93,7 +93,7 @@ void DataDisseminationExperiment::run(Message* msg)
     delete msg;
 
     ASSERT(fileGenerator.getArbiter()->requestImmediately() == COMETOS_SUCCESS); // we own fileGenerator
-    fileGenerator.generateRandomFile(filename, &file, fileSize, false, CALLBACK(&DataDisseminationExperiment::fileGenerated,*this));
+    fileGenerator.generateRandomFile(filename, &file, fileSize, false, CALLBACK_MET(&DataDisseminationExperiment::fileGenerated,*this));
 }
 
 void DataDisseminationExperiment::fileGenerated(cometos_error_t result)
@@ -111,7 +111,7 @@ void DataDisseminationExperiment::fileGenerated(cometos_error_t result)
 void DataDisseminationExperiment::findProperties()
 {
     ASSERT(verifier->getArbiter()->requestImmediately() == COMETOS_SUCCESS); // we own verifier
-    verifier->getLocalFileProperties(filename, CALLBACK(&DataDisseminationExperiment::localPropertiesFound,*this));
+    verifier->getLocalFileProperties(filename, CALLBACK_MET(&DataDisseminationExperiment::localPropertiesFound,*this));
 }
 
 void DataDisseminationExperiment::localPropertiesFound(FileProperties properties)
@@ -130,7 +130,7 @@ void DataDisseminationExperiment::runTransfer()
     node_t receiver = 0xffff;
 
     ASSERT(simpleFileTransfer->getArbiter()->requestImmediately() == COMETOS_SUCCESS); // we own simpleFileTransfer
-    simpleFileTransfer->run(receiver, filename, filename, CALLBACK(&DataDisseminationExperiment::transferFinished,*this));
+    simpleFileTransfer->run(receiver, filename, filename, CALLBACK_MET(&DataDisseminationExperiment::transferFinished,*this));
 }
 
 void DataDisseminationExperiment::transferFinished(cometos_error_t result, node_t node)
@@ -144,7 +144,7 @@ void DataDisseminationExperiment::transferFinished(cometos_error_t result, node_
     nodeIdx = 0;
 
     if(nodeIdx < nodes.size()) {
-        verifier->getRemoteFileProperties(nodes[nodeIdx], filename, CALLBACK(&DataDisseminationExperiment::verify,*this));
+        verifier->getRemoteFileProperties(nodes[nodeIdx], filename, CALLBACK_MET(&DataDisseminationExperiment::verify,*this));
         nodeIdx++;
     }
 }
@@ -157,7 +157,7 @@ void DataDisseminationExperiment::verify(node_t remote, FileProperties propertie
     std::cout << "----------------------------------------------" << std::endl;
 
     if(nodeIdx < nodes.size()) {
-        verifier->getRemoteFileProperties(nodes[nodeIdx], filename, CALLBACK(&DataDisseminationExperiment::verify,*this));
+        verifier->getRemoteFileProperties(nodes[nodeIdx], filename, CALLBACK_MET(&DataDisseminationExperiment::verify,*this));
         nodeIdx++;
     }
     else {
@@ -171,7 +171,7 @@ void DataDisseminationExperiment::final(cometos_error_t result)
     //Callback<void(cometos_error_t)> tmpcb;
     //running = false;
     //tmpcb = callback;
-    //callback = EMPTY_CALLBACK();
+    //callback = EMPTY_CALLBACK_MET();
     palExec_atomicEnd();
 
     //if(tmpcb) {

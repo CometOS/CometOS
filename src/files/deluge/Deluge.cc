@@ -78,7 +78,7 @@ void Deluge::persistInfo(DelugeInfo *pNewInfo) {
     }
 
     // Store info file
-    this->mInfoFile.writeInfo(pInfo, CALLBACK(&Deluge::infoWritten, *this));
+    this->mInfoFile.writeInfo(pInfo, CALLBACK_MET(&Deluge::infoWritten, *this));
 }
 
 void Deluge::infoWritten(cometos_error_t error, DelugeInfo* info) {
@@ -88,7 +88,7 @@ void Deluge::infoWritten(cometos_error_t error, DelugeInfo* info) {
 void Deluge::prepareForUpdate() {
     ENTER_METHOD_SILENT();
     stopTimer();
-    dataFile->close(CALLBACK(&Deluge::finalize, *this));
+    dataFile->close(CALLBACK_MET(&Deluge::finalize, *this));
 }
 
 void Deluge::updateDone() {
@@ -153,11 +153,11 @@ fsmReturnStatus Deluge::stateInit(DelugeEvent &event) {
     AirString filename(DELUGE_DATA_FILE);
     switch (event.signal) {
     case DelugeEvent::ENTRY_SIGNAL:
-        mInfoFile.getInfo(CALLBACK(&Deluge::onInfoFileLoaded, *this));
+        mInfoFile.getInfo(CALLBACK_MET(&Deluge::onInfoFileLoaded, *this));
         return FSM_HANDLED;
     case DelugeEvent::RESULT_SIGNAL:
         dataFile->setMaxSegmentSize(DELUGE_PACKET_SEGMENT_SIZE);
-        dataFile->open(filename, DELUGE_MAX_DATAFILE_SIZE, CALLBACK(&Deluge::finalize, *this));
+        dataFile->open(filename, DELUGE_MAX_DATAFILE_SIZE, CALLBACK_MET(&Deluge::finalize, *this));
         return transition(&Deluge::stateMaintenance);
     default:
         return FSM_IGNORED;
@@ -197,12 +197,8 @@ fsmReturnStatus Deluge::stateRX(DelugeEvent &event) {
     switch(event.signal) {
     case DelugeEvent::ENTRY_SIGNAL:
         mActive = true;
-
         sendPageRequest();
         startTimer(DELUGE_RX_NO_RECEIPT_DELAY);
-#ifdef DELUGE_OUTPUT
-        getCout() << "RX started" << endl;
-#endif
         return FSM_HANDLED;
     case DelugeEvent::TIMER_SIGNAL:
         return handleRXTimer();
@@ -233,6 +229,9 @@ fsmReturnStatus Deluge::stateTX(DelugeEvent &event) {
         return FSM_HANDLED;
     case DelugeEvent::RESULT_SIGNAL:
         return transition(&Deluge::stateMaintenance);
+    case DelugeEvent::EXIT_SIGNAL:
+        stopTimer();
+        return FSM_HANDLED;
     default:
         return FSM_IGNORED;
     }
@@ -254,7 +253,7 @@ void Deluge::onFileOpen(cometos_error_t result) {
         // We have to write at the last segment in order to allocate the complete space
         this->mBuffer.setSize(this->dataFile->getSegmentSize(this->dataFile->getNumSegments()-1));
         memset(this->mBuffer.getBuffer(), 0x12, this->mBuffer.getSize());
-        this->dataFile->write(this->mBuffer.getBuffer(), this->mBuffer.getSize(), this->dataFile->getNumSegments()-1, CALLBACK(&Deluge::finalize, *this));
+        this->dataFile->write(this->mBuffer.getBuffer(), this->mBuffer.getSize(), this->dataFile->getNumSegments()-1, CALLBACK_MET(&Deluge::finalize, *this));
     }
 }
 
@@ -468,7 +467,7 @@ void Deluge::handleObjectProfile() {
             }
         }
 
-        //dataFile->prepareUpdate(DELUGE_MAX_DATAFILE_SIZE, pPageComplete, CALLBACK(&Deluge::finalize, *this));
+        //dataFile->prepareUpdate(DELUGE_MAX_DATAFILE_SIZE, pPageComplete, CALLBACK_MET(&Deluge::finalize, *this));
 
         // Replace info file
         persistInfo(new DelugeInfo(versionNumber, numberOfPages, fileSize, pAgeVector, pCRCVector, pPageComplete));
@@ -633,7 +632,7 @@ void Deluge::handlePacket() {
     uint16_t packetSize = this->dataFile->getSegmentSize(this->mPageRX * DELUGE_PACKETS_PER_PAGE + packet);
     this->mBuffer.setSize(packetSize);
 
-    this->dataFile->write(this->mBuffer.getBuffer(), packetSize, this->mPageRX * DELUGE_PACKETS_PER_PAGE + packet, CALLBACK(&Deluge::onPacketWritten, *this));
+    this->dataFile->write(this->mBuffer.getBuffer(), packetSize, this->mPageRX * DELUGE_PACKETS_PER_PAGE + packet, CALLBACK_MET(&Deluge::onPacketWritten, *this));
 
 #ifdef DELUGE_OUTPUT
     getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received packet=" << static_cast<uint16_t>(packet) << " with size=" << static_cast<uint16_t>(this->mBuffer.getSize()) << endl;
@@ -657,7 +656,7 @@ void Deluge::onPacketWritten(cometos_error_t result) {
 
          uint16_t packetSize = this->dataFile->getSegmentSize(this->mPageRX * DELUGE_PACKETS_PER_PAGE);
          this->mBuffer.setSize(packetSize);
-         this->dataFile->read(this->mBuffer.getBuffer(), packetSize, this->mPageRX * DELUGE_PACKETS_PER_PAGE, CALLBACK(&Deluge::onPageCheck, *this));
+         this->dataFile->read(this->mBuffer.getBuffer(), packetSize, this->mPageRX * DELUGE_PACKETS_PER_PAGE, CALLBACK_MET(&Deluge::onPageCheck, *this));
 
      }
 }
@@ -712,7 +711,7 @@ void Deluge::onPageCheck(cometos_error_t result) {
 
         static uint8_t counter = 0;
         if(counter++ == DELUGE_PAGES_BEFORE_FLUSH) {
-              dataFile->flush(CALLBACK(&Deluge::finalize, *this));
+              dataFile->flush(CALLBACK_MET(&Deluge::finalize, *this));
               counter = 0;
         }
 
@@ -725,7 +724,7 @@ void Deluge::onPageCheck(cometos_error_t result) {
         int16_t segment = this->mPageRX * DELUGE_PACKETS_PER_PAGE + this->mPageCheckPacket;
         uint16_t packetSize = this->dataFile->getSegmentSize(segment);
         this->mBuffer.setSize(packetSize);
-        this->dataFile->read(this->mBuffer.getBuffer(), packetSize, segment, CALLBACK(&Deluge::onPageCheck, *this));
+        this->dataFile->read(this->mBuffer.getBuffer(), packetSize, segment, CALLBACK_MET(&Deluge::onPageCheck, *this));
     }
 }
 
@@ -774,7 +773,7 @@ void Deluge::preparePacket() {
     this->mBuffer.setSize(this->dataFile->getSegmentSize(this->mPageTX * DELUGE_PACKETS_PER_PAGE + mPacketToSend));
 
     // Open segment/packet
-    this->dataFile->read(this->mBuffer.getBuffer(), this->dataFile->getSegmentSize(segment), segment, CALLBACK(&Deluge::sendPacket,*this));
+    this->dataFile->read(this->mBuffer.getBuffer(), this->dataFile->getSegmentSize(segment), segment, CALLBACK_MET(&Deluge::sendPacket,*this));
 }
 
 void Deluge::sendPacket(cometos_error_t result) {

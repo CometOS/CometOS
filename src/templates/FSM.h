@@ -34,6 +34,7 @@
 #define FSM_H_
 
 #include "palExec.h"
+#include "cometosAssert.h"
 
 namespace cometos {
 
