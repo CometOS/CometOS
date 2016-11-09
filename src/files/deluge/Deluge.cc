@@ -57,7 +57,7 @@ void Deluge::initialize() {
 #endif
 
     //Start the state machine
-    run();
+    //run();
 }
 
 void Deluge::setFileCompleteCallback(Callback<void(uint16_t version, uint8_t pages)> finishedCallback) {

@@ -120,7 +120,7 @@ public:
 	/**Removes last element,
 	 * and return copy of this
 	 */
-	C& popBack() {
+	const C& popBack() {
 		ASSERT(size > 0);
 		size--;
 		return pBuffer[size];
@@ -164,7 +164,7 @@ public:
     
 	/**Removes first element, and return copy of this, O(N)!
 	 */
-	C& popFront() {
+	C popFront() {
 		ASSERT(size > 0);
         C element = pBuffer[0];
         for(uint8_t to = 0; to < size-1; to++) {
