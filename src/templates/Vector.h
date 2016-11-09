@@ -150,6 +150,30 @@ public:
 		return *this;
 	}
 
+
+	/**Prepends element to the front of the array, O(N)!
+	 */
+	void pushFront(const C& x) {
+		ASSERT(size < max_size);
+        for(uint8_t to = size; to > 0; to--) {
+            pBuffer[to] = pBuffer[to-1];
+        }
+		pBuffer[0] = x;
+		size++;
+	}
+    
+	/**Removes first element, and return copy of this, O(N)!
+	 */
+	C& popFront() {
+		ASSERT(size > 0);
+        C element = pBuffer[0];
+        for(uint8_t to = 0; to < size-1; to++) {
+            pBuffer[to] = pBuffer[to+1];
+        }
+		size--;
+		return element;
+	}
+
 private:
 	C* pBuffer;
 	uint8_t size;

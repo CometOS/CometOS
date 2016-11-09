@@ -178,7 +178,13 @@ public:
 		return *this;
 	}
 
+	uint8_t popFront() {
+        return data.popFront();
+	}
 
+	void pushFront(uint8_t element) {
+        data.pushFront(element);
+	}
 
 private:
 	AirframeData data;
