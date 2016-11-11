@@ -269,8 +269,8 @@ fsmReturnStatus Deluge::stateTX(DelugeEvent &event) {
 //---------------------------------------------
 
 void Deluge::handleWakeup() {
-    Airframe frame = rcvdMsg->getAirframe();
-    frame >> filename;
+    Airframe *frame = rcvdMsg->decapsulateAirframe();
+    (*frame) >> filename;
 
     mInfoFile.getInfo(CALLBACK_MET(&Deluge::onInfoFileLoaded, *this));
 }
@@ -362,11 +362,12 @@ fsmReturnStatus Deluge::handleSummary() {
     ASSERT(pInfo);
 
     // Extract summary data
-    Airframe frame = rcvdMsg->getAirframe();
+    Airframe* frame = rcvdMsg->decapsulateAirframe();
     uint16_t versionNumber;
     uint8_t gamma;
-    frame >> versionNumber;
-    frame >> gamma;
+    (*frame) >> versionNumber;
+    (*frame) >> gamma;
+     delete frame;
 
 #ifdef DELUGE_OUTPUT
     getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received summary (v=" << versionNumber << ",g=" << static_cast<uint16_t>(gamma) << ")" << endl;
@@ -432,27 +433,27 @@ void Deluge::reopenFile(cometos_error_t error) {
 
 void Deluge::handleObjectProfile() {
     // Extract crc code
-    Airframe frame = rcvdMsg->getAirframe();
+    Airframe *frame = rcvdMsg->decapsulateAirframe();
     uint16_t crc;
-    frame >> crc;
+    (*frame) >> crc;
 
     // Generate crc code
     uint16_t checkCRC = 0;
-    for (uint16_t i = 0; i < frame.getLength(); i++) {
-        checkCRC = crc16_update(checkCRC, frame.getData()[i]);
+    for (uint16_t i = 0; i < frame->getLength(); i++) {
+        checkCRC = crc16_update(checkCRC, frame->getData()[i]);
     }
     ASSERT(checkCRC == crc);
 
     // Extract version number
     uint16_t versionNumber;
-    frame >> versionNumber;
+    (*frame) >> versionNumber;
 
     // Extract number of pages
     uint8_t numberOfPages;
-    frame >> numberOfPages;
+    (*frame) >> numberOfPages;
 
     file_size_t fileSize;
-    frame >> fileSize; 
+    (*frame) >> fileSize; 
     this->fileSize = fileSize;   
  
     //TODO handle the case that the file is a dummy TODO handle the case that file is getting resized
@@ -470,7 +471,7 @@ void Deluge::handleObjectProfile() {
         uint16_t avSize = DelugeInfo::GetAgeVectorSize(numberOfPages);
         uint8_t *pAgeVector = new uint8_t[avSize];
         for (uint16_t i = 0; i < avSize; i++) {
-            frame >> pAgeVector[i];
+            (*frame) >> pAgeVector[i];
         }
 
         // Create empty CRC vector
@@ -508,14 +509,16 @@ void Deluge::handleObjectProfile() {
             mActive = true;
         }
     }
+    delete frame;
 }
 
 fsmReturnStatus Deluge::handlePageRequest() {
     uint8_t requestedPage;
     uint32_t requestedPackets;
-    Airframe frame = rcvdMsg->getAirframe();
-    frame >> requestedPage;
-    frame >> requestedPackets;
+    Airframe *frame = rcvdMsg->decapsulateAirframe();
+    (*frame) >> requestedPage;
+    (*frame) >> requestedPackets;
+    delete frame;
 
     // Check availability of page
     uint8_t gamma = pInfo->getHighestCompletePage();
@@ -623,13 +626,14 @@ void Deluge::handlePacket() {
     uint8_t page;
     uint8_t packet;
     uint16_t crc;
-    Airframe frame = rcvdMsg->getAirframe();
+    Airframe *frame = rcvdMsg->decapsulateAirframe();
     this->mBuffer.clear();
-    frame >> page;
-    frame >> this->mPageCRC;
-    frame >> packet;
-    frame >> crc;
-    frame >> this->mBuffer;
+    (*frame) >> page;
+    (*frame) >> this->mPageCRC;
+    (*frame) >> packet;
+    (*frame) >> crc;
+    (*frame) >> this->mBuffer;
+    delete frame;
 
     if (page != this->mPageRX) {
 #ifdef DELUGE_OUTPUT

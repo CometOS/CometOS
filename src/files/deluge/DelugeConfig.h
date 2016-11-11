@@ -39,12 +39,12 @@
 /***
  * Value that defines the packet size
  */
-#define DELUGE_PACKET_SEGMENT_SIZE      50
+#define DELUGE_PACKET_SEGMENT_SIZE      70
 
 /***
  * Value that defines the page size
  */
-#define DELUGE_PAGE_SIZE                500
+#define DELUGE_PAGE_SIZE                2100
 
 /**
  *
