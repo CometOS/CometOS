@@ -57,14 +57,15 @@ public:
         RCV_SUMMARY_SIGNAL,
         RCV_OBJPROFILE_SIGNAL,
         RCV_REQUEST_SIGNAL,
-        RCV_DATA_SIGNAL
+        RCV_DATA_SIGNAL,
+	WAKEUP_SIGNAL
     };
 };
 
 class Deluge : public Endpoint, public FSM<Deluge, DelugeEvent>, public Task {
 public:
     // Different types of messages for the deluge algorithm
-    enum MessageType {SUMMARY = 0, OBJECTPROFILE = 1, PAGE_REQUEST = 2, PACKET_TRANSMISSION = 3};
+    enum MessageType {SUMMARY = 0, OBJECTPROFILE = 1, PAGE_REQUEST = 2, PACKET_TRANSMISSION = 3, WAKEUP = 4};
 
     // Constructor
     Deluge();
@@ -86,8 +87,8 @@ public:
     Arbiter& getArbiter();
     // prepare for manual update
     void prepareForUpdate();
-    // update done
-    void updateDone();
+    // Signal that the update of given file is done
+    void updateDone(AirString &filename);
     // Persists the info file
     void persistInfo(DelugeInfo *pNewInfo = nullptr);
 
@@ -95,7 +96,7 @@ private:
     typedef FSM<Deluge, DelugeEvent> fsm_t;
 
     fsmReturnStatus stateInit(DelugeEvent &event);
-      void onFileOpen(cometos_error_t result);
+      void handleWakeup();
       void onInfoFileLoaded(cometos_error_t result, DelugeInfo* info);
 
     fsmReturnStatus stateMaintenance(DelugeEvent &event);
@@ -111,6 +112,7 @@ private:
       void sendObjectProfile();
       // handles the object profile from another node
       void handleObjectProfile();
+      void reopenFile(cometos_error_t error);
       // handles a page request from another node and transitions to RX
       fsmReturnStatus handlePageRequest();
 
@@ -207,6 +209,10 @@ private:
     DataIndication rcvdMsg;
     // the data file of the deluge algorithm
     SegmentedFile *dataFile;
+    // the destination filename
+    AirString filename;
+    file_size_t fileSize;
+    bool opened = false;
 };
 
 }

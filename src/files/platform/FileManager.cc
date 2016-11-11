@@ -153,8 +153,7 @@ cometos_error_t FileManager::hexdump(AirString& filename)
 cometos_error_t FileManager::transferFile(node_t& receiver, AirString& filename)
 {
     if(receiver == 0xFFFF) {
-        getCout() << "Broadcast is not yet supported for file transfer" << endl;
-        return COMETOS_ERROR_INVALID;
+	return delugeHandler.setFile(filename, EMPTY_CALLBACK());
     }
     else {
         return fileTransferAction.execute(receiver, filename, filename, simpleFileTransfer.getArbiter()->generateReleaseCallback<cometos_error_t,node_t>());

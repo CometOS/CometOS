@@ -81,7 +81,7 @@ void DelugeHandler::fileOriginOpened(cometos_error_t result) {
 
     // Open destination file
     this->pDestinationFile->setMaxSegmentSize(DELUGE_PACKET_SEGMENT_SIZE);
-    this->pDestinationFile->open(this->mDatafilename, DELUGE_MAX_DATAFILE_SIZE, CALLBACK_MET(&DelugeHandler::fileDestinationOpened,*this));
+    this->pDestinationFile->open(this->mDatafilename, pOriginFile->getFileSize(), CALLBACK_MET(&DelugeHandler::fileDestinationOpened,*this), true);
 }
 
 void DelugeHandler::fileDestinationOpened(cometos_error_t result) {
@@ -210,7 +210,7 @@ void DelugeHandler::infoFileOpened(cometos_error_t result, DelugeInfo *pInfo) {
     deluge->getArbiter().release();
 
     // Start deluge again
-    deluge->updateDone();
+    deluge->updateDone(mFilename);
 }
 
 void DelugeHandler::stop() {

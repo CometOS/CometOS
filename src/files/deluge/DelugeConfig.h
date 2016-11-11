@@ -79,7 +79,7 @@
 /***
  * Value that defines the maximum data file size
  */
-#define DELUGE_MAX_DATAFILE_SIZE 130000
+#define DELUGE_MAX_DATAFILE_SIZE 160000
 
 /***
  * Value that defines the maximum info file size
@@ -115,7 +115,7 @@
 /***
  * Defines the time RX waits until leaving RX state because of no receipt
  */
-#define DELUGE_RX_NO_RECEIPT_DELAY 5000
+#define DELUGE_RX_NO_RECEIPT_DELAY 2000
 
 /***
  * Defines the time TX waits between sending two packets

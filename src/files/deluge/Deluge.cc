@@ -50,21 +50,19 @@ Deluge::~Deluge() {
 }
 
 void Deluge::initialize() {
-#if 0
+#if 1
     palWdt_pause();
     cfs_format();
     palWdt_resume();
 #endif
 
     //Start the state machine
-    //run();
+   // run();
 }
 
 void Deluge::setFileCompleteCallback(Callback<void(uint16_t version, uint8_t pages)> finishedCallback) {
     this->mCallback = finishedCallback;
 }
-
-
 
 Arbiter& Deluge::getArbiter() {
     return this->mArbiter;
@@ -89,15 +87,32 @@ void Deluge::prepareForUpdate() {
     ENTER_METHOD_SILENT();
     stopTimer();
     dataFile->close(CALLBACK_MET(&Deluge::finalize, *this));
+ 
+    // go back to the init state because a wakeup will happen here
+    setStateIfIdle(&Deluge::stateMaintenance, &Deluge::stateInit);
+    setStateIfIdle(&Deluge::stateMaintenance, &Deluge::stateRX);
+    setStateIfIdle(&Deluge::stateMaintenance, &Deluge::stateTX);
+
 }
 
-void Deluge::updateDone() {
+void Deluge::updateDone(AirString &filename) {
     ENTER_METHOD_SILENT();
+    
+    this->filename = filename;	
     mActive = false;
+    opened = true;
     //transition(&Deluge::stateInit);
     //newRound();
-    setStateIfIdle(&Deluge::stateMaintenance, &Deluge::stateInit);
-    onInfoFileLoaded(COMETOS_SUCCESS, pInfo);
+     onInfoFileLoaded(COMETOS_SUCCESS, pInfo);
+
+    // Broadcast a wakeup message to prepare the other nodes for the update
+    Airframe* frame = new Airframe();
+    (*frame) << filename;
+    (*frame) << static_cast<uint8_t>(Deluge::MessageType::WAKEUP);
+
+    // Send broadcast msg
+    DataRequest* req = new DataRequest(0xFFFF, frame, this->createCallback(&Deluge::onMessageSent));
+    sendRequest(req);	
 }
 
 
@@ -133,6 +148,9 @@ void Deluge::handleIndication(DataIndication* msg) {
     case PACKET_TRANSMISSION:
         dispatchEvent.signal = DelugeEvent::RCV_DATA_SIGNAL;
         break;
+    case WAKEUP:
+	dispatchEvent.signal = DelugeEvent::WAKEUP_SIGNAL;
+	break;
     default:
         dispatchEvent.signal = DelugeEvent::EMPTY_SIGNAL;
     }
@@ -150,15 +168,18 @@ void Deluge::handleIndication(DataIndication* msg) {
 //---------------------------------------------
 
 fsmReturnStatus Deluge::stateInit(DelugeEvent &event) {
-    AirString filename(DELUGE_DATA_FILE);
     switch (event.signal) {
-    case DelugeEvent::ENTRY_SIGNAL:
-        mInfoFile.getInfo(CALLBACK_MET(&Deluge::onInfoFileLoaded, *this));
-        return FSM_HANDLED;
+    case DelugeEvent::WAKEUP_SIGNAL:
+        handleWakeup();
+	return FSM_HANDLED;
     case DelugeEvent::RESULT_SIGNAL:
         dataFile->setMaxSegmentSize(DELUGE_PACKET_SEGMENT_SIZE);
-        dataFile->open(filename, DELUGE_MAX_DATAFILE_SIZE, CALLBACK_MET(&Deluge::finalize, *this));
-        return transition(&Deluge::stateMaintenance);
+        if(opened) {
+	   dataFile->open(filename, -1, CALLBACK_MET(&Deluge::finalize, *this));
+        } else {
+	   dataFile->open(filename, DELUGE_MAX_DATAFILE_SIZE, CALLBACK_MET(&Deluge::finalize, *this));
+	}
+	return transition(&Deluge::stateMaintenance);
     default:
         return FSM_IGNORED;
     }
@@ -245,16 +266,11 @@ fsmReturnStatus Deluge::stateTX(DelugeEvent &event) {
 //         Init state helper functions
 //---------------------------------------------
 
-void Deluge::onFileOpen(cometos_error_t result) {
-    ASSERT(result == COMETOS_SUCCESS);
+void Deluge::handleWakeup() {
+    Airframe frame = rcvdMsg.getAirframe();
+    frame >> filename;
 
-    // Check if the datafile is already existent
-    if (pInfo->getVersion() == 0) {
-        // We have to write at the last segment in order to allocate the complete space
-        this->mBuffer.setSize(this->dataFile->getSegmentSize(this->dataFile->getNumSegments()-1));
-        memset(this->mBuffer.getBuffer(), 0x12, this->mBuffer.getSize());
-        this->dataFile->write(this->mBuffer.getBuffer(), this->mBuffer.getSize(), this->dataFile->getNumSegments()-1, CALLBACK_MET(&Deluge::finalize, *this));
-    }
+    mInfoFile.getInfo(CALLBACK_MET(&Deluge::onInfoFileLoaded, *this));
 }
 
 void Deluge::onInfoFileLoaded(cometos_error_t result, DelugeInfo* info) {
@@ -408,6 +424,10 @@ void Deluge::sendObjectProfile() {
 #endif
 }
 
+void Deluge::reopenFile(cometos_error_t error) {
+    dataFile->open(filename, fileSize, CALLBACK_MET(&Deluge::finalize, *this), true);
+}
+
 void Deluge::handleObjectProfile() {
     // Extract crc code
     Airframe frame = rcvdMsg.getAirframe();
@@ -429,9 +449,14 @@ void Deluge::handleObjectProfile() {
     uint8_t numberOfPages;
     frame >> numberOfPages;
 
-    // Extract file size
     file_size_t fileSize;
-    frame >> fileSize;
+    frame >> fileSize; 
+    this->fileSize = fileSize;   
+ 
+    //TODO handle the case that the file is a dummy TODO handle the case that file is getting resized
+    //if(dataFile->getFileSize() <= 0) {
+    //	dataFile->close(CALLBACK_MET(&Deluge::reopenFile, *this));
+    //} 
 
 #ifdef DELUGE_OUTPUT
     getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received objectprofile for version=" << static_cast<uint16_t>(versionNumber) << " and numberOfPages=" << static_cast<uint16_t>(numberOfPages) << " and filesize=" << fileSize << endl;
@@ -623,7 +648,7 @@ void Deluge::handlePacket() {
     // Remove packet from required packets
     DelugeUtility::UnsetBit(&this->mPacketsMissing, packet);
 
-    if (DelugeUtility::GetLeastSignificantBitSet(this->mPacketsMissing) >= DELUGE_PACKETS_PER_PAGE) {
+    if (DelugeUtility::GetLeastSignificantBitSet(this->mPacketsMissing) >=  DelugeUtility::NumOfPacketsInPage(mPageRX, pInfo->getFileSize())) {
        // getCout() << "start page check mPacketsMissing 0x" << hex << mPacketsMissing << endl;
         this->mPageCheckActive = true;
     }
@@ -642,7 +667,7 @@ void Deluge::handlePacket() {
 void Deluge::onPacketWritten(cometos_error_t result) {
     ASSERT(result == COMETOS_SUCCESS);
      // Check if we are done
-     if (DelugeUtility::GetLeastSignificantBitSet(this->mPacketsMissing) >= DELUGE_PACKETS_PER_PAGE) {
+     if (DelugeUtility::GetLeastSignificantBitSet(this->mPacketsMissing) >= DelugeUtility::NumOfPacketsInPage(this->mPageRX, pInfo->getFileSize())) {
          // reset the needed packets
          uint16_t numPacketsInPage = DelugeUtility::NumOfPacketsInPage((mPageRX+1)%pInfo->getNumberOfPages(), pInfo->getFileSize());
          DelugeUtility::SetFirstBits(&this->mPacketsMissing, numPacketsInPage);
