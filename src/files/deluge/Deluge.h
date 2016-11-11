@@ -206,7 +206,7 @@ private:
     // The file the info is written to
     DelugeInfoFile mInfoFile;
     // the last received message
-    DataIndication rcvdMsg;
+    DataIndication* rcvdMsg;
     // the data file of the deluge algorithm
     SegmentedFile *dataFile;
     // the destination filename

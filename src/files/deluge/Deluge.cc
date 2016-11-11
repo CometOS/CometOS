@@ -42,7 +42,7 @@ using namespace cometos;
 
 Define_Module(Deluge);
 
-Deluge::Deluge() : fsm_t(&Deluge::stateInit), rcvdMsg(NULL, 0, 0), dataFile(SegFileFactory::CreateInstance()) {
+Deluge::Deluge() : fsm_t(&Deluge::stateInit), rcvdMsg(nullptr), dataFile(SegFileFactory::CreateInstance()) {
     ASSERT(dataFile->getArbiter()->requestImmediately() == COMETOS_SUCCESS);
 }
 
@@ -128,7 +128,10 @@ void Deluge::invoke() {
 }
 
 void Deluge::handleIndication(DataIndication* msg) {
-    rcvdMsg = *msg;
+    if(rcvdMsg != nullptr) {
+        delete rcvdMsg;
+    }
+    rcvdMsg = msg;
 
     uint8_t msgType;
     msg->getAirframe() >> msgType;
@@ -156,7 +159,6 @@ void Deluge::handleIndication(DataIndication* msg) {
     }
 
     dispatch(dispatchEvent);
-    delete msg;
 }
 
 
@@ -177,7 +179,7 @@ fsmReturnStatus Deluge::stateInit(DelugeEvent &event) {
         if(opened) {
 	   dataFile->open(filename, -1, CALLBACK_MET(&Deluge::finalize, *this));
         } else {
-	   dataFile->open(filename, DELUGE_MAX_DATAFILE_SIZE, CALLBACK_MET(&Deluge::finalize, *this));
+	   dataFile->open(filename, DELUGE_MAX_DATAFILE_SIZE, CALLBACK_MET(&Deluge::finalize, *this), true);
 	}
 	return transition(&Deluge::stateMaintenance);
     default:
@@ -267,7 +269,7 @@ fsmReturnStatus Deluge::stateTX(DelugeEvent &event) {
 //---------------------------------------------
 
 void Deluge::handleWakeup() {
-    Airframe frame = rcvdMsg.getAirframe();
+    Airframe frame = rcvdMsg->getAirframe();
     frame >> filename;
 
     mInfoFile.getInfo(CALLBACK_MET(&Deluge::onInfoFileLoaded, *this));
@@ -360,7 +362,7 @@ fsmReturnStatus Deluge::handleSummary() {
     ASSERT(pInfo);
 
     // Extract summary data
-    Airframe frame = rcvdMsg.getAirframe();
+    Airframe frame = rcvdMsg->getAirframe();
     uint16_t versionNumber;
     uint8_t gamma;
     frame >> versionNumber;
@@ -382,7 +384,7 @@ fsmReturnStatus Deluge::handleSummary() {
         return FSM_HANDLED;
     } else if (versionNumber == pInfo->getVersion() && ((gamma > localGamma && gamma != 255) || (localGamma == 255 && gamma != 255))) {
         // Transition to RX
-        addSuitableHost(rcvdMsg.src);
+        addSuitableHost(rcvdMsg->src);
         return transition(&Deluge::stateRX);
     }
     return FSM_HANDLED;
@@ -430,7 +432,7 @@ void Deluge::reopenFile(cometos_error_t error) {
 
 void Deluge::handleObjectProfile() {
     // Extract crc code
-    Airframe frame = rcvdMsg.getAirframe();
+    Airframe frame = rcvdMsg->getAirframe();
     uint16_t crc;
     frame >> crc;
 
@@ -511,7 +513,7 @@ void Deluge::handleObjectProfile() {
 fsmReturnStatus Deluge::handlePageRequest() {
     uint8_t requestedPage;
     uint32_t requestedPackets;
-    Airframe frame = rcvdMsg.getAirframe();
+    Airframe frame = rcvdMsg->getAirframe();
     frame >> requestedPage;
     frame >> requestedPackets;
 
@@ -621,7 +623,7 @@ void Deluge::handlePacket() {
     uint8_t page;
     uint8_t packet;
     uint16_t crc;
-    Airframe frame = rcvdMsg.getAirframe();
+    Airframe frame = rcvdMsg->getAirframe();
     this->mBuffer.clear();
     frame >> page;
     frame >> this->mPageCRC;
@@ -834,11 +836,13 @@ void Deluge::sendPacket(cometos_error_t result) {
 }
 
 void Deluge::handlePageRequestTX() {
-    Airframe frame = rcvdMsg.getAirframe();
+    Airframe* frame = rcvdMsg->decapsulateAirframe();
+    ASSERT(frame != nullptr);
     uint8_t requestedPage;
     uint32_t requestedPackets;
-    frame >> requestedPage;
-    frame >> requestedPackets;
+    (*frame) >> requestedPage;
+    (*frame) >> requestedPackets;
+    delete frame;
 
     if(mPageTX == requestedPage) {
         mRequestedPackets |= requestedPackets;
