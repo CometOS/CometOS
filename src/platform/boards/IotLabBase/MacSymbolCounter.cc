@@ -37,23 +37,25 @@
 
 using namespace cometos;
 
+static MacSymbolCounter msc;
+
 MacSymbolCounter& MacSymbolCounter::getInstance() {
-    static MacSymbolCounter msc;
     return msc;
 }
 
 void MacSymbolCounter::init(Callback<void()> compareMatch) {
     this->compareMatch = compareMatch;
 
+	//Disable interrupt during setup
+    TIM3->DIER &= ~TIM_DIER_UIE;
+
 	RCC_ClocksTypeDef clocks;
 	RCC_GetClocksFreq(&clocks);
 
     // TODO calculate correct prescaler
-    uint32_t freq = 1000;
-	uint32_t full_pre = clocks.PCLK1_Frequency * 2 / (uint32_t)freq;
-
-	uint32_t soft_counter_up = full_pre / 65536;
-	uint32_t prescaler = full_pre / (soft_counter_up + 1);
+    //uint32_t freq = 65536;
+    uint32_t freq = 62500;
+	uint32_t prescaler = clocks.PCLK1_Frequency * 2 / (uint32_t)freq;
 
 	// Init interrupt line
 	NVIC_InitTypeDef nvicInit;
@@ -69,6 +71,41 @@ void MacSymbolCounter::init(Callback<void()> compareMatch) {
 	//Set Registers
 	TIM3->PSC = prescaler;
 	TIM3->EGR = TIM_PSCReloadMode_Immediate;
+
+	TIM3->ARR = 0xFFFF;
+	TIM3->CNT = 0;
+
+	TIM3->CR1 &= ~TIM_CR1_DIR; // upcounting
+
+	//Enable Timer
+    TIM3->SR &= ~TIM_SR_UIF; // clear update interrupt
+    TIM3->DIER |= TIM_DIER_UIE; // enable interrupt
+	TIM3->CR1 |= TIM_CR1_CEN;
+}
+
+void MacSymbolCounter::interrupt() {
+    uint8_t captureMSB = msb;
+    uint8_t compareMSB = msb;
+
+	if (TIM3->SR & TIM_SR_UIF){
+		TIM3->SR &= (uint16_t) ~TIM_SR_UIF;
+		//cometos::PalTimerImp<3>::getInstance().handleInterrupt();
+        msb++;
+        getCout() << msb << endl;
+
+        // The compare match and/or capture interrupt
+        // might have been before or after the overflow
+        if(
+	}
+}
+
+uint32_t MacSymbolCounter::getValue() {
+    return (((uint32_t)msb) << 16) | TIM3->CNT;
+}
+
+void MacSymbolCounter::setCompareMatch(uint32_t compareValue) {
+    compareValueMSB = compareValue >> 16;
+    TIM3->CCR1 = compareValue & 0xFFFF;
 }
 
 /*
@@ -85,11 +122,11 @@ inline void PalTimerImp<Peripheral>::initInputCapture(){
 }
 */
 
+extern "C" {
+
 void TIM3_IRQHandler(void)
 {
-	if (TIM3->SR & TIM_SR_UIF){
-		TIM3->SR &= (uint16_t) ~TIM_SR_UIF;
-		//cometos::PalTimerImp<3>::getInstance().handleInterrupt();
-        cometos::getCout() << "." << endl;
-	}
+    msc.interrupt();
+}
+
 }

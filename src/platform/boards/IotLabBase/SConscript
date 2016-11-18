@@ -21,7 +21,8 @@ env.add_sources([
 'pal.cc',
 'palFirmwareDummy.cc',
 'palExecUtils.cc',
-'palRand.cc'
+'palRand.cc',
+'MacSymbolCounter.cc'
 ])
 
 

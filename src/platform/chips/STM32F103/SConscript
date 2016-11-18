@@ -27,8 +27,7 @@ env.add_sources([
 'palWdt.cc',
 'palGPIOPin.cc',
 'palTimer.cc',
-'cometosAssert.cc',
-'MacSymbolCounter.cc'
+'cometosAssert.cc'
 ])
 
 SConscript("./system/SConscript")
