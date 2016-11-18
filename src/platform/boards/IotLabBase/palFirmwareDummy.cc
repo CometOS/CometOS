@@ -109,10 +109,6 @@ palFirmware_ret_t palFirmware_run(uint8_t slot) {
 
 }
 
-palFirmware_ret_t palExec_reset() {
-	return PAL_FIRMWARE_NOT_SUPPORTED;
-}
-
 palFirmware_ret_t palFirmware_initTransferAsync(palFirmware_slotNum_t slot,
                                                 palFirmware_segNum_t numSegs,
                                                 palFirmware_callback_t callback,

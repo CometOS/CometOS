@@ -1,7 +1,7 @@
 Import('env')
 
 
-SConscript("../IotLab/SConscript")
+SConscript("../IotLabBase/SConscript")
 
 
 
