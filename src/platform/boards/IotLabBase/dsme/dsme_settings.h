@@ -30,53 +30,35 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PALRAND_C
-#define PALRAND_C
+#ifndef DSME_SETTINGS_H
+#define DSME_SETTINGS_H
 
-#include "rf231.h"
-#include "palTimer.h"
-#include "palRand.h"
-#include "cmsis_device.h"
+namespace dsme {
 
-static unsigned int cometos_rnd = 0;
+constexpr uint8_t TOTAL_SLOTS_PER_SUPERFRAME = 16; // fixed value, see 4.5.1 of IEEE 802.15.4-2011, this includes beacon, CAP and GTS
+constexpr uint8_t macLIFSPeriod = 40; // fixed value, see 8.1.3 of IEEE 802.15.4-2011 (assuming no UWB PHY)
+constexpr uint8_t macSIFSPeriod = 12; // fixed value, see 8.1.3 of IEEE 802.15.4-2011 (assuming no UWB PHY)
+constexpr uint8_t PRE_EVENT_SHIFT = macSIFSPeriod;
+constexpr uint8_t MIN_CSMA_SLOTS = 0; // 0 for CAP reduction
+constexpr uint8_t MAX_GTSLOTS = TOTAL_SLOTS_PER_SUPERFRAME - MIN_CSMA_SLOTS - 1;
+constexpr uint8_t MAX_CHANNELS = 16;
+constexpr uint8_t MIN_CHANNEL = 11;
+constexpr uint8_t MAX_NEIGHBORS = 25;
 
-unsigned int palRand_get() {
-	return cometos_rnd;
+constexpr uint8_t MIN_SO = 1;
+constexpr uint8_t MAX_BO = 10;
+constexpr uint8_t MAX_MO = 9;
+constexpr uint16_t MAX_SLOTS_PER_SUPERFRAMES = 1 << (uint16_t)(MAX_BO - MIN_SO);
+constexpr uint16_t MAX_TOTAL_SUPERFRAMES = 1 << (uint16_t)(MAX_BO - MIN_SO);
+constexpr uint16_t MAX_SUPERFRAMES_PER_MULTI_SUPERFRAME = 1 << (uint16_t)(MAX_MO - MIN_SO);
+constexpr uint16_t MAX_OCCUPIED_SLOTS = MAX_SUPERFRAMES_PER_MULTI_SUPERFRAME*MAX_GTSLOTS*MAX_CHANNELS;
+
+constexpr uint8_t MAX_SAB_UNITS = 1;
+
+constexpr uint16_t CSMA_QUEUE_SIZE = 10;
+constexpr uint16_t TOTAL_GTS_QUEUE_SIZE = MAX_NEIGHBORS*CSMA_QUEUE_SIZE;
+constexpr uint16_t MSG_POOL_SIZE = CSMA_QUEUE_SIZE+TOTAL_GTS_QUEUE_SIZE+5;
+
 }
 
-void palRand_init() {
-	cometos::Rf231 * rf = cometos::Rf231::getInstance();
-	cometos::PalTimer* timer = cometos::PalTimer::getInstance(cometos::Timer::RADIO);
-	timer->setFrequency(1e6);
-
-	rf->cmd_state(AT86RF231_TRX_STATE_FORCE_TRX_OFF);
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF) {
-		__asm("nop");
-	}
-
-	rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_RX_ON)
-		__asm("nop");
-
-	unsigned int rnd = 0;
-
-	//the random value is updated every 1 us in the rf231
-	timer->delay(1);
-
-	for (uint8_t i=0; i < sizeof(rnd) * 8 / 2; i++) {
-		timer->delay(1);
-		uint8_t rssiReg = rf->readRegister(AT86RF231_REG_PHY_RSSI);
-		rnd = (rnd << 2) | ((rssiReg >> AT86RF231_PHY_RSSI_RND_0) & 0x03);
-	}
-
-	rf->cmd_state(AT86RF231_TRX_STATE_TRX_OFF);
-
-	cometos_rnd = rnd;
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF)
-		__asm("nop");
-}
-
-#endif //PALRAND_C
+#endif

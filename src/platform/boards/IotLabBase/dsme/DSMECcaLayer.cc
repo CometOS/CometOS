@@ -30,30 +30,71 @@
  * SUCH DAMAGE.
  */
 
-#include "DSMEMessage.h"
+#include "DSMECcaLayer.h"
+#include "cometos.h"
+#include "tosUtil.h"
+#include "RFA1DriverLayer.h"
 
-namespace dsme {
+//tasklet_norace
+static message_t *txMsg;
 
-void DSMEMessage::prependFrom(DSMEMessageElement* me) {
-    // TODO better fill buffer from the end (but this is not how it works in CometOS)
-    ASSERT(this->frame->getLength()+me->getSerializationLength() <= this->frame->getMaxLength());
-    memmove(this->frame->getData()+me->getSerializationLength(), this->frame->getData(), this->frame->getLength());
-    this->frame->setLength(this->frame->getLength()+me->getSerializationLength());
-    Serializer s(this->frame->getData(), SERIALIZATION);
-    me->serialize(s);
-    ASSERT(this->frame->getData()+me->getSerializationLength() == s.getData());
+//tasklet_norace
+static uint8_t ccaState;
+enum {
+    STATE_READY = 0, STATE_CCA_WAIT = 1, STATE_SEND = 2,
+};
+
+//tasklet_async event
+void radioSend_ready() {
+    if (ccaState == STATE_READY)
+        ccaSend_ready(MAC_SUCCESS);
 }
 
-void DSMEMessage::decapsulateTo(DSMEMessageElement* me) {
-    me->copyFrom(this);
-    this->frame->setLength(this->frame->getLength()-me->getSerializationLength());
-    memmove(this->frame->getData(), this->frame->getData()+me->getSerializationLength(), this->frame->getLength());
+//tasklet_async command
+mac_result_t cca_request() {
+    mac_result_t error;
+
+    if (ccaState == STATE_READY) {
+        if ((error = radioCCA_request()) == MAC_SUCCESS) {
+            ccaState = STATE_CCA_WAIT;
+        }
+    } else
+        error = MAC_ERROR_BUSY;
+
+    return error;
 }
 
-void DSMEMessage::copyTo(DSMEMessageElement* me) {
-    Serializer s(this->frame->getData(), DESERIALIZATION);
-    me->serialize(s);
-    ASSERT(this->frame->getData()+me->getSerializationLength() == s.getData());
+//tasklet_async command
+mac_result_t ccaSend_send(message_t* msg) {
+    mac_result_t error;
+
+    if (ccaState == STATE_READY) {
+        if (tosUtil_requiresCca(msg)) {
+            txMsg = msg;
+            if ((error = radioCCA_request()) == MAC_SUCCESS)
+                ccaState = STATE_CCA_WAIT;
+        } else if ((error = radioSend_send(msg)) == MAC_SUCCESS) {
+            ccaState = STATE_SEND;
+        }
+    } else
+        error = MAC_ERROR_BUSY;
+
+    return error;
 }
 
+//tasklet_async event
+void radioCCA_done(mac_result_t error) {
+    ASSERT(ccaState == STATE_CCA_WAIT);
+
+    ccaState = STATE_READY;
+    ccaResult_ready(error);
+    return;
+}
+
+//tasklet_async event
+void radioSend_sendDone(message_t* msg, mac_result_t error) {
+    ASSERT(ccaState == STATE_SEND);
+
+    ccaState = STATE_READY;
+    ccaSend_sendDone(msg, error);
 }

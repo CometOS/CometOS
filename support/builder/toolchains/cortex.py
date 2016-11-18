@@ -2,6 +2,9 @@ from SCons.Script import *
 import subprocess
 import sys
 import select
+import socket
+
+PORT = 2331
 
 class CortexToolchain:
 	def __init__(self,build,env):
@@ -52,25 +55,54 @@ class CortexToolchain:
 
 		# Build up flash command
 		def flash_image(env, target, source):
+                        use_openocd = (self.env.conf.str("cpu") == "cortex-m3")
+
 			print source
 			p = None
-                        if subprocess.call(['ps','-C','JLinkGDBServer','--no-headers']) == 0:
-                            print "JLinkGDBServer is already running. Trying to use that instance!"
+                        #if subprocess.call(['ps','-C','JLinkGDBServer','--no-headers']) == 0:
+                        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        result = sock.connect_ex(('127.0.0.1',PORT))
+                        if result == 0:
+                            print "GDB server is already running. Trying to use that instance!"
                         else:
-                            print "JLinkGDBServer is not running. Starting it temporarily!"
-                            p = subprocess.Popen(['JLinkGDBServer','-device','MK64FN1M0xxx12','-if','SWD'], stdout=subprocess.PIPE)
+                            if use_openocd:
+                                print "OpenOCD is not running. Starting it temporarily!"
+
+                                with open("openocd.cfg",'w') as f:
+                                    f.write('\n'.join([
+                                        'interface ftdi',
+                                        'ftdi_vid_pid 0x0403 0x6010',
+
+                                        'ftdi_layout_init 0x0c08 0x0c2b',
+                                        'ftdi_layout_signal nTRST -data 0x0800',
+                                        'ftdi_layout_signal nSRST -data 0x0400',
+
+                                        'source [find target/stm32f1x.cfg]',
+
+                                        'adapter_khz 1500',
+                                        'gdb_port '+str(PORT)
+                                        ]))
+
+                                cmd = ['openocd','-f','openocd.cfg']
+                                polltime = 1000
+                            else:
+                                print "JLinkGDBServer is not running. Starting it temporarily!"
+                                cmd = ['JLinkGDBServer','-device','MK64FN1M0xxx12','-if','SWD']
+                                polltime = 500
+
+                            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
                             poller = select.poll()
                             poller.register(p.stdout)
 
                             # wait for gdb server to be ready 
                             while True:
-                                evts = poller.poll(500)
+                                evts = poller.poll(polltime)
                                 if evts == []:
                                         break 
                                 for evt in evts:
                                     if evt[1] == select.POLLHUP:
                                         print ""
-                                        print "JLinkGDBServer closed."
+                                        print "GDB server closed."
                                         print "Check the connection to your device!"
                                         exit(1)
                                     else:
@@ -112,13 +144,19 @@ class CortexToolchain:
 			'symbol-file '+str(source[0]),
 			'load '+str(source[0]),
 			'monitor clrbp',
-			'monitor reset',
-			'monitor regs',
-			'monitor halt',
-			'flushreg',
-			'monitor go']
+			'monitor reset']
 
 			self.execute_cmds(cmds)
+
+                        if not use_openocd:
+                            cmds = [
+                            'monitor regs',
+                            'monitor halt',
+                            'flushreg',
+                            'monitor go']
+                            self.execute_cmds(cmds)
+
+
 			self.quit_gdb()
 
 			if p != None:

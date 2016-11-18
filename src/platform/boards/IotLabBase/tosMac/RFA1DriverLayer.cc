@@ -665,7 +665,7 @@ cometos_error_t radioCCA_request() {
 
 	rf->cmd_state(AT86RF231_TRX_STATE_PLL_ON);
 
-	cometos::PalTimer::getInstance(4)->delay(1);
+	cometos::PalTimer::getInstance(cometos::Timer::RADIO)->delay(1);
 
 	if (rf->getRfStatus() != AT86RF231_TRX_STATUS_PLL_ON) {
 		cmd = CMD_NONE;

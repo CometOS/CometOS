@@ -117,7 +117,7 @@ public:
 		USART_Cmd(usart, DISABLE);
 		USART_DeInit(usart);
 
-		timer = PalTimer::getInstance(2);
+		timer = PalTimer::getInstance(Timer::UART);
 		timer->init(1e3); //ms
 
 		// init local variables

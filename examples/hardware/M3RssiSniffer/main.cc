@@ -30,13 +30,6 @@
  * SUCH DAMAGE.
  */
 
-/**This is a full working example of a wireless node. The CometOS
- * default communication stack is included, which supports routing.
- *
- * The example also shows how to use RMI for writing user modules.
- *
- * @author Stefan Unterschuetz, Andreas Weigel
- */
 /*INCLUDES-------------------------------------------------------------------*/
 
 #include "cometos.h"
@@ -105,7 +98,7 @@ public:
 
 	RssiSniffer() :
 		cometos::Module("snif"),
-		runTask(CALLBACK(&RssiSniffer::run, *this))
+		runTask(CALLBACK_MET(&RssiSniffer::run, *this))
 	{}
 
 
@@ -154,11 +147,11 @@ public:
 		// clear pending interrupts (automatically done by reading the interrupt status register)
 		rf->readRegister(AT86RF231_REG_IRQ_STATUS);
 
-		timer = cometos::PalTimer::getInstance(5);
+		timer = cometos::PalTimer::getInstance(cometos::Timer::GENERAL_PURPOSE_A);
 		timer->setFrequency(1e6);
 
 #if DEBUG_TIMINGS
-		timer_debug = cometos::PalTimer::getInstance(4);
+		timer_debug = cometos::PalTimer::getInstance(cometos::Timer::GENERAL_PURPOSE_B);
 		timer_debug->setFrequency(1e6);
 #endif
 
@@ -421,7 +414,7 @@ void EXTI4_IRQHandler() {
 	EXTI_ClearITPendingBit(EXTI_Line4);
 
 #if DEBUG_TIMINGS
-	cometos::PalTimer::getInstance(4)->start_async(0xFFFF, NULL);
+	cometos::PalTimer::getInstance(Timer::GENERAL_PURPOSE_B)->start_async(0xFFFF, NULL);
 #endif
 
 	uint8_t irq =  cometos::Rf231::getInstance()->readRegister(AT86RF231_REG_IRQ_STATUS);

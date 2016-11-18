@@ -121,7 +121,7 @@ void init_radio(){
     spi->init(true, 4e6, 0, false);
 
     Rf231* radio = Rf231::getInstance();
-    radio->init(spi, &radio_rst, &radio_slptr, &radio_irq, PalTimer::getInstance(4));
+    radio->init(spi, &radio_rst, &radio_slptr, &radio_irq, PalTimer::getInstance(Timer::RADIO));
 
     initRadioInterruptPin();
 }

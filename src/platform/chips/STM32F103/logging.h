@@ -74,8 +74,12 @@ uint8_t logging_getLevel();
 #ifdef LOGGING_INFO
 #define LOGGING_WARN
 #define LOG_INFO(msg) LOG( LOG_LEVEL_INFO , "I:"<<msg)
+#define LOG_INFO_PURE(msg) LOG_RAW( LOG_LEVEL_INFO , msg)
+#define LOG_INFO_PREFIX LOG_PREFIX( LOG_LEVEL_INFO )
 #else
 #define LOG_INFO(msg)
+#define LOG_INFO_PURE(msg)
+#define LOG_INFO_PREFIX
 #endif
 
 #ifdef LOGGING_WARN
@@ -100,6 +104,8 @@ uint8_t logging_getLevel();
 #define LOG_ERROR(msg)
 #define LOG_WARN(msg)
 #define LOG_INFO(msg)
+#define LOG_INFO_PURE(msg)
+#define LOG_INFO_PREFIX
 #define LOG_DEBUG(msg)
 #define LOG_DEBUG_PURE(msg)
 #define LOG_DEBUG_RAW(msg)

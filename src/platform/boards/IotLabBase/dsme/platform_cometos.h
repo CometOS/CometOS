@@ -30,53 +30,22 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PALRAND_C
-#define PALRAND_C
+#ifndef PLATFORM_OMNETPP_H
+#define PLATFORM_OMNETPP_H
 
-#include "rf231.h"
-#include "palTimer.h"
-#include "palRand.h"
-#include "cmsis_device.h"
+#include "OutputStream.h" // TODO remove
+#include "dsme_settings.h"
+#include "DSMEMessage.h"
+#include "DSMEPlatform.h"
 
-static unsigned int cometos_rnd = 0;
-
-unsigned int palRand_get() {
-	return cometos_rnd;
+// recursive locks necessary!
+inline void dsme_atomicBegin() {
+    palExec_atomicBegin();
 }
 
-void palRand_init() {
-	cometos::Rf231 * rf = cometos::Rf231::getInstance();
-	cometos::PalTimer* timer = cometos::PalTimer::getInstance(cometos::Timer::RADIO);
-	timer->setFrequency(1e6);
-
-	rf->cmd_state(AT86RF231_TRX_STATE_FORCE_TRX_OFF);
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF) {
-		__asm("nop");
-	}
-
-	rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_RX_ON)
-		__asm("nop");
-
-	unsigned int rnd = 0;
-
-	//the random value is updated every 1 us in the rf231
-	timer->delay(1);
-
-	for (uint8_t i=0; i < sizeof(rnd) * 8 / 2; i++) {
-		timer->delay(1);
-		uint8_t rssiReg = rf->readRegister(AT86RF231_REG_PHY_RSSI);
-		rnd = (rnd << 2) | ((rssiReg >> AT86RF231_PHY_RSSI_RND_0) & 0x03);
-	}
-
-	rf->cmd_state(AT86RF231_TRX_STATE_TRX_OFF);
-
-	cometos_rnd = rnd;
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF)
-		__asm("nop");
+inline void dsme_atomicEnd() {
+    palExec_atomicEnd();
 }
 
-#endif //PALRAND_C
+#endif
+

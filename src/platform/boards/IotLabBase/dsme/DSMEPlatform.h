@@ -30,92 +30,76 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PALTIMER_H_
-#define PALTIMER_H_
+#ifndef DSMEPLATFORM_H
+#define DSMEPLATFORM_H
+
+#include "DSMEPlatformBase.h"
+#include "Module.h"
+#include "DataRequest.h"
+#include "DataIndication.h"
+
+#include "../tosMac/tosMsgReplace.h"
 
 #include <stdint.h>
 
-//-------------- TYPEDEFS -------------------
-typedef void (* tim_callback_t) (void);
+namespace dsme {
 
-
-/**
- * Abstract definition of a timer.
- */
-namespace cometos {
-
-enum class Timer {
-UART,RADIO,RADIO_ALARM,GENERAL_PURPOSE_A,GENERAL_PURPOSE_B
-};
-
-class PalTimer {
-
+class DSMEPlatform : public DSMEPlatformBase {
 public:
+    DSMEPlatform(const char* service_name = NULL);
 
-	/**
-	 *Initializes the timer and configures the prescaler
-	 * such that the counter increases with a frequency of
-	 * freq
-	 *
-	 * @param freq The counter increment frequency
-	 */
-	virtual void init(uint32_t freq) = 0;
+    static DSMEPlatform* instance;
 
-	/**
-	 * Starts the timer in the background counting up from 0 to
-	 * ticks. When the counter reaches ticks, a the callback function
-	 * is being executed
-	 */
-	virtual void start_async(uint16_t ticks, tim_callback_t callback) = 0;
+    virtual ~DSMEPlatform() {
+    }
 
-	/**
-	 * Sets the timer increment frequency to freq.
-	 */
-	virtual void setFrequency(uint32_t freq) = 0;
+    virtual void initialize() override;
 
-	/**
-	 * Starts the timer counting up from 0 to ticks,
-	 * synchronously waiting (blocking) until it reaches
-	 * ticks.
-	 */
-	virtual void delay(uint16_t ticks) = 0;
+    void startCCA() override;
 
-	/**
-	 * Stops a currently running timer.
-	 */
-	virtual void stop() = 0;
+    void startTimer(uint32_t symbolCounterValue) override;
 
-	/**
-	 * Returns an instance of an implementation of timer. Periph
-	 * is the timer index, in case there are several timers available
-	 * on the platform.
-	 */
-	static PalTimer* getInstance(Timer periph);
+    uint32_t getSymbolCounter() override;
 
-	/**
-	 * Yields the current usage status of the timer.
-	 *
-	 * @return true, if the timer is not currently running, false else.
-	 */
-	virtual bool available() = 0;
+    /**
+     * Directly send packet without delay and without CSMA
+     * but keep the message (the caller has to ensure that the message is eventually released)
+     * This might lead to an additional memory copy in the platform
+     */
+    bool sendCopyNow(DSMEMessage *msg, Delegate<void(bool)> txEndCallback);
 
-	/**
-	 * Yields the current counter value.
-	 *
-	 */
-	virtual uint16_t get();
+    /**
+     * Send an ACK message, delay until aTurnaRoundTime after reception_time has expired
+     */
+    bool sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback);
+
+    bool setChannelNumber(uint8_t k) override;
+
+    DSMELayer* getDSME() {
+        return dsme;
+    }
+
+    static uint8_t state;
+
+    enum {
+        STATE_READY = 0, STATE_CCA_WAIT = 1, STATE_SEND = 2,
+    };
+
+    static Delegate<void(bool)> txEndCallback;
+
+    static message_t* receive_phy(message_t* msg);
 
 protected:
+    static uint32_t getSFDTimestamp();
 
-	/**
-	 * Every subclass should enforce singleton. Therefore the constructor
-	 * can only be called from subclasses.
-	 */
-	PalTimer(){};
+    static uint8_t data[127];
 
-	~PalTimer() {};
+    static mac_ackCfg_t ackCfg;
+    static mac_backoffCfg_t backoffCfg;
+
+    uint8_t channel;
 };
 
 }
 
-#endif //PALTIMER_H_
+#endif

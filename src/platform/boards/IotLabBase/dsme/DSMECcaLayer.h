@@ -30,53 +30,27 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PALRAND_C
-#define PALRAND_C
+#ifndef __CCA_LAYER_H__
+#define __CCA_LAYER_H__
 
-#include "rf231.h"
-#include "palTimer.h"
-#include "palRand.h"
-#include "cmsis_device.h"
+#include "mac_interface.h"
+#include "tosMsgReplace.h"
+#include "mac_definitions.h"
+#include "cometosError.h"
 
-static unsigned int cometos_rnd = 0;
+/* ----------- COMMANDS --------------------------------------*/
+mac_result_t ccaSend_send(message_t* msg);
 
-unsigned int palRand_get() {
-	return cometos_rnd;
-}
 
-void palRand_init() {
-	cometos::Rf231 * rf = cometos::Rf231::getInstance();
-	cometos::PalTimer* timer = cometos::PalTimer::getInstance(cometos::Timer::RADIO);
-	timer->setFrequency(1e6);
+/* ----------- EVENTS ----------------------------------------*/
+void ccaSend_sendDone(message_t * msg, mac_result_t error);
 
-	rf->cmd_state(AT86RF231_TRX_STATE_FORCE_TRX_OFF);
+void ccaSend_ready(mac_result_t error);
 
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF) {
-		__asm("nop");
-	}
+void ccaResult_ready(mac_result_t error);
 
-	rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
+mac_result_t cca_request();
 
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_RX_ON)
-		__asm("nop");
 
-	unsigned int rnd = 0;
 
-	//the random value is updated every 1 us in the rf231
-	timer->delay(1);
-
-	for (uint8_t i=0; i < sizeof(rnd) * 8 / 2; i++) {
-		timer->delay(1);
-		uint8_t rssiReg = rf->readRegister(AT86RF231_REG_PHY_RSSI);
-		rnd = (rnd << 2) | ((rssiReg >> AT86RF231_PHY_RSSI_RND_0) & 0x03);
-	}
-
-	rf->cmd_state(AT86RF231_TRX_STATE_TRX_OFF);
-
-	cometos_rnd = rnd;
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF)
-		__asm("nop");
-}
-
-#endif //PALRAND_C
+#endif /* CSMACALAYER_H_ */

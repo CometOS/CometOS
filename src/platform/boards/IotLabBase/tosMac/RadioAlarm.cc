@@ -68,7 +68,7 @@ enum
 static radioAlarmUserId currUser;
 
 void radioAlarm_init() {
-    timer = cometos::PalTimer::getInstance(3);
+    timer = cometos::PalTimer::getInstance(cometos::Timer::RADIO_ALARM);
     timer->init(TIMER_FREQ);
 }
 

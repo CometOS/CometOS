@@ -30,53 +30,68 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PALRAND_C
-#define PALRAND_C
+/*INCLUDES-------------------------------------------------------------------*/
 
-#include "rf231.h"
-#include "palTimer.h"
+#include "mac_interface.h"
+#include "mac_definitions.h"
+#include "atrf_hardware.h"
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "palExec.h"
 #include "palRand.h"
-#include "cmsis_device.h"
+#include "palLocalTime.h"
 
-static unsigned int cometos_rnd = 0;
+#include "pinEventOutput.h"
 
-unsigned int palRand_get() {
-	return cometos_rnd;
+#include "cometos.h"
+
+mac_result_t mac_setBackoffConfig(const mac_backoffCfg_t *cfg) {
+    ASSERT(false);
+    return 0;
 }
 
-void palRand_init() {
-	cometos::Rf231 * rf = cometos::Rf231::getInstance();
-	cometos::PalTimer* timer = cometos::PalTimer::getInstance(cometos::Timer::RADIO);
-	timer->setFrequency(1e6);
-
-	rf->cmd_state(AT86RF231_TRX_STATE_FORCE_TRX_OFF);
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF) {
-		__asm("nop");
-	}
-
-	rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_RX_ON)
-		__asm("nop");
-
-	unsigned int rnd = 0;
-
-	//the random value is updated every 1 us in the rf231
-	timer->delay(1);
-
-	for (uint8_t i=0; i < sizeof(rnd) * 8 / 2; i++) {
-		timer->delay(1);
-		uint8_t rssiReg = rf->readRegister(AT86RF231_REG_PHY_RSSI);
-		rnd = (rnd << 2) | ((rssiReg >> AT86RF231_PHY_RSSI_RND_0) & 0x03);
-	}
-
-	rf->cmd_state(AT86RF231_TRX_STATE_TRX_OFF);
-
-	cometos_rnd = rnd;
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF)
-		__asm("nop");
+void mac_setPromiscuousMode(bool value) {
 }
 
-#endif //PALRAND_C
+bool mac_getPromiscuousMode() {
+    return false;
+}
+
+void mac_getAutoAckConfig(mac_ackCfg_t *cfg) {
+    ASSERT(false);
+}
+
+void mac_getBackoffConfig(mac_backoffCfg_t *cfg) {
+    ASSERT(false);
+}
+
+mac_result_t mac_setAutoAckConfig(const mac_ackCfg_t *cfg) {
+    ASSERT(false);
+    return false;
+}
+
+mac_result_t mac_sendToNetwork(uint8_t const* data, mac_payloadSize_t length,
+        mac_nodeId_t dst, mac_networkId_t dstNwk) {
+    ASSERT(false);
+    return MAC_ERROR_FAIL;
+}
+
+mac_result_t mac_send(uint8_t const* data, mac_payloadSize_t length,
+        mac_nodeId_t dst) {
+    ASSERT(false);
+    return MAC_ERROR_FAIL;
+}
+
+mac_result_t mac_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
+        mac_channel_t channel, mac_txMode_t mode, mac_ackCfg_t *ackCfg,
+        mac_backoffCfg_t *backoffCfg) {
+    return MAC_SUCCESS;
+}
+
+mac_result_t mac_setReceiveBuffer(uint8_t *buffer) {
+    return MAC_SUCCESS;
+}

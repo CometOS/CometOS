@@ -225,19 +225,19 @@ PalTimerImp<Peripheral>::PalTimerImp() {
 
 
 
-PalTimer* PalTimer::getInstance(uint8_t i){
+PalTimer* PalTimer::getInstance(Timer i){
 	switch (i){
-	case 2:
+    case Timer::UART:
 		return &(PalTimerImp<2>::getInstance());
-	case 3:
-		return &(PalTimerImp<3>::getInstance());
-	case 4:
+    //case 3: USED IN MacSymbolCounter.h/.cc
+	//  return &(PalTimerImp<3>::getInstance());
+    case Timer::RADIO:
 		return &(PalTimerImp<4>::getInstance());
-	case 5:
+	case Timer::RADIO_ALARM:
 		return &(PalTimerImp<5>::getInstance());
-	case 6:
+    case Timer::GENERAL_PURPOSE_A:
 		return &(PalTimerImp<6>::getInstance());
-	case 7:
+    case Timer::GENERAL_PURPOSE_B:
 		return &(PalTimerImp<7>::getInstance());
 	default:
 		break;
@@ -269,6 +269,7 @@ void TIM2_IRQHandler(void)
 	}
 }
 
+/* USED IN MacSymbolCounter.cc/.h
 void TIM3_IRQHandler(void)
 {
 	if (TIM3->SR & TIM_SR_UIF){
@@ -276,6 +277,7 @@ void TIM3_IRQHandler(void)
 		cometos::PalTimerImp<3>::getInstance().handleInterrupt();
 	}
 }
+*/
 
 void TIM4_IRQHandler(void)
 {

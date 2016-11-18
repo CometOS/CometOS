@@ -30,53 +30,66 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PALRAND_C
-#define PALRAND_C
-
-#include "rf231.h"
-#include "palTimer.h"
-#include "palRand.h"
+#include "MacSymbolCounter.h"
 #include "cmsis_device.h"
+#include "cometosAssert.h"
+#include "OutputStream.h"
 
-static unsigned int cometos_rnd = 0;
+using namespace cometos;
 
-unsigned int palRand_get() {
-	return cometos_rnd;
+MacSymbolCounter& MacSymbolCounter::getInstance() {
+    static MacSymbolCounter msc;
+    return msc;
 }
 
-void palRand_init() {
-	cometos::Rf231 * rf = cometos::Rf231::getInstance();
-	cometos::PalTimer* timer = cometos::PalTimer::getInstance(cometos::Timer::RADIO);
-	timer->setFrequency(1e6);
+void MacSymbolCounter::init(Callback<void()> compareMatch) {
+    this->compareMatch = compareMatch;
 
-	rf->cmd_state(AT86RF231_TRX_STATE_FORCE_TRX_OFF);
+	RCC_ClocksTypeDef clocks;
+	RCC_GetClocksFreq(&clocks);
 
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF) {
-		__asm("nop");
-	}
+    // TODO calculate correct prescaler
+    uint32_t freq = 1000;
+	uint32_t full_pre = clocks.PCLK1_Frequency * 2 / (uint32_t)freq;
 
-	rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
+	uint32_t soft_counter_up = full_pre / 65536;
+	uint32_t prescaler = full_pre / (soft_counter_up + 1);
 
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_RX_ON)
-		__asm("nop");
+	// Init interrupt line
+	NVIC_InitTypeDef nvicInit;
+	nvicInit.NVIC_IRQChannel = TIM3_IRQn;
+	nvicInit.NVIC_IRQChannelCmd = ENABLE;
+	nvicInit.NVIC_IRQChannelPreemptionPriority = 0xF;
+	nvicInit.NVIC_IRQChannelSubPriority = 0x0F;
+	NVIC_Init(&nvicInit);
 
-	unsigned int rnd = 0;
+	//Activate clock for timer module
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
-	//the random value is updated every 1 us in the rf231
-	timer->delay(1);
-
-	for (uint8_t i=0; i < sizeof(rnd) * 8 / 2; i++) {
-		timer->delay(1);
-		uint8_t rssiReg = rf->readRegister(AT86RF231_REG_PHY_RSSI);
-		rnd = (rnd << 2) | ((rssiReg >> AT86RF231_PHY_RSSI_RND_0) & 0x03);
-	}
-
-	rf->cmd_state(AT86RF231_TRX_STATE_TRX_OFF);
-
-	cometos_rnd = rnd;
-
-	while (rf->getRfStatus() != AT86RF231_TRX_STATUS_TRX_OFF)
-		__asm("nop");
+	//Set Registers
+	TIM3->PSC = prescaler;
+	TIM3->EGR = TIM_PSCReloadMode_Immediate;
 }
 
-#endif //PALRAND_C
+/*
+template <int Peripheral>
+inline void PalTimerImp<Peripheral>::initInputCapture(){
+	// Channel 3 Configuration in InputCapture
+	TIM_ICInitStructure.TIM_Channel = TIM_Channel_3;
+	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+	TIM_ICInitStructure.TIM_ICFilter = 0x0;
+
+	TIM_ICInit(TIM_BASE(Peripheral), &TIM_ICInitStructure);
+}
+*/
+
+void TIM3_IRQHandler(void)
+{
+	if (TIM3->SR & TIM_SR_UIF){
+		TIM3->SR &= (uint16_t) ~TIM_SR_UIF;
+		//cometos::PalTimerImp<3>::getInstance().handleInterrupt();
+        cometos::getCout() << "." << endl;
+	}
+}
