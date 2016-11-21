@@ -179,14 +179,25 @@ void initExternalFlash() {
 #include "OutputStream.h"
 
 static void serial_putchar(char c) {
-    cometos::PalSerial::getInstance(1)->write( (uint8_t*) &c, 1);
+    //cometos::PalSerial::getInstance(1)->write( (uint8_t*) &c, 1);
+
+	// Wait for empty transmit buffer
+	while (!(USART1->SR & USART_SR_TXE))
+		;
+	USART1->DR = c;
 }
 
 namespace cometos {
 
-OutputStream  &getCout() {
+static OutputStream cout(serial_putchar);
 
-    static OutputStream cout(serial_putchar);
+OutputStream  &getCout() {
+    static bool init=false;
+    if (init==false) {
+        init=true;
+        SystemCoreClockUpdate();
+        init_uart();
+    }
 
     return cout;
 }
