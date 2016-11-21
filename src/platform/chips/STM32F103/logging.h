@@ -33,7 +33,7 @@
 /**In this file CometOS logging interface is declared. Logging is
  * still work in progress and not finished yet.
  *
- * @author Florian Meier
+ * @author Stefan Unterschuetz
  */
 
 #ifndef LOGGING_H_
@@ -46,6 +46,8 @@
 
 #ifdef ENABLE_LOGGING
 #include "OutputStream.h"
+#include "palLocalTime.h"
+#include "NetworkTime.h"
 
 #define HEXOUT cometos::hex
 #define DECOUT cometos::dec
@@ -53,17 +55,17 @@
 /**@return 	current log level, various implementation of this function are possible,
  * 			in case of CometOS, different log levels can be assigned to modules */
 uint8_t logging_getLevel();
+const char* getName();
 
+#define LOG(level,msg) {if (level>=logging_getLevel()) cometos::getCout()<<::NetworkTime::get()<<"|"<<getName()<<"|"<<msg<<"\n";}
+#define LOG_PREFIX(level) {if (level>=logging_getLevel()) cometos::getCout()<<::NetworkTime::get()<<"|"<<getName()<<"|";}
+#define LOG_RAW(level,msg) {if (level>=logging_getLevel()) cometos::getCout()<<msg;}
 
-#define LOG(level,msg) if (level>=logging_getLevel()) cometos::getCout()<<msg<<"\n"
-
-// Just for Testing
 #ifdef LOGGING_DEBUG
 #define LOGGING_INFO
 #define LOG_DEBUG(msg) LOG( LOG_LEVEL_DEBUG , "D:"<<msg)
-#define LOG_DEBUG_PURE(msg)
-#define LOG_DEBUG_RAW(msg)
-#define LOG_DEBUG_PREFIX
+#define LOG_DEBUG_PURE(msg) LOG_RAW( LOG_LEVEL_DEBUG , msg)
+#define LOG_DEBUG_PREFIX LOG_PREFIX( LOG_LEVEL_DEBUG )
 #else
 #define LOG_DEBUG(msg)
 #define LOG_DEBUG_PURE(msg)

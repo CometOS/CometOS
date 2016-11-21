@@ -44,7 +44,6 @@
 #include "logLevels.h"
 #include <stdint.h>
 
-
 #ifdef ENABLE_LOGGING
 #include "OutputStream.h"
 #include "palLocalTime.h"
@@ -70,6 +69,7 @@ const char* getName();
 #else
 #define LOG_DEBUG(msg)
 #define LOG_DEBUG_PURE(msg)
+#define LOG_DEBUG_RAW(msg)
 #define LOG_DEBUG_PREFIX
 #endif
 
@@ -110,6 +110,7 @@ const char* getName();
 #define LOG_INFO_PREFIX
 #define LOG_DEBUG(msg)
 #define LOG_DEBUG_PURE(msg)
+#define LOG_DEBUG_RAW(msg)
 #define LOG_DEBUG_PREFIX
 
 #endif
