@@ -33,7 +33,6 @@
 /*INCLUDES-------------------------------------------------------------------*/
 
 #include "cometos.h"
-#include "CsmaMac.h"
 #include "TrafficExample.h"
 #include "palLed.h"
 #include "palId.h"
@@ -42,9 +41,9 @@
 #include "SList.h"
 #include "DSMEPlatform.h"
 
-#include "DSMEMessage.h"
-
 #include "palPin.h"
+
+#include "MacSymbolCounter.h"
 
 #ifndef PAN_COORDINATOR
 #define PAN_COORDINATOR false
@@ -97,6 +96,8 @@ int main() {
     cometos::setRootLogLevel(LOG_LEVEL_DEBUG);
 
     getCout() << "Booted" << endl;
+
+    ASSERT(false);
 
     /* start system */
     cometos::initialize();

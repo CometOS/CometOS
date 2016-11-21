@@ -36,6 +36,7 @@
 #include "palId.h"
 #include "helper/DSMEMessageBuffer.h"
 #include "openDSME/dsmeLayer/DSMELayer.h"
+#include "MacSymbolCounter.h"
 
 #ifndef PAN_COORDINATOR
 #define PAN_COORDINATOR false
@@ -77,8 +78,8 @@ void DSMEPlatform::initialize() {
     this->dsme->setMCPS(&(this->mcps_sap));
     this->dsme->setMLME(&(this->mlme_sap));
 
-    /* Enable message timestamping (ATmega256RFR2 documentation, 10.11.34) */
-    SCCR0 |= (1 << SCTSE);
+    // Enable MacSymbolCounter
+    MacSymbolCounter::getInstance().init(CALLBACK_MET(&DSMEEventDispatcher::timerInterrupt, dsme::DSMEPlatform::instance->getDSME()->getEventDispatcher()));
 
     this->dsmeAdaptionLayer.initialize();
 
@@ -116,7 +117,7 @@ void DSMEPlatform::initialize() {
 
     this->dsmeAdaptionLayer.settings.allocationScheme = DSMEAdaptionLayerSettings::ALLOC_CONTIGUOUS_SLOT;
 
-    this->dsmeAdaptionLayer.setReceiveMessage(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
+    this->dsmeAdaptionLayer.setIndicationCallback(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
 
     mac_result_t result = RFA1Driver_init(this->mac_pib.macShortAddress, 0, this->channel, 0x00, &DSMEPlatform::ackCfg,
             &DSMEPlatform::backoffCfg);

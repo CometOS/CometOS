@@ -35,9 +35,7 @@
 #include "RFA1DriverLayer.h"
 #include "DSMECcaLayer.h"
 #include "openDSME/dsmeLayer/DSMELayer.h"
-
-#include <avr/interrupt.h>
-#include <util/atomic.h>
+#include "MacSymbolCounter.h"
 
 using namespace cometos;
 
@@ -49,32 +47,16 @@ uint8_t DSMEPlatform::state = STATE_READY;
 Delegate<void(bool)> DSMEPlatform::txEndCallback;
 
 uint32_t DSMEPlatform::getSymbolCounter() {
-    uint32_t cnt;
-    cnt = SCCNTLL;
-    cnt |= ((uint32_t) SCCNTLH) << 8;
-    cnt |= ((uint32_t) SCCNTHL) << 16;
-    cnt |= ((uint32_t) SCCNTHH) << 24;
-    return cnt;
+    return MacSymbolCounter::getInstance().getValue();
 }
 
 uint32_t DSMEPlatform::getSFDTimestamp() {
-    uint32_t cnt;
-    cnt = SCTSRLL;
-    cnt |= ((uint32_t) SCTSRLH) << 8;
-    cnt |= ((uint32_t) SCTSRHL) << 16;
-    cnt |= ((uint32_t) SCTSRHH) << 24;
-    return cnt;
+    // -2 since the AT86RF231 captures at the end of the PHR (+6us) instead at the end of the SFD as the ATmega256RFR2
+    return MacSymbolCounter::getInstance().getCapture() - 2;
 }
 
 void DSMEPlatform::startTimer(uint32_t symbolCounterValue) {
-    SCOCR1HH = (symbolCounterValue >> 24) & 0xFF;
-    SCOCR1HL = (symbolCounterValue >> 16) & 0xFF;
-    SCOCR1LH = (symbolCounterValue >> 8) & 0xFF;
-    SCOCR1LL = (symbolCounterValue) & 0xFF;
-    SCCR0 |= (1 << SCEN);
-    SCIRQM |= (1 << IRQMCP1);
-    // TODO what if we are too late?
-    // cometos::getCout() << symbolCounterValue << " " << getSymbolCounter() << cometos::endl;
+    MacSymbolCounter::getInstance().setCompareMatch(symbolCounterValue);
 }
 
 bool DSMEPlatform::setChannelNumber(uint8_t channel) {
@@ -170,10 +152,6 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
     return phy_msg;
 }
 
-}
-
-ISR(SCNT_CMP1_vect) {
-    dsme::DSMEPlatform::instance->getDSME()->getEventDispatcher().timerInterrupt();
 }
 
 /**

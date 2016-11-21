@@ -119,7 +119,7 @@ void DSMEPlatform::initialize() {
 
     this->dsmeAdaptionLayer.settings.allocationScheme = DSMEAdaptionLayerSettings::ALLOC_CONTIGUOUS_SLOT;
 
-    this->dsmeAdaptionLayer.setReceiveMessage(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
+    this->dsmeAdaptionLayer.setIndicationCallback(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
 
     mac_result_t result = RFA1Driver_init(this->mac_pib.macShortAddress, 0, this->channel, 0x00, &DSMEPlatform::ackCfg,
             &DSMEPlatform::backoffCfg);
