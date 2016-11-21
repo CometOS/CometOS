@@ -97,8 +97,6 @@ int main() {
 
     getCout() << "Booted" << endl;
 
-    ASSERT(false);
-
     /* start system */
     cometos::initialize();
 

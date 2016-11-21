@@ -37,6 +37,8 @@
 #include "helper/DSMEMessageBuffer.h"
 #include "openDSME/dsmeLayer/DSMELayer.h"
 #include "MacSymbolCounter.h"
+#include "rf231.h"
+#include "mac_interface_ext.h"
 
 #ifndef PAN_COORDINATOR
 #define PAN_COORDINATOR false
@@ -71,6 +73,8 @@ DSMEPlatform::DSMEPlatform(const char * name) :
 }
 
 void DSMEPlatform::initialize() {
+    mac_setRadioDevice(Rf231::getInstance());
+
     DSMEPlatformBase::initialize();
 
     this->dsme->setPHY_PIB(&(this->phy_pib));
