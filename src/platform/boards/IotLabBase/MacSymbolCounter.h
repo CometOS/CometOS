@@ -49,6 +49,7 @@ private:
     uint16_t msb;
     cometos::Callback<void()> compareMatch;
     uint16_t compareValueMSB;
+    uint32_t lastCapture;
 };
 
 }
