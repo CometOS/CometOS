@@ -77,26 +77,42 @@ void MacSymbolCounter::init(Callback<void()> compareMatch) {
 
 	TIM3->CR1 &= ~TIM_CR1_DIR; // upcounting
 
+    TIM3->SR &= ~TIM_SR_UIF; // clear overflow interrupt
+    TIM3->DIER |= TIM_DIER_UIE; // enable overflow interrupt
+    TIM3->SR &= ~TIM_SR_CC1IF; // clear compare match interrupt
+    TIM3->DIER |= TIM_DIER_CC1IE; // enable compare match interrupt
+
 	//Enable Timer
-    TIM3->SR &= ~TIM_SR_UIF; // clear update interrupt
-    TIM3->DIER |= TIM_DIER_UIE; // enable interrupt
 	TIM3->CR1 |= TIM_CR1_CEN;
 }
 
 void MacSymbolCounter::interrupt() {
-    uint8_t captureMSB = msb;
-    uint8_t compareMSB = msb;
+    bool overflow = false;
 
-	if (TIM3->SR & TIM_SR_UIF){
+	if(TIM3->SR & TIM_SR_UIF){
 		TIM3->SR &= (uint16_t) ~TIM_SR_UIF;
+        overflow = true;
 		//cometos::PalTimerImp<3>::getInstance().handleInterrupt();
         msb++;
         getCout() << msb << endl;
-
-        // The compare match and/or capture interrupt
-        // might have been before or after the overflow
-        if(
 	}
+
+    if(TIM3->SR & TIM_SR_CC1IF) {
+		TIM3->SR &= (uint16_t) ~TIM_SR_CC1IF;
+
+        uint8_t compareMSB = msb;
+
+        if(overflow && TIM3->CCR1 >= 0x8000) {
+            // The compare match interrupt was probably
+            // before the overflow interrupt
+            compareMSB--;
+        }
+
+        if(compareMSB == compareValueMSB) {
+            compareMatch();
+        }
+    }
+        //uint8_t captureMSB = msb;
 }
 
 uint32_t MacSymbolCounter::getValue() {
