@@ -59,10 +59,10 @@ public:
     }
 };
 
-//void setBlockingCout(bool value);
+void setBlockingCout(bool value);
 
 int main() {
-    //setBlockingCout(true);
+    setBlockingCout(true);
 
     TrafficExample* traffic;
 
@@ -71,7 +71,8 @@ int main() {
     if (PAN_COORDINATOR) {
         /* set up destinations */
         StaticSList<node_t, 10> dests;
-        dests.push_front(0x101A);
+        //dests.push_front(0x101A);
+        dests.push_front(0x2856);
 
         /* instantiate traffic modules */
         traffic = new TrafficExample(dests, 24, 5000, 500, false);
@@ -101,7 +102,7 @@ int main() {
     /* start system */
     cometos::initialize();
 
-    getCout() << "Booted" << endl;
+    getCout() << "Booted " << hex << palId_id() << endl;
 
     cometos::run();
     return 0;
