@@ -104,9 +104,7 @@ void MacSymbolCounter::interrupt() {
 	if(TIM3->SR & TIM_SR_UIF){
 		TIM3->SR &= (uint16_t) ~TIM_SR_UIF;
         overflow = true;
-		//cometos::PalTimerImp<3>::getInstance().handleInterrupt();
         msw++;
-        getCout() << msw << endl;
 	}
 
     if(TIM3->SR & TIM_SR_CC1IF) {
