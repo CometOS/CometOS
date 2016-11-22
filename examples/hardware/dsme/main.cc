@@ -52,14 +52,6 @@
 
 using namespace cometos;
 
-class TestGateHandler : public Module{
-public:
-    void handle(DataIndication* msg) {
-        cometos::getCout() << "MSG!" << cometos::endl;
-        return;
-    }
-};
-
 void setBlockingCout(bool value);
 
 int main() {
@@ -69,36 +61,29 @@ int main() {
 
     palId_init();
 
-    getCout() << "Booting " << palId_id() << endl;
+    getCout() << "Booting " << hex << palId_id() << dec << endl;
 
+    /* set up destinations */
+    StaticSList<node_t, 10> dests;
     if (palId_id() != PAN_COORDINATOR) {
-        /* set up destinations */
-        StaticSList<node_t, 10> dests;
-        //dests.push_front(0x101A);
         dests.push_front(PAN_COORDINATOR);
-
-        /* instantiate traffic modules */
-        traffic = new TrafficExample(dests, 24, 1000, 500, false);
     }
+
+    /* instantiate traffic modules */
+    traffic = new TrafficExample(dests, 24, 1000, 500, false);
 
 #ifdef DSME
     dsme::DSMEPlatform mac("mac");
 #else
-	CsmaMac mac("mac");
+    CsmaMac mac("mac");
 #endif
 
-    if (palId_id() != PAN_COORDINATOR) {
-        /* connect gates */
-        traffic->gateReqOut.connectTo(mac.gateReqIn);
-        mac.gateIndOut.connectTo(traffic->gateIndIn);
+    //   if (palId_id() != PAN_COORDINATOR) {
+    /* connect gates */
+    traffic->gateReqOut.connectTo(mac.gateReqIn);
+    mac.gateIndOut.connectTo(traffic->gateIndIn);
 
-        traffic->setLogLevel(LOG_LEVEL_DEBUG);
-    } else {
-        Endpoint testEndpoint;
-        TestGateHandler *testHandler = new TestGateHandler();
-        InputGate<DataIndication> gate(testHandler, &TestGateHandler::handle, "Test");
-        mac.gateIndOut.connectTo(gate);
-    }
+    traffic->setLogLevel(LOG_LEVEL_DEBUG);
 
     /* customizing CometOS's logging facility */
     cometos::setRootLogLevel(LOG_LEVEL_ERROR);

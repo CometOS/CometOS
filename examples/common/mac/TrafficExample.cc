@@ -143,6 +143,11 @@ void TrafficExample::traffic(Message *timer) {
 
     schedule(new Message, &TrafficExample::traffic, intrand(rI) + fI);
 
+    if(destAddresses.size() == 0) {
+        delete(timer);
+        return;
+    }
+
 	Airframe *msg = frame->getCopy();
 
 	sequenceNumber++;
