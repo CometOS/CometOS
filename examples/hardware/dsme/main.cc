@@ -68,7 +68,7 @@ int main() {
 
     getCout() << "Booting" << endl;
 
-    if (PAN_COORDINATOR) {
+    if (!PAN_COORDINATOR) {
         /* set up destinations */
         StaticSList<node_t, 10> dests;
         //dests.push_front(0x101A);
@@ -81,7 +81,7 @@ int main() {
     dsme::DSMEPlatform dsme("mac");
     dsme.setLogLevel(LOG_LEVEL_DEBUG);
 
-    if (PAN_COORDINATOR) {
+    if (!PAN_COORDINATOR) {
         /* connect gates */
         traffic->gateReqOut.connectTo(dsme.gateReqIn);
         dsme.gateIndOut.connectTo(traffic->gateIndIn);
