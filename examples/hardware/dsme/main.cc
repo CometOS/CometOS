@@ -43,8 +43,6 @@
 
 #include "palPin.h"
 
-#include "MacSymbolCounter.h"
-
 #ifndef PAN_COORDINATOR
 #define PAN_COORDINATOR false
 #endif
@@ -61,10 +59,10 @@ public:
     }
 };
 
-void setBlockingCout(bool value);
+//void setBlockingCout(bool value);
 
 int main() {
-    setBlockingCout(true);
+    //setBlockingCout(true);
 
     TrafficExample* traffic;
 
