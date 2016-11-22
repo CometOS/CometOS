@@ -46,9 +46,9 @@ public:
     static MacSymbolCounter& getInstance();
 
 private:
-    uint16_t msb;
+    uint16_t msw;
     cometos::Callback<void()> compareMatch;
-    uint16_t compareValueMSB;
+    uint16_t compareValueMSW;
     uint32_t lastCapture;
 };
 

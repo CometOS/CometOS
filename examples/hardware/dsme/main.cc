@@ -102,7 +102,7 @@ int main() {
     /* start system */
     cometos::initialize();
 
-    getCout() << "Booted " << hex << palId_id() << endl;
+    getCout() << "Booted " << hex << palId_id() << dec << endl;
 
     cometos::run();
     return 0;

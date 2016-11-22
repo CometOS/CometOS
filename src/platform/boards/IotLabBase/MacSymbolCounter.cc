@@ -45,6 +45,7 @@ MacSymbolCounter& MacSymbolCounter::getInstance() {
 
 void MacSymbolCounter::init(Callback<void()> compareMatch) {
     this->compareMatch = compareMatch;
+    lastCapture = 0;
 
 	//Disable interrupt during setup
     TIM3->DIER &= ~TIM_DIER_UIE;
@@ -83,7 +84,7 @@ void MacSymbolCounter::init(Callback<void()> compareMatch) {
     TIM3->CCMR2 &= ~TIM_CCMR2_IC3PSC; // disable input prescaler
     TIM3->CCMR2 &= ~TIM_CCMR2_IC3F; // disable input filter
     TIM3->CCER &= ~TIM_CCER_CC3P; // rising edge
-    TIM3->CCER |= TIM_CCER_CC1E; // enable capture
+    TIM3->CCER |= TIM_CCER_CC3E; // enable capture
 
     // Enable Interrupts
     TIM3->SR &= ~TIM_SR_UIF; // clear overflow interrupt
@@ -104,22 +105,22 @@ void MacSymbolCounter::interrupt() {
 		TIM3->SR &= (uint16_t) ~TIM_SR_UIF;
         overflow = true;
 		//cometos::PalTimerImp<3>::getInstance().handleInterrupt();
-        msb++;
-        getCout() << msb << endl;
+        msw++;
+        getCout() << msw << endl;
 	}
 
     if(TIM3->SR & TIM_SR_CC1IF) {
 		TIM3->SR &= (uint16_t) ~TIM_SR_CC1IF;
 
-        uint8_t compareMSB = msb;
+        uint16_t compareMSW = msw;
 
         if(overflow && TIM3->CCR1 >= 0x8000) {
             // The compare match interrupt was probably
             // before the overflow interrupt
-            compareMSB--;
+            compareMSW--;
         }
 
-        if(compareMSB == compareValueMSB) {
+        if(compareMSW == compareValueMSW) {
             compareMatch();
         }
     }
@@ -127,23 +128,23 @@ void MacSymbolCounter::interrupt() {
     if(TIM3->SR & TIM_SR_CC3IF) {
 		TIM3->SR &= (uint16_t) ~TIM_SR_CC3IF;
 
-        uint8_t captureLSB = TIM3->CCR3;
-        uint8_t captureMSB = msb;
+        uint16_t captureLSW = TIM3->CCR3;
+        uint16_t captureMSW = msw;
 
-        if(overflow && captureLSB >= 0x8000) {
+        if(overflow && captureLSW >= 0x8000) {
             // The capture interrupt was probably
             // before the overflow interrupt
-            captureMSB--;
+            captureMSW--;
         }
 
-        lastCapture = (captureMSB << (uint32_t)16) | captureLSB;
+        lastCapture = (captureMSW << (uint32_t)16) | captureLSW;
     }
 
     ASSERT((TIM3->SR & 0xFF00) == 0); // no overcapture
 }
 
 uint32_t MacSymbolCounter::getValue() {
-    return (((uint32_t)msb) << 16) | TIM3->CNT;
+    return (((uint32_t)msw) << 16) | TIM3->CNT;
 }
 
 uint32_t MacSymbolCounter::getCapture() {
@@ -151,7 +152,7 @@ uint32_t MacSymbolCounter::getCapture() {
 }
 
 void MacSymbolCounter::setCompareMatch(uint32_t compareValue) {
-    compareValueMSB = compareValue >> 16;
+    compareValueMSW = compareValue >> 16;
     TIM3->CCR1 = compareValue & 0xFFFF;
 }
 

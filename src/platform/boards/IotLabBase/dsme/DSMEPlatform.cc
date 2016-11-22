@@ -73,7 +73,8 @@ DSMEPlatform::DSMEPlatform(const char * name) :
 }
 
 void DSMEPlatform::initialize() {
-    mac_setRadioDevice(Rf231::getInstance());
+    auto rf = Rf231::getInstance();
+    mac_setRadioDevice(rf);
 
     DSMEPlatformBase::initialize();
 
@@ -81,9 +82,6 @@ void DSMEPlatform::initialize() {
     this->dsme->setMAC_PIB(&(this->mac_pib));
     this->dsme->setMCPS(&(this->mcps_sap));
     this->dsme->setMLME(&(this->mlme_sap));
-
-    // Enable MacSymbolCounter
-    MacSymbolCounter::getInstance().init(CALLBACK_MET(&DSMEEventDispatcher::timerInterrupt, dsme::DSMEPlatform::instance->getDSME()->getEventDispatcher()));
 
     this->dsmeAdaptionLayer.initialize();
 
@@ -126,6 +124,17 @@ void DSMEPlatform::initialize() {
     mac_result_t result = RFA1Driver_init(this->mac_pib.macShortAddress, 0, this->channel, 0x00, &DSMEPlatform::ackCfg,
             &DSMEPlatform::backoffCfg);
     ASSERT(result == MAC_SUCCESS);
+
+    // Enable MacSymbolCounter
+    MacSymbolCounter::getInstance().init(CALLBACK_MET(&DSMEEventDispatcher::timerInterrupt, dsme::DSMEPlatform::instance->getDSME()->getEventDispatcher()));
+	uint8_t trx_ctrl_1 = rf->readRegister(AT86RF231_REG_TRX_CTRL_1);
+	trx_ctrl_1 |= AT86RF231_TRX_CTRL_1_MASK_IRQ_2_EXT_EN;
+	rf->writeRegister(AT86RF231_REG_TRX_CTRL_1, trx_ctrl_1);
+
+#ifdef RFA1_ENABLE_EXT_ANT_SW
+#error "Antenna diversity does not work if capture is used"
+#endif
+
 }
 
 }
