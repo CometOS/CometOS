@@ -62,7 +62,7 @@ TrafficExample::TrafficExample(StaticSList<node_t, 10> destAddresses,
                                timeOffset_t fixedInterval,
                                timeOffset_t rndInterval,
                                bool snoop) :
-        Endpoint(),
+        Endpoint("traf"),
         gateSnoopIn(this, &TrafficExample::handleSnoopIndication, "gateSnoopIn"),
         fI(fixedInterval),
         rI(rndInterval),
@@ -86,6 +86,7 @@ void TrafficExample::initialize() {
 	ASSERT(msgSize + sizeof(myCrc) + sizeof(sequenceNumber) <= AIRFRAME_MAX_SIZE);
 	schedule(new Message, &TrafficExample::traffic, intrand(rI) + fI);
 	counter = 0;
+	failed = 0;
 	frame = new Airframe();
 	for (uint8_t i = 0; i < msgSize - sizeof(myCrc) - sizeof(sequenceNumber); i++) {
 	    uint8_t data = intrand(256);
@@ -148,7 +149,7 @@ void TrafficExample::traffic(Message *timer) {
 	(*msg) << sequenceNumber;
 
 	node_t dst = destAddresses[intrand(destAddresses.size())];
-	LOG_INFO("tx:    dst=0x" << cometos::hex << dst << "|seq=" << cometos::dec << (int) counter);
+	LOG_INFO("tx:    dst=0x" << cometos::hex << dst << "|seq=" << cometos::dec << counter << "|failed=" << failed);
 
 	ts = NetworkTime::get();
 	sendRequest(
@@ -160,6 +161,10 @@ void TrafficExample::traffic(Message *timer) {
 
 void TrafficExample::resp(DataResponse *response) {
 	LOG_INFO("finish transmission: " << response->success);
+
+	if(!response->success) {
+		failed++;
+	}
 
 	delete response;
 	counter++;

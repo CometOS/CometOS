@@ -73,6 +73,7 @@ public:
 
 private:
 	uint64_t counter;
+	uint64_t failed;
 
 	uint32_t ts;
 

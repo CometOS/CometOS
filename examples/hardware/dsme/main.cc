@@ -75,11 +75,10 @@ int main() {
         dests.push_front(0x2856);
 
         /* instantiate traffic modules */
-        traffic = new TrafficExample(dests, 24, 5000, 500, false);
+        traffic = new TrafficExample(dests, 24, 1000, 500, false);
     }
 
     dsme::DSMEPlatform dsme("mac");
-    dsme.setLogLevel(LOG_LEVEL_DEBUG);
 
     if (!PAN_COORDINATOR) {
         /* connect gates */
@@ -95,7 +94,7 @@ int main() {
     }
 
     /* customizing CometOS's logging facility */
-    cometos::setRootLogLevel(LOG_LEVEL_DEBUG);
+    cometos::setRootLogLevel(LOG_LEVEL_ERROR);
 
     //getCout() << "Booted" << endl;
 

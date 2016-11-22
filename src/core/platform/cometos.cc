@@ -92,6 +92,11 @@ void setRootLogLevel(uint8_t level) {
 
 #include "logging.h"
 uint8_t logging_getLevel() {
+    const cometos::Module* mod = cometos::getScheduler().currentContext();
+    if (mod == NULL) {
+        return cometos::_level;
+    }
+
     uint8_t tmp = cometos::getScheduler().getCurrentLogLevel();
     if (tmp == LOG_LEVEL_INVALID) {
         return cometos::_level;
