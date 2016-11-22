@@ -46,7 +46,6 @@ static volatile time_ms_t localTime;
 static volatile time_ms_t elapsedTime;
 static volatile time_ms_t sleepCounter;
 static volatile bool sleep;
-static uint8_t inAtomic = 0;
 
 void palLocalTime_init(){
 	localTime = 0;
@@ -116,20 +115,35 @@ void palExec_wakeup(){
 	sleep = false;
 }
 
-void palExec_atomicBegin(){
-	__disable_irq();
-	ASSERT(inAtomic < UINT8_MAX);
-	++inAtomic;
+static uint8_t inAtomic = 0;
+static bool alreadyAtomic = false;
+
+void palExec_atomicBegin() {
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+
+    ASSERT(inAtomic < UINT8_MAX);
+
+    if(inAtomic == 0 && (primask & 1)) {
+        // We are already in an atomic section (e.g. ISR)
+	alreadyAtomic = true;
+    }
+
+    ++inAtomic;
 }
 
-void palExec_atomicEnd(){
-	if (inAtomic <= 0)
-		ASSERT(inAtomic > 0);
+void palExec_atomicEnd() {
+    ASSERT(inAtomic >= 1);
+    --inAtomic;
 
-	--inAtomic;
-
-	if (inAtomic == 0)
-		__enable_irq();
+    if(inAtomic == 0) {
+        if(alreadyAtomic) {
+            alreadyAtomic = false;
+        }
+        else {
+	    __enable_irq();
+        }
+    }
 }
 
 time_ms_t palExec_elapsed(){

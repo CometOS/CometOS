@@ -114,21 +114,21 @@ static bool alreadyAtomic = false;
 
 void palExec_atomicBegin() {
     uint8_t tmp = SREG;
-	cli();
+    cli();
 
     ASSERT(inAtomic < UINT8_MAX);
 
-	if(inAtomic == 0 && !(tmp & (1 << 7))) {
-	    // We are already in an atomic section (e.g. ISR)
-	    alreadyAtomic = true;
-	}
+    if(inAtomic == 0 && !(tmp & (1 << 7))) {
+        // We are already in an atomic section (e.g. ISR)
+	alreadyAtomic = true;
+    }
 
-    inAtomic++;
+    ++inAtomic;
 }
 
 void palExec_atomicEnd() {
     ASSERT(inAtomic >= 1);
-    inAtomic--;
+    --inAtomic;
 
     if(inAtomic == 0) {
         if(alreadyAtomic) {
