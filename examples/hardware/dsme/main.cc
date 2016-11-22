@@ -39,13 +39,14 @@
 #include "OutputStream.h"
 #include "logging.h"
 #include "SList.h"
+
+#ifdef DSME
 #include "DSMEPlatform.h"
+#endif
+
+#include "CsmaMac.h"
 
 #include "palPin.h"
-
-#ifndef PAN_COORDINATOR
-#define PAN_COORDINATOR false
-#endif
 
 /*PROTOTYPES-----------------------------------------------------------------*/
 
@@ -66,35 +67,42 @@ int main() {
 
     TrafficExample* traffic;
 
-    getCout() << "Booting" << endl;
+    palId_init();
 
-    if (!PAN_COORDINATOR) {
+    getCout() << "Booting " << palId_id() << endl;
+
+    if (palId_id() != PAN_COORDINATOR) {
         /* set up destinations */
         StaticSList<node_t, 10> dests;
         //dests.push_front(0x101A);
-        dests.push_front(0x2856);
+        dests.push_front(PAN_COORDINATOR);
 
         /* instantiate traffic modules */
         traffic = new TrafficExample(dests, 24, 1000, 500, false);
     }
 
-    dsme::DSMEPlatform dsme("mac");
+#ifdef DSME
+    dsme::DSMEPlatform mac("mac");
+#else
+	CsmaMac mac("mac");
+#endif
 
-    if (!PAN_COORDINATOR) {
+    if (palId_id() != PAN_COORDINATOR) {
         /* connect gates */
-        traffic->gateReqOut.connectTo(dsme.gateReqIn);
-        dsme.gateIndOut.connectTo(traffic->gateIndIn);
+        traffic->gateReqOut.connectTo(mac.gateReqIn);
+        mac.gateIndOut.connectTo(traffic->gateIndIn);
 
         traffic->setLogLevel(LOG_LEVEL_DEBUG);
     } else {
         Endpoint testEndpoint;
         TestGateHandler *testHandler = new TestGateHandler();
         InputGate<DataIndication> gate(testHandler, &TestGateHandler::handle, "Test");
-        dsme.gateIndOut.connectTo(gate);
+        mac.gateIndOut.connectTo(gate);
     }
 
     /* customizing CometOS's logging facility */
     cometos::setRootLogLevel(LOG_LEVEL_ERROR);
+    //cometos::setRootLogLevel(LOG_LEVEL_INFO);
 
     //getCout() << "Booted" << endl;
 

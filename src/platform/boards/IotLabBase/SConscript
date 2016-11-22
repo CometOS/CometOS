@@ -34,9 +34,11 @@ if env.conf.bool('pal_mac'):
 	SConscript("mac_common/SConscript")
 
 	mc = env.conf.str('mac', valid_values=['tos','dsme'])
+
 	if mc == 'tos':
 	    SConscript("tosMac/SConscript")
 	elif mc == 'dsme':
+ 		env.Append(CPPDEFINES=["DSME"])
 		SConscript("dsme/SConscript")
 		SConscript("tosMac/SConscript")
 		#env.add_sources(['timer1.cc'])

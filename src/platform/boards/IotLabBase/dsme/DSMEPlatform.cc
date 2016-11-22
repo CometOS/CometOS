@@ -96,7 +96,7 @@ void DSMEPlatform::initialize() {
 
     this->mac_pib.macShortAddress = this->mac_pib.macExtendedAddress.getShortAddress();
 
-    this->mac_pib.macAssociatedPANCoord = PAN_COORDINATOR;
+    this->mac_pib.macAssociatedPANCoord = (PAN_COORDINATOR == palId_id());
     this->mac_pib.macBeaconOrder = 6;
     this->mac_pib.macSuperframeOrder = 3;
     this->mac_pib.macMultiSuperframeOrder = 5;
@@ -111,7 +111,7 @@ void DSMEPlatform::initialize() {
 
     this->mac_pib.recalculateDependentProperties();
 
-    settings->isPANCoordinator = PAN_COORDINATOR;
+    settings->isPANCoordinator = this->mac_pib.macAssociatedPANCoord;
     settings->isCoordinator = settings->isPANCoordinator;
 
     settings->commonChannel = 11; // TODO configure!
