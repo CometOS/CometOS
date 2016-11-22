@@ -117,6 +117,7 @@ protected:
     virtual void signalReleasedMsg(DSMEMessage* msg) {}
 
     void handleDataMessageFromMCPS(DSMEMessage* msg);
+    void handleConfirmFromMCPS(DSMEMessage* msg, DataStatus::Data_Status dataStatus);
 
     bool send(cometos::Airframe* frame);
 

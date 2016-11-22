@@ -101,6 +101,14 @@ void DSMEPlatformBase::handleDataMessageFromMCPS(DSMEMessage* msg) {
     this->gateIndOut.send(ind);
 }
 
+void DSMEPlatformBase::handleConfirmFromMCPS(DSMEMessage* msg, DataStatus::Data_Status dataStatus) {
+    if(msg->request != nullptr) {
+        msg->request->response(new cometos::DataResponse(dataStatus == DataStatus::Data_Status::SUCCESS));
+    }
+
+    releaseMessage(msg);
+}
+
 void DSMEPlatformBase::handleReceivedMessageFromAckLayer(DSMEMessage* message) {
     dsme_atomicBegin();
     if (handleMessageTask.isScheduled()) {
@@ -336,10 +344,6 @@ void DSMEPlatformBase::releaseMessage(DSMEMessage* msg) {
     messagesInUse--;
 
     signalReleasedMsg(msg);
-    if(msg->request != nullptr) {
-        msg->request->response(new cometos::DataResponse(false));
-    }
-
     messageBuffer.release(msg);
     //delete msg;
 }

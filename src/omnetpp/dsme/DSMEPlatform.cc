@@ -103,6 +103,7 @@ void DSMEPlatform::initialize() {
     }
 
     this->dsmeAdaptionLayer.setIndicationCallback(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
+    this->dsmeAdaptionLayer.setConfirmCallback(DELEGATE(&DSMEPlatform::handleConfirmFromMCPS, *this));
 }
 
 void DSMEPlatform::finish() {
