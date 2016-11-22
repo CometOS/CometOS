@@ -61,7 +61,10 @@ public:
     }
 };
 
+void setBlockingCout(bool value);
+
 int main() {
+    setBlockingCout(true);
 
     TrafficExample* traffic;
 
@@ -95,10 +98,12 @@ int main() {
     /* customizing CometOS's logging facility */
     cometos::setRootLogLevel(LOG_LEVEL_DEBUG);
 
-    getCout() << "Booted" << endl;
+    //getCout() << "Booted" << endl;
 
     /* start system */
     cometos::initialize();
+
+    getCout() << "Booted" << endl;
 
     cometos::run();
     return 0;

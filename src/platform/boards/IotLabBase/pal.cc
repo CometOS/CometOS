@@ -178,13 +178,22 @@ void initExternalFlash() {
 #ifdef SERIAL_PRINTF
 #include "OutputStream.h"
 
-static void serial_putchar(char c) {
-    //cometos::PalSerial::getInstance(1)->write( (uint8_t*) &c, 1);
+static bool blockingCout = false;
 
-	// Wait for empty transmit buffer
-	while (!(USART1->SR & USART_SR_TXE))
-		;
-	USART1->DR = c;
+void setBlockingCout(bool value) {
+    blockingCout = value;
+}
+
+static void serial_putchar(char c) {
+    if(blockingCout) {
+	    // Wait for empty transmit buffer
+	    while (!(USART1->SR & USART_SR_TXE))
+		    ;
+	    USART1->DR = c;
+    }
+    else {
+        cometos::PalSerial::getInstance(1)->write( (uint8_t*) &c, 1);
+    }
 }
 
 namespace cometos {

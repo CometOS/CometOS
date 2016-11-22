@@ -41,6 +41,8 @@
 
 #include "cometosAssert.h"
 
+void setBlockingCout(bool value); // defined in pal.cc
+
 //#include <unwind.h> // GCC's internal unwinder, part of libgcc
 //_Unwind_Reason_Code trace_fcn(_Unwind_Context *ctx, void *d)
 //{
@@ -74,11 +76,13 @@ void resetTheNode() {
 #ifdef ASSERT_SHORT
     #ifdef SERIAL_ASSERT
     void doAssert(uint16_t line, uint16_t fileId) {
+        setBlockingCout(true);
         cometos::getCout() << "A:" << cometos::dec << fileId << ":" << line << cometos::endl;
         resetTheNode();
     }
     #else
     void doAssert(uint16_t line, uint16_t fileId) {
+        setBlockingCout(true);
         palExec_writeAssertInfoShort(line, fileId);
         resetTheNode();
     }
@@ -88,12 +92,14 @@ void resetTheNode() {
 #ifdef ASSERT_LONG
     #ifdef SERIAL_ASSERT
     void doAssert(uint16_t line, const char* filename) {
+        setBlockingCout(true);
         palLed_on(4);
     	cometos::getCout() << "A:" << cometos::dec << line << ":" << filename  << cometos::endl;
         resetTheNode();
     }
     #else
     void doAssert(uint16_t line, const char* filename) {
+        setBlockingCout(true);
         palExec_writeAssertInfoLong(line, filename);
         resetTheNode();
     }
@@ -102,11 +108,13 @@ void resetTheNode() {
 
     #ifdef SERIAL_ASSERT
     void doAssert() {
+        setBlockingCout(true);
         cometos::getCout() << "A:" << cometos::dec << cometos::endl;
         resetTheNode();
     }
     #else
     void doAssert() {
+        setBlockingCout(true);
     	palLed_on(1);
         resetTheNode();
     }
