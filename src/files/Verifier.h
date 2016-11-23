@@ -56,6 +56,7 @@ public:
 
     void handleIndication(DataIndication* msg);
     void setFileWrapper(SegmentedFile* file);
+    void useAddition(bool addition);
     void initialize();
 
     Arbiter* getArbiter();
@@ -79,7 +80,7 @@ public:
      * CRC calculation
      * (xmodem, polynom is 0x1021)
      */
-    static uint16_t updateCRC(uint16_t crc, const uint8_t* data, uint16_t length);
+    static uint16_t updateCRC(uint16_t crc, const uint8_t* data, uint16_t length, bool addition = false);
 
 private:
     static const segment_size_t FILE_SEGMENT_SIZE = 128;
@@ -99,6 +100,7 @@ private:
     Arbiter arbiter;
     AirString filename;
     ArbiterAction fileRequest;
+    bool addition;    
 
     enum class CMD : uint8_t {
         REQUEST,

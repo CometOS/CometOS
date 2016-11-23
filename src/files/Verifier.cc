@@ -42,7 +42,7 @@ Define_Module(cometos::Verifier);
 using namespace cometos;
 
 Verifier::Verifier(const char * service_name)
-: Endpoint(service_name), replyAddr(0xffff)
+: Endpoint(service_name), replyAddr(0xffff), addition(false)
 {
     fileRequest.setCallback(CALLBACK_MET(&Verifier::fileAccessGranted,*this));
 }
@@ -60,14 +60,18 @@ Arbiter* Verifier::getArbiter()
  * CRC calculation
  * (xmodem, polynom is 0x1021)
  */
-uint16_t Verifier::updateCRC(uint16_t crc, const uint8_t* data, uint16_t length)
+uint16_t Verifier::updateCRC(uint16_t crc, const uint8_t* data, uint16_t length, bool addition)
 {
     for(uint16_t j = 0; j < length; j++) {
-        crc = crc ^ ((uint16_t)data[j] << 8);
-        for (uint8_t i=0; i<8; i++) {
-            if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
-            else crc <<= 1;
-        }
+        if(addition == true) {
+	    crc = crc + ((uint16_t)data[j]);
+	} else {
+	    crc = crc ^ ((uint16_t)data[j] << 8);
+            for (uint8_t i=0; i<8; i++) {
+                if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
+                else crc <<= 1;
+            }
+	}
     }
     return crc;
 }
@@ -77,12 +81,16 @@ void Verifier::setFileWrapper(SegmentedFile* file)
     this->file = file;
 }
 
+void Verifier::useAddition(bool addition) {
+   this->addition = addition;
+}
+
 void Verifier::getLocalFileProperties(cometos::AirString filename, Callback<void(FileProperties)> callback)
 {
     ASSERT_RUNNING(&arbiter);
 
     this->localCallback = callback;
-    prop.filenameCRC = updateCRC(0, (const uint8_t*)filename.getStr(), strlen(filename.getStr()));;
+    prop.filenameCRC = updateCRC(0, (const uint8_t*)filename.getStr(), strlen(filename.getStr()), addition);
     prop.bytes = 0;
     prop.bytesNotNull = 0;
     prop.crc = 0;
@@ -117,7 +125,7 @@ void Verifier::read(cometos_error_t result)
         // perform operation on read data
         uint8_t len = file->getSegmentSize(readSegment);
 
-        prop.crc = updateCRC(prop.crc, buf, len);
+        prop.crc = updateCRC(prop.crc, buf, len, addition);
 
         for(uint8_t j = 0; j < len; j++) {
             if(buf[j] != 0) {
