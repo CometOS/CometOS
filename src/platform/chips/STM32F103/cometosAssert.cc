@@ -82,7 +82,6 @@ void resetTheNode() {
     }
     #else
     void doAssert(uint16_t line, uint16_t fileId) {
-        setBlockingCout(true);
         palExec_writeAssertInfoShort(line, fileId);
         resetTheNode();
     }
@@ -99,7 +98,6 @@ void resetTheNode() {
     }
     #else
     void doAssert(uint16_t line, const char* filename) {
-        setBlockingCout(true);
         palExec_writeAssertInfoLong(line, filename);
         resetTheNode();
     }
@@ -114,7 +112,6 @@ void resetTheNode() {
     }
     #else
     void doAssert() {
-        setBlockingCout(true);
     	palLed_on(1);
         resetTheNode();
     }
