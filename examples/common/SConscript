@@ -11,4 +11,4 @@ if env.get_platform() == 'omnet':
     SConscript('sniffer/SConscript')
 
 if env.conf.bool("pal_mac"):
-    SConscript('mac/SConscript')
+    SConscript('traffic/SConscript')

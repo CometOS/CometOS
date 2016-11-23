@@ -30,71 +30,55 @@
  * SUCH DAMAGE.
  */
 
+/**
+ * @author Florian Kauer
+ */
+
+#ifndef TRAFFIC_EVALUATION_H_
+#define TRAFFIC_EVALUATION_H_
+
 /*INCLUDES-------------------------------------------------------------------*/
-
-#include "cometos.h"
-#include "TrafficEvaluation.h"
-#include "palLed.h"
-#include "palId.h"
-#include "OutputStream.h"
-#include "logging.h"
-#include "SList.h"
-
-#ifdef DSME
-#include "DSMEPlatform.h"
-#endif
-
-#include "CsmaMac.h"
-
-#include "palPin.h"
+#include "Endpoint.h"
 
 /*PROTOTYPES-----------------------------------------------------------------*/
 
-using namespace cometos;
+namespace cometos {
 
-void setBlockingCout(bool value);
+class TrafficEvaluation : public cometos::Endpoint {
+public:
+    TrafficEvaluation(uint8_t msgSize = 60,
+                   timeOffset_t meanInterval = 500);
 
-int main() {
-    setBlockingCout(true);
+	/**Sets parameters*/
+    void initialize();
 
-    TrafficEvaluation* traffic;
+    void setDestination(node_t destination);
 
-    palId_init();
+    void finish();
 
-    getCout() << "Booting " << hex << palId_id() << dec << endl;
+	void traffic(Message *timer);
 
-    /* instantiate traffic modules */
-    traffic = new TrafficEvaluation(60, 500);
+	void resp(DataResponse *response);
 
-    /* set up destination */
-    if (palId_id() != PAN_COORDINATOR) {
-        traffic->setDestination(PAN_COORDINATOR);
-    }
+	virtual void handleIndication(DataIndication* msg);
 
-#ifdef DSME
-    dsme::DSMEPlatform mac("mac");
-#else
-    CsmaMac mac("mac");
-#endif
+private:
+    bool destinationSet;
+    node_t destination;
 
-    //   if (palId_id() != PAN_COORDINATOR) {
-    /* connect gates */
-    traffic->gateReqOut.connectTo(mac.gateReqIn);
-    mac.gateIndOut.connectTo(traffic->gateIndIn);
+	uint64_t counter;
+	uint64_t failed;
 
-    traffic->setLogLevel(LOG_LEVEL_DEBUG);
+	uint32_t ts;
 
-    /* customizing CometOS's logging facility */
-    cometos::setRootLogLevel(LOG_LEVEL_ERROR);
-    //cometos::setRootLogLevel(LOG_LEVEL_INFO);
+	timeOffset_t meanInterval;
+	cometos::Airframe * frame;
+	uint16_t myCrc;
+	uint8_t msgSize;
 
-    //getCout() << "Booted" << endl;
+    int64_t sequenceNumber; // TODO data type
+};
 
-    /* start system */
-    cometos::initialize();
+} // namespace cometos
 
-    getCout() << "Booted " << hex << palId_id() << dec << endl;
-
-    cometos::run();
-    return 0;
-}
+#endif /* TRAFFIC_EVALUATION_H_ */
