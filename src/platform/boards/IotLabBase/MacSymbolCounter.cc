@@ -142,31 +142,25 @@ void MacSymbolCounter::interrupt() {
 }
 
 uint32_t MacSymbolCounter::getValue() {
-    return (((uint32_t)msw) << 16) | TIM3->CNT;
+    palExec_atomicBegin();
+    uint32_t result = (((uint32_t)msw) << 16) | TIM3->CNT;
+    palExec_atomicEnd();
+    return result;
 }
 
 uint32_t MacSymbolCounter::getCapture() {
-    return lastCapture;
+    palExec_atomicBegin();
+    uint32_t result = lastCapture;
+    palExec_atomicEnd();
+    return result;
 }
 
 void MacSymbolCounter::setCompareMatch(uint32_t compareValue) {
+    palExec_atomicBegin();
     compareValueMSW = compareValue >> 16;
     TIM3->CCR1 = compareValue & 0xFFFF;
+    palExec_atomicEnd();
 }
-
-/*
-template <int Peripheral>
-inline void PalTimerImp<Peripheral>::initInputCapture(){
-	// Channel 3 Configuration in InputCapture
-	TIM_ICInitStructure.TIM_Channel = TIM_Channel_3;
-	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
-	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
-	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
-	TIM_ICInitStructure.TIM_ICFilter = 0x0;
-
-	TIM_ICInit(TIM_BASE(Peripheral), &TIM_ICInitStructure);
-}
-*/
 
 extern "C" {
 
