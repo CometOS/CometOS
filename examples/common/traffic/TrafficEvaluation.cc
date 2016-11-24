@@ -45,6 +45,7 @@
 #include "MacAbstractionBase.h"
 #include "palFirmware.h"
 #include <math.h>
+#include "palId.h"
 
 /*METHOD DEFINITION----------------------------------------------------------*/
 

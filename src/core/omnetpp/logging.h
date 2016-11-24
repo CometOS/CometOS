@@ -88,6 +88,7 @@ inline void cometos_logRaw(uint8_t level, node_t channel, const char* str) {
 #define LOG_INFO(msg) LOG(3,palId_id(),msg)
 #define LOG_INFO_PURE(msg) LOG_RAW(3,palId_id(), msg)
 #define LOG_INFO_PREFIX  LOG_PREFIX(3, palId_id())
+#define LOG_ENDL cometos::endl
 #define LOG_DEBUG(msg) LOG(4,palId_id(),msg)
 #define LOG_DEBUG_PURE(msg) LOG_RAW(4,palId_id(), msg)
 #define LOG_DEBUG_PREFIX  LOG_PREFIX(4, palId_id())

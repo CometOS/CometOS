@@ -85,8 +85,8 @@ int main() {
     traffic->setLogLevel(LOG_LEVEL_DEBUG);
 
     /* customizing CometOS's logging facility */
-    cometos::setRootLogLevel(LOG_LEVEL_ERROR);
-    //cometos::setRootLogLevel(LOG_LEVEL_INFO);
+    //cometos::setRootLogLevel(LOG_LEVEL_ERROR);
+    cometos::setRootLogLevel(LOG_LEVEL_INFO);
 
     //getCout() << "Booted" << endl;
 

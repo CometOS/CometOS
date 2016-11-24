@@ -115,7 +115,7 @@ const char* getName();
 
 #endif
 
-
+#define LOG_ENDL cometos::endl
 
 #ifdef ASSERT_RESET
 #define resetNode() palExec_reset()

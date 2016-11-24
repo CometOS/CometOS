@@ -120,4 +120,6 @@ const char * getName();
 
 #endif
 
+#define LOG_ENDL cometos::endl
+
 #endif /* LOGGING_H_ */
