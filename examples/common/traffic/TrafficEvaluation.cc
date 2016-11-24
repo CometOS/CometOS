@@ -112,7 +112,7 @@ void TrafficEvaluation::traffic(Message *timer) {
     (*msg) << dummy;
 
 	//LOG_INFO("tx:    dst=0x" << cometos::hex << destination << "|seq=" << cometos::dec << counter << "|failed=" << failed);
-	LOG_INFO("§0x" << hex << palId_id() << "§T§" << (dummy?"d":"m") << "§" << dec << sequenceNumber);
+	LOG_INFO("!0x" << hex << palId_id() << "!T!" << (dummy?"d":"m") << "!" << dec << sequenceNumber);
 	LOG_INFO("dst=0x" << hex << destination << "|attempts=" << dec << counter << "|failed=" << failed);
 
 	ts = NetworkTime::get();
@@ -162,7 +162,7 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
             (void) rssi; // avoid warning if logging is disabled
         }
 
-	    LOG_INFO("§0x" << hex << palId_id() << "§R§" << (dummy?"d":"m") << "§" << dec << sequenceNumber);
+	    LOG_INFO("!0x" << hex << palId_id() << "!R!" << (dummy?"d":"m") << "!" << dec << sequenceNumber);
         LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
 
         palLed_toggle(2);
