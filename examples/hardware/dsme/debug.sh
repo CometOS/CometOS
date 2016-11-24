@@ -23,5 +23,11 @@ EOL
 
 mkdir -p logs
 
-tmux new-session "cat $C0 | tee logs/$DATE-a.log" \; split-window -v -p 20 'arm-none-eabi-gdb -x gdbscriptA' \; split-window -h -p 50 'arm-none-eabi-gdb -x gdbscriptB' \; select-pane -t:.0 \; split-window -h -p 50 "cat $C1 | tee logs/$DATE-b.log" \; select-pane -t:.3 \; bind C-n "kill-session" \; set -g mode-mouse on \; set -g mouse-select-pane on \; set -g mouse-select-window on
+cat >logscript.sh << EOL
+cat \$1 | while read line; do D=\`date +%F-%H-%M-%S.%N | cut -b1-23\`; echo "\$D \$line"; done | tee logs/\$2.log
+EOL
+
+chmod a+x logscript.sh
+
+tmux new-session "./logscript.sh $C0 $DATE-a" \; split-window -v -p 20 'arm-none-eabi-gdb -x gdbscriptA' \; split-window -h -p 50 'arm-none-eabi-gdb -x gdbscriptB' \; select-pane -t:.0 \; split-window -h -p 50 "./logscript.sh $C1 $DATE-b" \; select-pane -t:.3 \; bind C-n "kill-session" \; set -g mode-mouse on \; set -g mouse-select-pane on \; set -g mouse-select-window on
 
