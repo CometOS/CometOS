@@ -87,6 +87,7 @@ public:
 
     /* IDSMEPlatformBase */
 
+    bool isReceptionFromAckLayerPossible() override;
 
     void handleReceivedMessageFromAckLayer(DSMEMessage* message) override;
 

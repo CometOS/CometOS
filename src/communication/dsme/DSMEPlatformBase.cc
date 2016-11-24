@@ -109,17 +109,15 @@ void DSMEPlatformBase::handleConfirmFromMCPS(DSMEMessage* msg, DataStatus::Data_
     releaseMessage(msg);
 }
 
-void DSMEPlatformBase::handleReceivedMessageFromAckLayer(DSMEMessage* message) {
-    DSME_ASSERT(message);
+bool DSMEPlatformBase::isReceptionFromAckLayerPossible() {
+    return (handleMessageTask.isOccupied() == false);
+}
 
-    dsme_atomicBegin();
-    if (handleMessageTask.isScheduled()) {
-        releaseMessage(message);
-    } else {
-        handleMessageTask.set(message, this->receiveFromAckLayerDelegate);
-        cometos::getScheduler().add(handleMessageTask);
-    }
-    dsme_atomicEnd();
+void DSMEPlatformBase::handleReceivedMessageFromAckLayer(DSMEMessage* message) {
+    ASSERT(handleMessageTask.isOccupied() == false);
+    bool success = handleMessageTask.occupy(message, this->receiveFromAckLayerDelegate);
+    ASSERT(success); // assume that isMessageReceptionFromAckLayerPossible was called before in the same atomic block
+    cometos::getScheduler().add(handleMessageTask);
 }
 
 void DSMEPlatformBase::scheduleStartOfCFP() {

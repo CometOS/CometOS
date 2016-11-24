@@ -8,17 +8,26 @@ typedef Delegate<void(DSMEMessage* msg)> receive_delegate_t;
 class HandleMessageTask : public cometos::Task {
 public:
     HandleMessageTask() :
-            message(nullptr) {
+            message(nullptr), occupied(false) {
     }
 
-    void set(DSMEMessage* message, receive_delegate_t receiveDelegate) {
+    bool occupy(DSMEMessage* message, receive_delegate_t receiveDelegate) {
         palExec_atomicBegin();
-        {
+        if(this->occupied) {
+            palExec_atomicEnd();
+            return false;
+        }
+        else {
+            this->occupied = true;
             this->message = message;
             this->receiveDelegate = receiveDelegate;
+            palExec_atomicEnd();
+            return true;
         }
-        palExec_atomicEnd();
-        return;
+    }
+
+    bool isOccupied() {
+        return occupied;
     }
 
     virtual void invoke() {
@@ -34,12 +43,14 @@ public:
         palExec_atomicBegin();
         {
             message = nullptr;
+            occupied = false;
         }
         palExec_atomicEnd();
     }
 private:
     DSMEMessage* message;
     receive_delegate_t receiveDelegate;
+    bool occupied;
 };
 }
 
