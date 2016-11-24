@@ -41,6 +41,7 @@ simple DSME extends cometos.src.communication.ieee802154.mac.MacAbstractionLayer
 
         int numChannels = default(16);
         int commonChannel = default(11);
+        int macPANId = default(10);
         
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
         

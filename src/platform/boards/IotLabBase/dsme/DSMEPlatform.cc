@@ -95,6 +95,9 @@ void DSMEPlatform::initialize() {
     ccaTimer = new Message();
 
     this->mac_pib.macShortAddress = this->mac_pib.macExtendedAddress.getShortAddress();
+    if((PAN_COORDINATOR == palId_id())) {
+        this->mac_pib.macPANId = MAC_DEFAULT_NWK_ID;
+    }
 
     this->mac_pib.macAssociatedPANCoord = (PAN_COORDINATOR == palId_id());
     this->mac_pib.macBeaconOrder = 6;
