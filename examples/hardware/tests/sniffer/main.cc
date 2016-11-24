@@ -122,6 +122,7 @@ int main() {
 /*WIRING---------------------------------------------------------------------*/
 
 	mac.gateIndOut.connectTo(sniff.dataIn);
+	mac.gateSnoopIndOut.connectTo(sniff.dataIn);
 
 /*INITIALIZATION-------------------------------------------------------------*/
 
