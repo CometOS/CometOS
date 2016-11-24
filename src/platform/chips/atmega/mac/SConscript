@@ -6,7 +6,6 @@ env.add_sources([
 'mac.cc'
 ])
 
-
 env.conf_to_str_define([
 'MAC_DEVBOARD_MANUAL_RETRIES',
 'MAC_DEVBOARD_RESET_CCA_BE'

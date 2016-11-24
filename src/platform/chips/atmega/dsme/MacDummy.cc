@@ -70,8 +70,7 @@ void mac_getBackoffConfig(mac_backoffCfg_t *cfg) {
 }
 
 mac_result_t mac_setAutoAckConfig(const mac_ackCfg_t *cfg) {
-    ASSERT(false);
-    return false;
+    return true;
 }
 
 mac_result_t mac_sendToNetwork(uint8_t const* data, mac_payloadSize_t length,
