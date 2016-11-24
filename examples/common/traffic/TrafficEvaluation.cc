@@ -70,6 +70,10 @@ void TrafficEvaluation::initialize() {
 #ifdef OMNETPP
     msgSize = par("msgSize");
 	meanInterval = par("meanInterval");
+	if(par("destination").operator int() != -1) {
+	    destination = par("destination");
+	    destinationSet = true;
+	}
 #endif
 
 	ASSERT(msgSize + sizeof(myCrc) + sizeof(sequenceNumber) <= AIRFRAME_MAX_SIZE);
@@ -77,7 +81,7 @@ void TrafficEvaluation::initialize() {
 	counter = 0;
 	failed = 0;
 	frame = new Airframe();
-	for (uint8_t i = 0; i < msgSize - sizeof(myCrc) - sizeof(sequenceNumber); i++) {
+	for (uint8_t i = 0; i < msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*dummy*/; i++) {
 	    uint8_t data = intrand(256);
 	    myCrc = palFirmware_crc_update(myCrc, data);
 	    (*frame) << data;
@@ -90,7 +94,8 @@ void TrafficEvaluation::finish() {
 }
 
 void TrafficEvaluation::traffic(Message *timer) {
-    auto x = -log(1-(rand()/(double)RAND_MAX))/meanInterval;
+    double rnd = rand()/(double)RAND_MAX;
+    double x = -log(1-rnd)*meanInterval; // interval = 1/lambda
     schedule(new Message, &TrafficEvaluation::traffic, x);
 
     if(!destinationSet) {
@@ -100,10 +105,15 @@ void TrafficEvaluation::traffic(Message *timer) {
 
 	Airframe *msg = frame->getCopy();
 
+    uint8_t dummy = 0;
+
 	sequenceNumber++;
 	(*msg) << sequenceNumber;
+    (*msg) << dummy;
 
-	LOG_INFO("tx:    dst=0x" << cometos::hex << destination << "|seq=" << cometos::dec << counter << "|failed=" << failed);
+	//LOG_INFO("tx:    dst=0x" << cometos::hex << destination << "|seq=" << cometos::dec << counter << "|failed=" << failed);
+	LOG_INFO("§0x" << hex << palId_id() << "§T§" << (dummy?"d":"m") << "§" << dec << sequenceNumber);
+	LOG_INFO("dst=0x" << hex << destination << "|attempts=" << dec << counter << "|failed=" << failed);
 
 	ts = NetworkTime::get();
 	sendRequest(
@@ -114,7 +124,7 @@ void TrafficEvaluation::traffic(Message *timer) {
 };
 
 void TrafficEvaluation::resp(DataResponse *response) {
-	LOG_INFO("finish transmission: " << response->success);
+	//LOG_INFO("finish transmission: " << response->success);
 
 	if(!response->success) {
 		failed++;
@@ -127,14 +137,16 @@ void TrafficEvaluation::resp(DataResponse *response) {
 
 void TrafficEvaluation::handleIndication(DataIndication* msg) {
     int64_t remoteSequenceNumber;
+    uint8_t dummy;
+    msg->getAirframe() >> dummy;
     msg->getAirframe() >> remoteSequenceNumber;
 
 	uint16_t crc = 0xFFFF;
 	uint16_t sentCrc;
 	msg->getAirframe() >> sentCrc;
 	uint8_t * data = msg->getAirframe().getData();
-	if (msg->getAirframe().getLength() == msgSize - sizeof(myCrc) - sizeof(sequenceNumber)) {
-        for (uint8_t i = 0; i < msgSize + 2 - sizeof(myCrc) - sizeof(sequenceNumber); i++) {
+	if (msg->getAirframe().getLength() == msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*dummy*/) {
+        for (uint8_t i = 0; i < msgSize + 2 - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*dummy*/; i++) {
             crc = palFirmware_crc_update(crc, data[i]);
         }
         crc = palFirmware_crc_update(crc, (uint8_t) crc >> 8);
@@ -147,9 +159,11 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
         int16_t rssi = RSSI_INVALID;
         if (msg->has<MacRxInfo>()) {
             rssi = msg->get<MacRxInfo>()->rssi;
-            (void) rssi; // TODO use?
+            (void) rssi; // avoid warning if logging is disabled
         }
-        LOG_INFO("rx:    dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
+
+	    LOG_INFO("§0x" << hex << palId_id() << "§R§" << (dummy?"d":"m") << "§" << dec << sequenceNumber);
+        LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
 
         palLed_toggle(2);
 	}

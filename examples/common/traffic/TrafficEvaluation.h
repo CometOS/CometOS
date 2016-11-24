@@ -76,7 +76,7 @@ private:
 	uint16_t myCrc;
 	uint8_t msgSize;
 
-    int64_t sequenceNumber; // TODO data type
+    int64_t sequenceNumber;
 };
 
 } // namespace cometos

@@ -1,4 +1,4 @@
-package cometos.examples.common.mac;
+package cometos.examples.common.traffic;
 
 import cometos.src.communication.base.Endpoint;
 
