@@ -2,13 +2,19 @@
 import re
 import sys
 
+nodes = {}
+
 with open(sys.argv[1]) as log:
     for l in log:
-        m = re.search('!(0x.*)!(.)!(.)!(.*)',l)
+        m = re.search('!(0x.*)!(0x.*)!(.)!(.)!(.*)',l)
         if m:
-            myid = m.group(1)
-            direction = m.group(2)
-            dummy = (m.group(3) == "d")
-            seq = m.group(4)
-            print myid, direction, dummy, seq
+            sender = m.group(1)
+            receiver = m.group(2)
+            direction = m.group(3)
+            dummy = (m.group(4) == "d")
+            seq = m.group(5)
+            print sender, receiver, direction, dummy, seq
             print l
+
+            if not sender in nodes:
+                nodes[sender] = {}
