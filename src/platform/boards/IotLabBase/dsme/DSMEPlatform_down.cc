@@ -63,9 +63,6 @@ bool DSMEPlatform::setChannelNumber(uint8_t channel) {
     this->channel = channel;
     cometos_error_t error = mac_setChannel(this->channel);
     bool success = error != MAC_ERROR_BUSY;
-    if(success) {
-        dsme->getPHY_PIB().phyCurrentChannel = channel;
-    }
     return success;
 }
 

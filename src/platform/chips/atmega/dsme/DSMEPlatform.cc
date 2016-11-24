@@ -117,7 +117,7 @@ void DSMEPlatform::initialize() {
     settings->isPANCoordinator = this->mac_pib.macAssociatedPANCoord;
     settings->isCoordinator = settings->isPANCoordinator;
 
-    this->phy_pib.phyCurrentChannel = 11;
+    this->phy_pib.phyCurrentChannel = MAC_DEFAULT_CHANNEL;
     settings->optimizations = false;
 
     this->dsmeAdaptionLayer.settings.allocationScheme = DSMEAdaptionLayerSettings::ALLOC_CONTIGUOUS_SLOT;

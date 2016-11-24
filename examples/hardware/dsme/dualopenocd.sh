@@ -1,6 +1,8 @@
 C0=/dev/ttyUSB1
 C1=/dev/ttyUSB3
 
+# only works for the both upper usb ports
+
 DEV_C0=`/bin/udevadm info --name=$C0 | grep DEVPATH | sed 's/.*usb.\/\(.\)-\(.\).*/\1:\2/g'`
 DEV_C1=`/bin/udevadm info --name=$C1 | grep DEVPATH | sed 's/.*usb.\/\(.\)-\(.\).*/\1:\2/g'`
 
@@ -15,6 +17,9 @@ then
     echo "Not connected"
     exit 1
 fi
+
+echo $DEV_C0
+echo $DEV_C1
 
 cat >Dockerfile << EOL
 FROM ubuntu:xenial
