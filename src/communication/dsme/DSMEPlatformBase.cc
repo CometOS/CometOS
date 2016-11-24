@@ -110,6 +110,8 @@ void DSMEPlatformBase::handleConfirmFromMCPS(DSMEMessage* msg, DataStatus::Data_
 }
 
 void DSMEPlatformBase::handleReceivedMessageFromAckLayer(DSMEMessage* message) {
+    DSME_ASSERT(message);
+
     dsme_atomicBegin();
     if (handleMessageTask.isScheduled()) {
         releaseMessage(message);

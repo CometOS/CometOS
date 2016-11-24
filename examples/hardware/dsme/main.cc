@@ -52,11 +52,7 @@
 
 using namespace cometos;
 
-void setBlockingCout(bool value);
-
 int main() {
-    setBlockingCout(true);
-
     TrafficEvaluation* traffic;
 
     palId_init();
@@ -73,6 +69,7 @@ int main() {
 
 #ifdef DSME
     dsme::DSMEPlatform mac("mac");
+    //mac.setLogLevel(LOG_LEVEL_INFO);
 #else
     CsmaMac mac("mac");
 #endif

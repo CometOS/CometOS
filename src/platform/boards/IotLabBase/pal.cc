@@ -178,7 +178,7 @@ void initExternalFlash() {
 #ifdef SERIAL_PRINTF
 #include "OutputStream.h"
 
-static bool blockingCout = false;
+static bool blockingCout = true;
 
 void setBlockingCout(bool value) {
     blockingCout = value;
