@@ -212,6 +212,11 @@ OutputStream  &getCout() {
 }
 
 }
+#else
+
+void setBlockingCout(bool value) {
+}
+
 #endif
 
 void pal_init() {
