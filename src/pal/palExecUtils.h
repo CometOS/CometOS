@@ -60,6 +60,8 @@ bool palExec_clearAssertInfo();
 
 void palExec_badisr();
 
+uint32_t palExec_getStackSize();
+
 /**
  * In case of no error, this function always resets the node.
  */

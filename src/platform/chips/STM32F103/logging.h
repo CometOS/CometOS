@@ -48,6 +48,7 @@
 #include "OutputStream.h"
 #include "palLocalTime.h"
 #include "NetworkTime.h"
+#include "palExecUtils.h"
 
 #define HEXOUT cometos::hex
 #define DECOUT cometos::dec
@@ -57,7 +58,7 @@
 uint8_t logging_getLevel();
 const char* getName();
 
-#define LOG(level,msg) {if (level>=logging_getLevel()) cometos::getCout()<<::NetworkTime::get()<<"|"<<getName()<<"|"<<msg<<"\n";}
+#define LOG(level,msg) {if (level>=logging_getLevel()) {cometos::getCout()<<::NetworkTime::get()<<"|"<<cometos::dec<<palExec_getStackSize()<<"|"<<getName()<<"|"<<msg<<"\n";}}
 #define LOG_PREFIX(level) {if (level>=logging_getLevel()) cometos::getCout()<<::NetworkTime::get()<<"|"<<getName()<<"|";}
 #define LOG_RAW(level,msg) {if (level>=logging_getLevel()) cometos::getCout()<<msg;}
 

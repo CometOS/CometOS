@@ -52,8 +52,18 @@
 
 using namespace cometos;
 
+#ifdef DSME
+dsme::DSMEPlatform mac("mac");
+#else
+CsmaMac mac("mac");
+#endif
+
 int main() {
     TrafficEvaluation* traffic;
+
+#ifdef DSME
+    mac.setLogLevel(LOG_LEVEL_INFO);
+#endif
 
     palId_init();
 
@@ -66,13 +76,6 @@ int main() {
     if (palId_id() != PAN_COORDINATOR) {
         traffic->setDestination(PAN_COORDINATOR);
     }
-
-#ifdef DSME
-    dsme::DSMEPlatform mac("mac");
-    //mac.setLogLevel(LOG_LEVEL_INFO);
-#else
-    CsmaMac mac("mac");
-#endif
 
     //   if (palId_id() != PAN_COORDINATOR) {
     /* connect gates */
@@ -90,6 +93,7 @@ int main() {
     /* start system */
     cometos::initialize();
 
+    LOG_INFO("Booted");
     getCout() << "Booted " << hex << palId_id() << dec << endl;
 
     cometos::run();

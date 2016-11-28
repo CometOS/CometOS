@@ -212,4 +212,15 @@ cometos_error_t palExec_reset(){
     return(COMETOS_SUCCESS);
 }
 
+extern long __stack;
+extern long __Main_Stack_Limit;
 
+uint32_t palExec_getStackSize() {
+    auto msp = __get_MSP();
+    auto stackSize = ((size_t)&__stack) - msp;
+    if(((size_t)&__Main_Stack_Limit) >= msp) {
+        cometos::getCout() << "0x" << cometos::hex << msp << " 0x" << ((size_t)&__Main_Stack_Limit) << " " << cometos::dec << stackSize << cometos::endl;
+        ASSERT(false); // Stack Overflow!
+    }
+    return stackSize;
+}
