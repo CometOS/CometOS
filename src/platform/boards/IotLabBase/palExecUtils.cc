@@ -215,6 +215,26 @@ cometos_error_t palExec_reset(){
 extern long __stack;
 extern long __Main_Stack_Limit;
 
+/* never tested
+void enableStackProtection() {
+	// Disable MPU
+	MPU->CTRL &= ~MPU_CTRL_ENABLE_Msk;
+
+	MPU->RNR  = 0;
+	MPU->RBAR = ((size_t)&__Main_Stack_Limit);// Address
+	MPU->RASR =  (4 << MPU_RASR_SIZE_Pos)     // 2*(SIZE+1) -> 32 Byte
+				 | (0 << MPU_RASR_AP_Pos)     // No access allowed
+				 | MPU_RASR_XN_Msk            // XN bit
+				 | MPU_RASR_ENA_Msk;          // Enable
+
+	// Enable memory fault exception
+	SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+
+	// Enable MPU
+	MPU->CTRL |= MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_ENABLE_Msk;
+}
+*/
+
 uint32_t palExec_getStackSize() {
     auto msp = __get_MSP();
     auto stackSize = ((size_t)&__stack) - msp;

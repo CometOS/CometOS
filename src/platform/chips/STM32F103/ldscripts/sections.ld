@@ -19,7 +19,7 @@ _estack = __stack; 	/* STM specific definition */
  */
 
 /*__Main_Stack_Size = 1024 ;*/
-__Main_Stack_Size = 2048 ;
+__Main_Stack_Size = 4096 ;
 
 PROVIDE ( _Main_Stack_Size = __Main_Stack_Size ) ;
 
