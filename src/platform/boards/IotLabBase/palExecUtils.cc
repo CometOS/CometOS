@@ -235,6 +235,11 @@ void enableStackProtection() {
 }
 */
 
+__STATIC_INLINE uint32_t NVIC_GetEnabled(IRQn_Type IRQn)
+{
+  return((uint32_t)((NVIC->ISER[(uint32_t)(IRQn) >> 5] & (1 << ((uint32_t)(IRQn) & 0x1F)))?1:0)); /* Return 1 if active else 0 */
+}
+
 uint32_t palExec_getStackSize() {
     auto msp = __get_MSP();
     auto stackSize = ((size_t)&__stack) - msp;
@@ -242,5 +247,22 @@ uint32_t palExec_getStackSize() {
         cometos::getCout() << "0x" << cometos::hex << msp << " 0x" << ((size_t)&__Main_Stack_Limit) << " " << cometos::dec << stackSize << cometos::endl;
         ASSERT(false); // Stack Overflow!
     }
+
+    // Also check if only the correct interrupts are enabled
+    for(int i = 0; i <= 67; i++) {
+        if(NVIC_GetEnabled((IRQn_Type)i)) {
+            if( i != EXTI4_IRQn
+                && i != DMA1_Channel4_IRQn
+                && i != TIM2_IRQn
+                && i != TIM3_IRQn
+                && i != TIM4_IRQn
+                && i != USART1_IRQn
+              ) {
+                cometos::getCout() << i << ".";
+                ASSERT(false);
+            }
+        }
+    }
+
     return stackSize;
 }
