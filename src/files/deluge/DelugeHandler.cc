@@ -118,7 +118,7 @@ void DelugeHandler::segmentRead(cometos_error_t result) {
     this->mBuffer.setSize(size);
 
     // Calculate CRC
-    this->mCRC = Verifier::updateCRC(this->mCRC, this->mBuffer.getBuffer(), this->mBuffer.getSize());
+    this->mCRC = Verifier::updateCRC(this->mCRC, this->mBuffer.getBuffer(), this->mBuffer.getSize(), true);
 
     // Check page end
     if (this->mCurrentSegment % DELUGE_PACKETS_PER_PAGE == DELUGE_PACKETS_PER_PAGE - 1 || this->mCurrentSegment == this->pOriginFile->getNumSegments()-1) {

@@ -622,12 +622,15 @@ void Deluge::handlePacket() {
     // Store that we received a packet
     this->mPacketsSinceLastTimer++;
 
+    // TODO remove
+    mBuffer.setSize(DELUGE_PACKET_SEGMENT_SIZE);
+    memset(mBuffer.getBuffer(), 0, DELUGE_PACKET_SEGMENT_SIZE);
+
     // Extract data
     uint8_t page;
     uint8_t packet;
     uint16_t crc;
     Airframe *frame = rcvdMsg->decapsulateAirframe();
-    this->mBuffer.clear();
     (*frame) >> page;
     (*frame) >> this->mPageCRC;
     (*frame) >> packet;
@@ -643,7 +646,7 @@ void Deluge::handlePacket() {
     }
 
     // Calculate own crc and compare to received
-    uint16_t localCRC = Verifier::updateCRC(0, this->mBuffer.getBuffer(), this->mBuffer.getSize());
+    uint16_t localCRC = Verifier::updateCRC(0, this->mBuffer.getBuffer(), this->mBuffer.getSize(), true);
     if (localCRC != crc) {
         getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received invalid Packet" << endl;
 
@@ -660,10 +663,10 @@ void Deluge::handlePacket() {
     }
 
     // Store buffer into file
-    uint16_t packetSize = this->dataFile->getSegmentSize(this->mPageRX * DELUGE_PACKETS_PER_PAGE + packet);
-    this->mBuffer.setSize(packetSize);
+    uint16_t packetSize = DelugeUtility::PacketSize(this->mPageRX, packet, pInfo->getFileSize());
+    this->mBuffer.setSize(DELUGE_PACKET_SEGMENT_SIZE);
 
-    this->dataFile->write(this->mBuffer.getBuffer(), packetSize, this->mPageRX * DELUGE_PACKETS_PER_PAGE + packet, CALLBACK_MET(&Deluge::onPacketWritten, *this));
+    this->dataFile->write(this->mBuffer.getBuffer(), DELUGE_PACKET_SEGMENT_SIZE, this->mPageRX * DELUGE_PACKETS_PER_PAGE + packet, CALLBACK_MET(&Deluge::onPacketWritten, *this));
 
 #ifdef DELUGE_OUTPUT
     getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received packet=" << static_cast<uint16_t>(packet) << " with size=" << static_cast<uint16_t>(this->mBuffer.getSize()) << endl;
@@ -685,7 +688,7 @@ void Deluge::onPacketWritten(cometos_error_t result) {
          getCout() << "[" << palId_id() << "] "  << __PRETTY_FUNCTION__ << ": Start page check" << endl;
  #endif
 
-         uint16_t packetSize = this->dataFile->getSegmentSize(this->mPageRX * DELUGE_PACKETS_PER_PAGE);
+	 uint16_t packetSize = DelugeUtility::PacketSize(this->mPageRX, 0, pInfo->getFileSize());
          this->mBuffer.setSize(packetSize);
          this->dataFile->read(this->mBuffer.getBuffer(), packetSize, this->mPageRX * DELUGE_PACKETS_PER_PAGE, CALLBACK_MET(&Deluge::onPageCheck, *this));
 
@@ -697,7 +700,7 @@ void Deluge::onPageCheck(cometos_error_t result) {
     this->mBuffer.setSize(DelugeUtility::PacketSize(this->mPageRX, this->mPageCheckPacket, pInfo->getFileSize()));
 
     // Store CRC value
-    this->mPageCheckCRC = Verifier::updateCRC(this->mPageCheckCRC, this->mBuffer.getBuffer(), this->mBuffer.getSize());
+    this->mPageCheckCRC = Verifier::updateCRC(this->mPageCheckCRC, this->mBuffer.getBuffer(), this->mBuffer.getSize(), true);
 
     // Increase packet index
     this->mPageCheckPacket++;
@@ -753,9 +756,10 @@ void Deluge::onPageCheck(cometos_error_t result) {
     } else {
         // Check if we have all packets checked
         int16_t segment = this->mPageRX * DELUGE_PACKETS_PER_PAGE + this->mPageCheckPacket;
-        uint16_t packetSize = this->dataFile->getSegmentSize(segment);
-        this->mBuffer.setSize(packetSize);
-        this->dataFile->read(this->mBuffer.getBuffer(), packetSize, segment, CALLBACK_MET(&Deluge::onPageCheck, *this));
+        uint16_t packetSize = DelugeUtility::PacketSize(this->mPageRX, this->mPageCheckPacket, pInfo->getFileSize());
+
+        this->mBuffer.setSize(DELUGE_PACKET_SEGMENT_SIZE);
+        this->dataFile->read(this->mBuffer.getBuffer(), DELUGE_PACKET_SEGMENT_SIZE, segment, CALLBACK_MET(&Deluge::onPageCheck, *this));
     }
 }
 
@@ -790,6 +794,7 @@ void Deluge::preparePacket() {
     this->mPacketToSend = DelugeUtility::GetLeastSignificantBitSet(this->mRequestedPackets);
     // Check if we have to send packets
     uint16_t segment = (uint16_t)this->mPageTX * DELUGE_PACKETS_PER_PAGE + mPacketToSend;
+    //(pInfo->getNumberOfPages()-2)*DELUGE_PACKETS_PER_PAGE+DelugeUtility::NumOfPacketsInPage(pInfo->getNumberOfPages()-2, pInfo->getFileSize())
     if (this->mPacketToSend >= DELUGE_PACKETS_PER_PAGE || segment >= this->dataFile->getNumSegments()) {
         mPacketToSend = 255;
         mRequestedPackets = 0;
@@ -801,10 +806,10 @@ void Deluge::preparePacket() {
     }
 
     // Set buffer size
-    this->mBuffer.setSize(this->dataFile->getSegmentSize(this->mPageTX * DELUGE_PACKETS_PER_PAGE + mPacketToSend));
+    this->mBuffer.setSize(DelugeUtility::PacketSize(this->mPageTX, this->mPacketToSend, pInfo->getFileSize()));
 
     // Open segment/packet
-    this->dataFile->read(this->mBuffer.getBuffer(), this->dataFile->getSegmentSize(segment), segment, CALLBACK_MET(&Deluge::sendPacket,*this));
+    this->dataFile->read(this->mBuffer.getBuffer(), DelugeUtility::PacketSize(mPageTX, mPacketToSend, pInfo->getFileSize()), segment, CALLBACK_MET(&Deluge::sendPacket,*this));
 }
 
 void Deluge::sendPacket(cometos_error_t result) {
@@ -816,7 +821,7 @@ void Deluge::sendPacket(cometos_error_t result) {
     ASSERT(this->mBuffer.getSize() > 0);
 
     // Calculate buffer crc code
-    uint16_t crc = Verifier::updateCRC(0, this->mBuffer.getBuffer(), this->mBuffer.getSize());
+    uint16_t crc = Verifier::updateCRC(0, this->mBuffer.getBuffer(), this->mBuffer.getSize(), true);
 
     // Create Airframe
     Airframe* frame = new Airframe();

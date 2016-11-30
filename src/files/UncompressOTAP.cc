@@ -115,7 +115,7 @@ void UncompressOTAP::segmentRead(cometos_error_t result)
 {
     // calculate checksum of otap file
     segment_size_t segmentSize = fromFile->getSegmentSize(segmentToRead);
-    otapcrc = Verifier::updateCRC(otapcrc, fromBuffer[segmentToRead%2], segmentSize);
+    otapcrc = Verifier::updateCRC(otapcrc, fromBuffer[segmentToRead%2], segmentSize, true);
 
     segmentToRead++;
 

@@ -70,6 +70,7 @@ public:
     cometos_error_t transferFile(node_t& receiver, AirString& filename);
     cometos_error_t getFileProperties(AirString& filename);
     cometos_error_t deluge(AirString& filename);
+    cometos_error_t stopDeluge();
 
     InputGate<DataIndication>& getGateIndIn();
     OutputGate<DataRequest>& getGateReqOut();

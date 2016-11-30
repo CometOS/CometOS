@@ -115,7 +115,7 @@
 /***
  * Defines the time RX waits until leaving RX state because of no receipt
  */
-#define DELUGE_RX_NO_RECEIPT_DELAY 2000
+#define DELUGE_RX_NO_RECEIPT_DELAY 1000
 
 /***
  * Defines the time TX waits between sending two packets

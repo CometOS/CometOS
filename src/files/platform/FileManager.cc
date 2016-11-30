@@ -175,6 +175,11 @@ cometos_error_t FileManager::deluge(AirString& filename) {
     return delugeHandler.setFile(filename, EMPTY_CALLBACK());
 }
 
+cometos_error_t FileManager::stopDeluge() {
+    delugeHandler.stop();
+    return COMETOS_SUCCESS;
+}
+
 
 
 
