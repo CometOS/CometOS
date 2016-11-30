@@ -55,7 +55,7 @@ public:
 
     virtual void initialize() override;
 
-    void startCCA() override;
+    bool startCCA() override;
 
     void startTimer(uint32_t symbolCounterValue) override;
 

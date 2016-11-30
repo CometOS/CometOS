@@ -66,10 +66,8 @@ bool DSMEPlatform::setChannelNumber(uint8_t channel) {
     return success;
 }
 
-void DSMEPlatform::startCCA() {
-    cca_request();
-    // TODO
-    //scheduleAt(simTime() + 8*symbolDuration, ccaTimer);
+bool DSMEPlatform::startCCA() {
+    return (cca_request() == MAC_SUCCESS);
 }
 
 bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallback) {
