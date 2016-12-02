@@ -97,6 +97,8 @@ protected:
     static mac_ackCfg_t ackCfg;
     static mac_backoffCfg_t backoffCfg;
 
+    static message_t phy_msg;
+
     uint8_t channel;
 };
 

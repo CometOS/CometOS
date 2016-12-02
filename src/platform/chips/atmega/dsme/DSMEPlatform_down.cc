@@ -45,6 +45,7 @@ namespace dsme {
 
 uint8_t DSMEPlatform::data[127];
 uint8_t DSMEPlatform::state = STATE_READY;
+message_t DSMEPlatform::phy_msg;
 
 Delegate<void(bool)> DSMEPlatform::txEndCallback;
 
@@ -117,7 +118,6 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
     /* copy data */
     memcpy(buffer, msg->frame->getData(), msg->frame->getLength());
 
-    message_t phy_msg;
     phy_msg.data = DSMEPlatform::data;
     phy_msg.phyPayloadLen = length;
     phy_msg.requiresCca = false;
