@@ -53,7 +53,7 @@ namespace dsme {
 
 void DSMEPlatformBase::translateMacAddress(node_t& from, IEEE802154MacAddress& to) {
     if(from == 0xFFFF) {
-        to = IEEE802154MacAddress::SHORT_BROADCAST_ADDRESS;
+        to = IEEE802154MacAddress(IEEE802154MacAddress::SHORT_BROADCAST_ADDRESS);
     } else {
         to.setShortAddress(from);
     }
@@ -65,23 +65,18 @@ DSMEPlatformBase::DSMEPlatformBase(const char* service_name) :
                 phy_pib(10),
                 mac_pib(phy_pib),
 
-                dsme(new DSMELayer()),
-                mcps_sap(*dsme),
-                mlme_sap(*dsme),
-                dsmeAdaptionLayer(*dsme),
+                mcps_sap(dsme),
+                mlme_sap(dsme),
+                dsmeAdaptionLayer(dsme),
 
                 messagesInUse(0),
 
-                settings(new DSMESettings()),
-
                 startTask(CALLBACK_MET(&DSMEPlatformBase::start,*this)),
-                handleStartOfCFPTask(CALLBACK_MET(&DSMELayer::handleStartOfCFP,*dsme))
+                handleStartOfCFPTask(CALLBACK_MET(&DSMELayer::handleStartOfCFP,dsme))
 {
 }
 
 DSMEPlatformBase::~DSMEPlatformBase() {
-    delete dsme;
-    delete settings;
 }
 
 void DSMEPlatformBase::initialize() {
@@ -90,7 +85,7 @@ void DSMEPlatformBase::initialize() {
 }
 
 void DSMEPlatformBase::start() {
-    dsme->start(*settings, this);
+    dsme.start();
     this->dsmeAdaptionLayer.startAssociation();
 }
 

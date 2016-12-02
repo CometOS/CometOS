@@ -56,18 +56,6 @@ mac_backoffCfg_t DSMEPlatform::backoffCfg { 0, 0, 0, 0 };
 
 DSMEPlatform::DSMEPlatform(const char * name) :
         DSMEPlatformBase(name),
-        /* TODO remove
-        gateReqIn(this, &DSMEPlatform::handleRequest, "gateReqIn"),
-        gateIndOut(this, "gateIndOut"),
-        phy_pib(10),
-        mac_pib(phy_pib),
-
-        mcps(dsmeLayer),
-        mlme(dsmeLayer),
-
-        dsmeAdaptionLayer(dsmeLayer),
-
-        */
         channel(MIN_CHANNEL) {
     instance = this;
 }
@@ -78,12 +66,13 @@ void DSMEPlatform::initialize() {
 
     DSMEPlatformBase::initialize();
 
-    this->dsme->setPHY_PIB(&(this->phy_pib));
-    this->dsme->setMAC_PIB(&(this->mac_pib));
-    this->dsme->setMCPS(&(this->mcps_sap));
-    this->dsme->setMLME(&(this->mlme_sap));
+    this->dsme.setPHY_PIB(&(this->phy_pib));
+    this->dsme.setMAC_PIB(&(this->mac_pib));
+    this->dsme.setMCPS(&(this->mcps_sap));
+    this->dsme.setMLME(&(this->mlme_sap));
 
     this->dsmeAdaptionLayer.initialize();
+    this->dsme.initialize(this);
 
     /* Initialize Address */
     IEEE802154MacAddress address;
@@ -99,7 +88,8 @@ void DSMEPlatform::initialize() {
         this->mac_pib.macPANId = MAC_DEFAULT_NWK_ID;
     }
 
-    this->mac_pib.macAssociatedPANCoord = (PAN_COORDINATOR == palId_id());
+    this->mac_pib.macIsPANCoord = (PAN_COORDINATOR == palId_id());
+    this->mac_pib.macAssociatedPANCoord = this->mac_pib.macIsPANCoord;
     this->mac_pib.macBeaconOrder = 6;
     this->mac_pib.macSuperframeOrder = 3;
     this->mac_pib.macMultiSuperframeOrder = 5;
@@ -114,11 +104,7 @@ void DSMEPlatform::initialize() {
 
     this->mac_pib.recalculateDependentProperties();
 
-    settings->isPANCoordinator = this->mac_pib.macAssociatedPANCoord;
-    settings->isCoordinator = settings->isPANCoordinator;
-
     this->phy_pib.phyCurrentChannel = MAC_DEFAULT_CHANNEL;
-    settings->optimizations = false;
 
     this->dsmeAdaptionLayer.settings.allocationScheme = DSMEAdaptionLayerSettings::ALLOC_CONTIGUOUS_SLOT;
 
@@ -130,7 +116,7 @@ void DSMEPlatform::initialize() {
     ASSERT(result == MAC_SUCCESS);
 
     // Enable MacSymbolCounter
-    MacSymbolCounter::getInstance().init(CALLBACK_MET(&DSMEEventDispatcher::timerInterrupt, dsme::DSMEPlatform::instance->getDSME()->getEventDispatcher()));
+    MacSymbolCounter::getInstance().init(CALLBACK_MET(&DSMEEventDispatcher::timerInterrupt, dsme.getEventDispatcher()));
 	uint8_t trx_ctrl_1 = rf->readRegister(AT86RF231_REG_TRX_CTRL_1);
 	trx_ctrl_1 |= AT86RF231_TRX_CTRL_1_MASK_IRQ_2_EXT_EN;
 	rf->writeRegister(AT86RF231_REG_TRX_CTRL_1, trx_ctrl_1);

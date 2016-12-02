@@ -62,6 +62,8 @@
 #include "DSMEMessageBuffer.h"
 #include "HandleMessageTask.h"
 
+#include "openDSME/dsmeLayer/DSMELayer.h"
+
 namespace dsme {
 
 struct DSMESettings;
@@ -127,7 +129,7 @@ protected:
     PHY_PIB phy_pib;
     MAC_PIB mac_pib;
 
-    DSMELayer* dsme;
+    DSMELayer dsme;
 
     mcps_sap::MCPS_SAP mcps_sap;
     mlme_sap::MLME_SAP mlme_sap;
@@ -141,8 +143,6 @@ protected:
     cometos::Message* timer;
     cometos::Message* ccaTimer;
     Delegate<void(bool)> txEndCallback;
-
-    DSMESettings* settings;
 
     DSMEMessageBuffer messageBuffer;
 

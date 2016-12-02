@@ -142,7 +142,7 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
     msg->frame->setLength(phy_msg->phyPayloadLen - msg->getHeader().getSerializationLength());
     memcpy(msg->frame->getData(), buffer, msg->frame->getLength());
 
-    instance->dsme->getAckLayer().receive(msg);
+    instance->dsme.getAckLayer().receive(msg);
 
     return phy_msg;
 }
@@ -160,7 +160,7 @@ void ccaSend_ready(mac_result_t error) {
  * Interface to tosMac
  */
 void ccaResult_ready(mac_result_t error) {
-    dsme::DSMEPlatform::instance->getDSME()->dispatchCCAResult(error == MAC_SUCCESS);
+    dsme::DSMEPlatform::instance->getDSME().dispatchCCAResult(error == MAC_SUCCESS);
     return;
 }
 

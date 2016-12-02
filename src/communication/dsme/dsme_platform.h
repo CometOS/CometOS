@@ -51,6 +51,5 @@
 #include "DSMEMessage.h"
 #include "dsme_settings.h"
 #include "dsme_atomic.h"
-#include "DSMEPlatform.h"
 
 #endif
