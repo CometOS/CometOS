@@ -144,6 +144,10 @@ void MacSymbolCounter::interrupt() {
 uint32_t MacSymbolCounter::getValue() {
     palExec_atomicBegin();
     uint32_t result = (((uint32_t)msw) << 16) | TIM3->CNT;
+    if(TIM3->SR & TIM_SR_UIF) {
+        // Recent and unhandled overflow
+        result += (1 << (uint32_t)16);
+    }
     palExec_atomicEnd();
     return result;
 }
