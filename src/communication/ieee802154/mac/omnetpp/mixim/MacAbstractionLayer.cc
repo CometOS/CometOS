@@ -95,6 +95,14 @@ MacAbstractionLayer::MacAbstractionLayer(const char * name,
     ASSERT(address == NULL);
 }
 
+MacAbstractionLayer::~MacAbstractionLayer() {
+    delete timer;
+    timer = nullptr;
+
+    delete lqiProvider;
+    lqiProvider = nullptr;
+}
+
 void MacAbstractionLayer::finish() {
 	cancel(timer);
 	recordScalar("sendingSucceed", sendingSucceed);
@@ -115,8 +123,11 @@ void MacAbstractionLayer::finish() {
     recordScalar("ackSuccessWithInterference", ackFrames.successWithInterference);
     recordScalar("ackSuccessWithoutInterference", ackFrames.successWithoutInterference);
 
-	delete timer;
-	delete lqiProvider;
+    delete timer;
+    timer = nullptr;
+
+    delete lqiProvider;
+    lqiProvider = nullptr;
 }
 
 void MacAbstractionLayer::setLqiProvider(LqiProvider * provider) {

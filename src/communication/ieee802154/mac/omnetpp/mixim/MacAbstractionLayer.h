@@ -107,6 +107,8 @@ public:
 	MacAbstractionLayer(const char * name = NULL,
 	                    const node_t* const address = NULL);
 
+	virtual ~MacAbstractionLayer();
+
 
 	/**************************************************************************
 	 ** General MacAbstractionInterface  **************************************

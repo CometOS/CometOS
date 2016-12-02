@@ -51,6 +51,11 @@ DSMEMessageBuffer::DSMEMessageBuffer() :
 }
 
 DSMEMessageBuffer::~DSMEMessageBuffer() {
+    while(airframeStack.getSize() != 0) {
+        Airframe* p = airframeStack.top();
+        airframeStack.pop();
+        delete p;
+    }
 }
 
 DSMEMessage* DSMEMessageBuffer::aquire() {

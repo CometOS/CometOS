@@ -49,7 +49,7 @@ Deluge::~Deluge() {
 }
 
 void Deluge::initialize() {
-#if 1
+#if 0
     palWdt_pause();
     cfs_format();
     palWdt_resume();

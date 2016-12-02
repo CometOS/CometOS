@@ -51,7 +51,8 @@ namespace dsme {
 
 class DSMEPlatform : public DSMEPlatformBase {
 public:
-    DSMEPlatform() :
+    DSMEPlatform(const char* service_name = NULL) :
+        DSMEPlatformBase(service_name),
         msgId(0)
     {
     }
