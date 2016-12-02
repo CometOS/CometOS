@@ -843,11 +843,13 @@ void serviceRadio() {
 
 		RADIO_ASSERT( radio_state == STATE_BUSY_TX_2_RX_ON );
 
+		ASSERT(txMsg);
 		txMsg->txInfo.tsData.isValid = true;
 		txMsg->txInfo.tsData.ts = capturedTime;
 		radio_state = STATE_RX_ON;
 		cmd = CMD_NONE;
 		radioSend_sendDone(txMsg, MAC_SUCCESS);
+		txMsg = nullptr;
 	}
 
 
