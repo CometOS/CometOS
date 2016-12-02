@@ -172,7 +172,11 @@ void ccaSend_sendDone(message_t * msg, mac_result_t result) {
     ASSERT(dsme::DSMEPlatform::state == dsme::DSMEPlatform::STATE_SEND);
 
 // TODO: schedule as task?
-    dsme::DSMEPlatform::txEndCallback(result == MAC_SUCCESS);
+    dsme_atomicBegin();
+    Delegate<void(bool)> cb = dsme::DSMEPlatform::txEndCallback;
+    ASSERT(cb);
+    dsme_atomicEnd();
+    cb(result == MAC_SUCCESS);
 
     dsme::DSMEPlatform::state = dsme::DSMEPlatform::STATE_READY;
     return;
