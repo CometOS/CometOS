@@ -58,11 +58,14 @@ dsme::DSMEPlatform mac("mac");
 CsmaMac mac("mac");
 #endif
 
+//#define DSME_LOG LOG_LEVEL_ERROR
+#define DSME_LOG LOG_LEVEL_INFO
+
 int main() {
     TrafficEvaluation* traffic;
 
 #ifdef DSME
-    mac.setLogLevel(LOG_LEVEL_INFO);
+    mac.setLogLevel(DSME_LOG);
 #endif
 
     palId_init();
@@ -85,8 +88,7 @@ int main() {
     traffic->setLogLevel(LOG_LEVEL_DEBUG);
 
     /* customizing CometOS's logging facility */
-    //cometos::setRootLogLevel(LOG_LEVEL_ERROR);
-    cometos::setRootLogLevel(LOG_LEVEL_INFO);
+    cometos::setRootLogLevel(DSME_LOG);
 
     //getCout() << "Booted" << endl;
 
