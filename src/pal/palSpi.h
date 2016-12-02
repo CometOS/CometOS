@@ -254,7 +254,7 @@ public:
 	/**
 	 * @return True, if no transmission is active at the moment, false else.
 	 */
-	virtual bool isAvailable();
+	virtual bool isAvailable() = 0;
 
 	/**
 	 * Returns an instance of this class

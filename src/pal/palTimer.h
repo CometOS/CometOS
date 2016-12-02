@@ -103,7 +103,7 @@ public:
 	 * Yields the current counter value.
 	 *
 	 */
-	virtual uint16_t get();
+	virtual uint16_t get() = 0;
 
 protected:
 
@@ -113,7 +113,7 @@ protected:
 	 */
 	PalTimer(){};
 
-	~PalTimer() {};
+	virtual ~PalTimer() {};
 };
 
 }
