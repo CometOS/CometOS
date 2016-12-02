@@ -46,6 +46,7 @@
 #include "palFirmware.h"
 #include <math.h>
 #include "palId.h"
+#include "palLocalTime.h"
 
 /*METHOD DEFINITION----------------------------------------------------------*/
 
@@ -55,14 +56,19 @@ namespace cometos {
 Define_Module(TrafficEvaluation);
 
 TrafficEvaluation::TrafficEvaluation(uint8_t msgSize,
-                               timeOffset_t meanInterval) :
+                               timeOffset_t meanInterval,
+                               time_ms_t warmup,
+                               int16_t maxMeasurementPackets) :
         Endpoint("traf"),
         destinationSet(false),
         meanInterval(meanInterval),
         frame(NULL),
         myCrc(0xFFFF),
         msgSize(msgSize),
-        sequenceNumber(0)
+        warmup(warmup),
+        sequenceNumber(0),
+        measurementPackets(0),
+        maxMeasurementPackets(maxMeasurementPackets)
 {}
 
 void TrafficEvaluation::initialize() {
@@ -71,10 +77,12 @@ void TrafficEvaluation::initialize() {
 #ifdef OMNETPP
     msgSize = par("msgSize");
 	meanInterval = par("meanInterval");
+    warmup = par("warmup");
 	if(par("destination").operator int() != -1) {
 	    destination = par("destination");
 	    destinationSet = true;
 	}
+	maxMeasurementPackets = par("maxMeasurementPackets");
 #endif
 
 	ASSERT(msgSize + sizeof(myCrc) + sizeof(sequenceNumber) <= AIRFRAME_MAX_SIZE);
@@ -106,9 +114,13 @@ void TrafficEvaluation::traffic(Message *timer) {
 
 	Airframe *msg = frame->getCopy();
 
-    uint8_t dummy = 0;
+    uint8_t dummy = (palLocalTime_get() < warmup || measurementPackets >= maxMeasurementPackets);
 
-	sequenceNumber++;
+    if(!dummy) {
+        measurementPackets++;
+    }
+
+    sequenceNumber++;
 	(*msg) << sequenceNumber;
     (*msg) << dummy;
 

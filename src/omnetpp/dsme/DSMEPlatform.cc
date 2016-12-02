@@ -249,7 +249,7 @@ void DSMEPlatform::receiveLowerControl(cMessage *msg) {
 }
 
 void DSMEPlatform::signalNewMsg(DSMEMessage* msg) {
-#if 1
+#if 0
     LOG_INFO_PREFIX;
     LOG_INFO_PURE("signalNewMsg " << msgId << " - ");
     for(auto i : msgsActive) {
@@ -269,7 +269,7 @@ void DSMEPlatform::signalReleasedMsg(DSMEMessage* msg) {
     DSME_ASSERT(it != msgsActive.end());
     msgsActive.erase(it);
 
-#if 1
+#if 0
     LOG_INFO_PREFIX;
     LOG_INFO_PURE("signalReleasedMsg " << id << " - ");
     for(auto i : msgsActive) {
