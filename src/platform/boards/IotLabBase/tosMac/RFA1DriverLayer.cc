@@ -769,7 +769,7 @@ inline void downloadMessage()
 
             pc.numStartDl++;
             //download message while rf231 is receiving it
-            mac_result_t result = rf->downloadFrameParallel(rxMsg->data, &rxMsg->phyFrameLen, &(rxMsg->rxInfo.lqi), downloadMessage_successCallback, downloadMessage_failCallback);
+            mac_result_t result = rf->downloadFrameParallel(rxMsg->data, sizeof(rxBuf), &rxMsg->phyFrameLen, &(rxMsg->rxInfo.lqi), downloadMessage_successCallback, downloadMessage_failCallback);
 
             if (result != MAC_SUCCESS){
                 palExec_atomicBegin();
@@ -941,6 +941,7 @@ void serviceRadio() {
 				radioCCA_done(MAC_ERROR_FAIL);
 			}
 		} else {
+			LOG_ERROR("0x" << cometos::hex << cmd << " " << "0x" << radio_state);
 			RADIO_ASSERT(false);
 			palLed_toggle(0x2);
 		}

@@ -140,6 +140,7 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
 
     /* copy data */
     msg->frame->setLength(phy_msg->phyPayloadLen - msg->getHeader().getSerializationLength());
+    ASSERT(msg->frame->getLength() <= msg->frame->getMaxLength());
     memcpy(msg->frame->getData(), buffer, msg->frame->getLength());
 
     instance->dsme.getAckLayer().receive(msg);

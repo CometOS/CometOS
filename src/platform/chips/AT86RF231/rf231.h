@@ -85,7 +85,8 @@ private:
     volatile bool receptionFinished;
     uint8_t failedTries;
     uint8_t frameLength, frameMissing;
-    uint8_t *dataPtr, *lqiPtr;
+    uint8_t *dataPtr, *origDataPtr, *lqiPtr;
+    uint8_t maxBufferLength;
 
     //Callbacks
     callback_t interruptCallback, frameDownloadCallback, frameTimeoutCallback;
@@ -93,6 +94,7 @@ private:
     Rf231(){
     	lqiPtr = NULL;
     	dataPtr = NULL;
+        origDataPtr = NULL;
     	slptr_pin = NULL;
 
         interruptCallback = NULL;
@@ -210,7 +212,7 @@ public:
      * @param data_buffer The frame content will be written to the memory starting at this address.
      * @param rssi The RSSI value, this package was received with will be written to this address.
      */
-    uint8_t readFrameBuffer(uint8_t* length, uint8_t* data_buffer, uint8_t* rssi) {
+    uint8_t readFrameBuffer(uint8_t* length, uint8_t* data_buffer, uint8_t max_buffer_length, uint8_t* rssi) {
         // read header information from rf2xx
         txBuffer[0] = AT86RF231_ACCESS_FRAMEBUFFER | AT86RF231_ACCESS_READ;
         spi->enable();
@@ -227,6 +229,7 @@ public:
         // read rest of frame
         uint16_t i;
         for (i = 0; i < *length; i++){
+            ASSERT(i < max_buffer_length);
             spi->transmitBlocking(txBuffer + 2, data_buffer + i, 1);
         }
 
@@ -281,7 +284,7 @@ public:
      * @param timeout_callback Callback function called, when the frame could not successfully be
      * 		transmitted to the buffer.
      */
-    uint8_t downloadFrameParallel(uint8_t *data, uint8_t* length, uint8_t* lqi, callback_t success_callback, callback_t timeout_callback) {
+    uint8_t downloadFrameParallel(uint8_t *data,  uint8_t max_buffer_length, uint8_t* length, uint8_t* lqi, callback_t success_callback, callback_t timeout_callback) {
 
     	parallelReceptionOn = true;
 
@@ -297,6 +300,8 @@ public:
         frameDownloadCallback = success_callback;
         frameTimeoutCallback = timeout_callback;
         dataPtr = data;
+        origDataPtr = data;
+        maxBufferLength = max_buffer_length;
         lqiPtr = lqi;
 
         if (frameLength > 128) {
@@ -333,6 +338,7 @@ public:
 
     	while (irq_pin->get() == 0) {
     		failedTries = 0;
+			ASSERT(dataPtr-origDataPtr < maxBufferLength);
 			spi->transmitBlocking(&txBuffer, dataPtr++, 1);
 			frameMissing--;
 

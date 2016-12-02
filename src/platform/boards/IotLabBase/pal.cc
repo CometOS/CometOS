@@ -189,7 +189,11 @@ static void serial_putchar(char c) {
 	    // Wait for empty transmit buffer
 	    while (!(USART1->SR & USART_SR_TXE))
 		    ;
+	    palExec_atomicBegin();
+	    while (!(USART1->SR & USART_SR_TXE))
+		    ;
 	    USART1->DR = c;
+	    palExec_atomicEnd();
     }
     else {
         cometos::PalSerial::getInstance(1)->write( (uint8_t*) &c, 1);
