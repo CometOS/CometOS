@@ -48,7 +48,8 @@ class TrafficEvaluation : public cometos::Endpoint {
 public:
     TrafficEvaluation(uint8_t msgSize = 60,
                    timeOffset_t meanInterval = 500,
-                   time_ms_t warmup = 1000,
+                   time_ms_t warmupDuration = 1000,
+                   time_ms_t cooldownDuration = 2000,
                    int16_t maxMeasurementPackets = 100);
 
 	/**Sets parameters*/
@@ -78,12 +79,15 @@ private:
 	uint16_t myCrc;
 	uint8_t msgSize;
 
-    time_ms_t warmup;
+    time_ms_t warmupDuration;
+    time_ms_t cooldownDuration;
 
     int64_t sequenceNumber;
 
     int64_t measurementPackets;
     int16_t maxMeasurementPackets;
+
+    time_ms_t lastHotReception;
 };
 
 } // namespace cometos

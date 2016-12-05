@@ -50,6 +50,9 @@
 
 /*METHOD DEFINITION----------------------------------------------------------*/
 
+#define WARMUP_TYPE 'w'
+#define MEASUREMENT_TYPE 'm'
+#define COOLDOWN_TYPE 'c'
 
 namespace cometos {
 
@@ -57,7 +60,8 @@ Define_Module(TrafficEvaluation);
 
 TrafficEvaluation::TrafficEvaluation(uint8_t msgSize,
                                timeOffset_t meanInterval,
-                               time_ms_t warmup,
+                               time_ms_t warmupDuration,
+                               time_ms_t cooldownDuration,
                                int16_t maxMeasurementPackets) :
         Endpoint("traf"),
         destinationSet(false),
@@ -65,10 +69,12 @@ TrafficEvaluation::TrafficEvaluation(uint8_t msgSize,
         frame(NULL),
         myCrc(0xFFFF),
         msgSize(msgSize),
-        warmup(warmup),
+        warmupDuration(warmupDuration),
+        cooldownDuration(cooldownDuration),
         sequenceNumber(0),
         measurementPackets(0),
-        maxMeasurementPackets(maxMeasurementPackets)
+        maxMeasurementPackets(maxMeasurementPackets),
+        lastHotReception(0)
 {}
 
 void TrafficEvaluation::initialize() {
@@ -77,7 +83,8 @@ void TrafficEvaluation::initialize() {
 #ifdef OMNETPP
     msgSize = par("msgSize");
 	meanInterval = par("meanInterval");
-    warmup = par("warmup");
+    warmupDuration = par("warmupDuration");
+    cooldownDuration = par("cooldownDuration");
 	if(par("destination").operator int() != -1) {
 	    destination = par("destination");
 	    destinationSet = true;
@@ -90,7 +97,7 @@ void TrafficEvaluation::initialize() {
 	counter = 0;
 	failed = 0;
 	frame = new Airframe();
-	for (uint8_t i = 0; i < msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*dummy*/; i++) {
+	for (uint8_t i = 0; i < msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/; i++) {
 	    uint8_t data = intrand(256);
 	    myCrc = palFirmware_crc_update(myCrc, data);
 	    (*frame) << data;
@@ -114,18 +121,24 @@ void TrafficEvaluation::traffic(Message *timer) {
 
 	Airframe *msg = frame->getCopy();
 
-    uint8_t dummy = (palLocalTime_get() < warmup || measurementPackets >= maxMeasurementPackets);
+    char type = MEASUREMENT_TYPE;
+    if(palLocalTime_get() < warmupDuration) {
+        type = WARMUP_TYPE;
+    }
+    else if(measurementPackets >= maxMeasurementPackets) {
+        type = COOLDOWN_TYPE;
+    }
 
-    if(!dummy) {
+    if(type == MEASUREMENT_TYPE) {
         measurementPackets++;
     }
 
     sequenceNumber++;
 	(*msg) << sequenceNumber;
-    (*msg) << dummy;
+    (*msg) << type;
 
 	//LOG_INFO("tx:    dst=0x" << cometos::hex << destination << "|seq=" << cometos::dec << counter << "|failed=" << failed);
-	LOG_INFO("!0x" << hex << palId_id() << "!0x" << destination << "!T!" << (dummy?"d":"m") << "!" << dec << sequenceNumber);
+	LOG_INFO("!0x" << hex << palId_id() << "!0x" << destination << "!T!" << type << "!" << dec << sequenceNumber);
 	LOG_INFO("dst=0x" << hex << destination << "|attempts=" << dec << counter << "|failed=" << failed);
 
 	ts = NetworkTime::get();
@@ -150,16 +163,16 @@ void TrafficEvaluation::resp(DataResponse *response) {
 
 void TrafficEvaluation::handleIndication(DataIndication* msg) {
     int64_t remoteSequenceNumber;
-    uint8_t dummy;
-    msg->getAirframe() >> dummy;
+    char type;
+    msg->getAirframe() >> type;
     msg->getAirframe() >> remoteSequenceNumber;
 
 	uint16_t crc = 0xFFFF;
 	uint16_t sentCrc;
 	msg->getAirframe() >> sentCrc;
 	uint8_t * data = msg->getAirframe().getData();
-	if (msg->getAirframe().getLength() == msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*dummy*/) {
-        for (uint8_t i = 0; i < msgSize + 2 - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*dummy*/; i++) {
+	if (msg->getAirframe().getLength() == msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/) {
+        for (uint8_t i = 0; i < msgSize + 2 - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/; i++) {
             crc = palFirmware_crc_update(crc, data[i]);
         }
         crc = palFirmware_crc_update(crc, (uint8_t) crc >> 8);
@@ -175,10 +188,19 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
             (void) rssi; // avoid warning if logging is disabled
         }
 
-	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!R!" << (dummy?"d":"m") << "!" << dec << remoteSequenceNumber);
+	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!R!" << type << "!" << dec << remoteSequenceNumber);
         LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
 
         palLed_toggle(2);
+
+        if(type != COOLDOWN_TYPE) {
+            lastHotReception = palLocalTime_get();
+        }
+        else {
+            if(palLocalTime_get() - lastHotReception > cooldownDuration) {
+                LOG_INFO("--- experiment finished ---");
+            }
+        }
 	}
 	delete msg;
 }
