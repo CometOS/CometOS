@@ -249,6 +249,7 @@ uint32_t palExec_getStackSize() {
     }
 
     // Also check if only the correct interrupts are enabled
+    /*
     for(int i = 0; i <= 67; i++) {
         if(NVIC_GetEnabled((IRQn_Type)i)) {
             if( i != EXTI4_IRQn
@@ -263,6 +264,7 @@ uint32_t palExec_getStackSize() {
             }
         }
     }
+    */
 
     return stackSize;
 }
