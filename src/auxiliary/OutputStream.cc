@@ -116,14 +116,9 @@ cometos::OutputStream::OutputStream(putchar_t putchar, flush_t flushfun) :
     printChar(putchar), flushfun(flushfun), radix(10), wide(0), fillch('0') {
 }
 
-cometos::OutputStream& cometos::OutputStream::operator<<(const uint8_t& data) {
-    this->printChar((char)data);
-    return *this;
-}
 
-
-cometos::OutputStream& cometos::OutputStream::operator<<(const int8_t& data) {
-    this->printChar((char)data);
+cometos::OutputStream& cometos::OutputStream::operator<<(const char& data) {
+    this->printChar(data);
     return *this;
 }
 

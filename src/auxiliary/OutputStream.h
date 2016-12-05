@@ -90,8 +90,7 @@ public:
        return *this;
     }
 
-    OutputStream& operator<<(const uint8_t& data);
-    OutputStream& operator<<(const int8_t& data);
+    OutputStream& operator<<(const char& data);
     OutputStream& operator<<(const char* data);
     OutputStream& operator<<(char* const& data);
     OutputStream& operator<<(const Endl& data);
