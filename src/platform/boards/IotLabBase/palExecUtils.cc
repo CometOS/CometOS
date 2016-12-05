@@ -33,6 +33,7 @@
 #include "palExecUtils.h"
 #include "logging.h"
 #include "cmsis_device.h"
+#include "OutputStream.h"
 
 #ifdef CFS
 #include "cfs.h"
@@ -40,6 +41,7 @@
 
 
 #include <string.h>
+
 
 
 uint8_t palExec_getResetReason(){

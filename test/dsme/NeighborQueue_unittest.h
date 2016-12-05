@@ -66,7 +66,7 @@ public:
     }
 protected:
     dsme::NeighborQueue<MAX_NEIGHBORS> queue;
-    dsme::IEEE802154MacAddress a = 1, b = 2, c = 3;
+    dsme::IEEE802154MacAddress a = dsme::IEEE802154MacAddress(1), b = dsme::IEEE802154MacAddress(2), c = dsme::IEEE802154MacAddress(3);
 };
 
 /*
