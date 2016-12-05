@@ -110,8 +110,9 @@ void TrafficEvaluation::finish() {
 }
 
 void TrafficEvaluation::traffic(Message *timer) {
-    double rnd = rand()/(double)RAND_MAX;
+    double rnd = rand()/(((double)RAND_MAX)+1);
     double x = -log(1-rnd)*meanInterval; // interval = 1/lambda
+    LOG_INFO("rnd:"<<rnd*1000<<" x:"<<x);
     schedule(new Message, &TrafficEvaluation::traffic, x);
 
     if(!destinationSet) {
