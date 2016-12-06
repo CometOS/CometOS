@@ -72,9 +72,7 @@ bool DSMEPlatform::startCCA() {
 }
 
 bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallback) {
-    if (msg == nullptr) {
-        return false;
-    }
+    ASSERT(msg != nullptr);
 
     palExec_atomicBegin();
     {
