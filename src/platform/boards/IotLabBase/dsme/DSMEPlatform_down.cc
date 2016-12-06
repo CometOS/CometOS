@@ -62,7 +62,7 @@ void DSMEPlatform::startTimer(uint32_t symbolCounterValue) {
 
 bool DSMEPlatform::setChannelNumber(uint8_t channel) {
     this->channel = channel;
-    cometos_error_t error = mac_setChannel(this->channel);
+    cometos_error_t error = radioState_setChannel(this->channel);
     bool success = error != MAC_ERROR_BUSY;
     return success;
 }

@@ -50,6 +50,8 @@ void mac_setRadioDevice(cometos::Rf231* device){
 	rf = device;
 }
 
+// Not safe when the RFA1DriverLayer is running in parallel
+// -> Use the function provided there!
 mac_result_t mac_setChannel(mac_channel_t channel) {
 	if (MAC_MIN_CHANNEL > channel || MAC_MAX_CHANNEL < channel){
 		return MAC_ERROR_FAIL;

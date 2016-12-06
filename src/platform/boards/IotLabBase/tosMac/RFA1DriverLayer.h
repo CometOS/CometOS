@@ -54,7 +54,7 @@ mac_result_t radioSend_send(message_t* msg);
 
 mac_result_t radioCCA_request();
 
-//cometos_error_t radioState_setChannel(uint8_t c); rather use mac_setChannel!
+cometos_error_t radioState_setChannel(uint8_t c);
 
 /* ------------ EVENTS ------------------------------------------------ */
 void radioSend_sendDone(message_t* msg, mac_result_t result);

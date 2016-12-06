@@ -134,7 +134,7 @@ enum
 	CMD_TRANSMIT = 4,    // currently transmitting a message
 	CMD_RECEIVE = 5,    // currently receiving a message
 	CMD_CCA = 6,    // performing clear channel assessment
-	CMD_CHANNEL = 7,    // changing the channel
+	//CMD_CHANNEL = 7,    // changing the channel
 	CMD_SIGNAL_DONE = 8,  // signal the end of the state transition
 	CMD_DOWNLOAD = 9,    // download the received message
 	CMD_SENDING = 10  	// Currently sending a packet
@@ -179,7 +179,9 @@ volatile static  time_ms_t capturedTime;
  */
 static uint8_t txPower = 0;
 static uint8_t cca_mode = 1;
-static uint8_t tos_channel = 11;
+//static uint8_t tos_channel = 11;
+static uint8_t activeChannel = 0;
+static uint8_t pendingChannel = 11;
 static uint8_t cca_threshold = 7;
 static mac_networkId_t network_id =  0xFFFF;
 static mac_nodeId_t node_id = 0xFFFF;
@@ -271,7 +273,7 @@ mac_result_t RFA1Driver_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
 	radio_setTxPowerLvl(MAC_DEFAULT_TX_PWR_LVL);
 
 
-	tos_channel = channel;
+	//tos_channel = channel;
 
 	//enable auto crc
 	uint8_t trx_ctrl_1 = rf->readRegister(AT86RF231_REG_TRX_CTRL_1);
@@ -412,11 +414,21 @@ mac_nodeId_t radio_getNodeId() {
 //tasklet_async command
 uint8_t radioState_getChannel()
 {
-	return tos_channel;
+	//return tos_channel;
+    return activeChannel;
 }
 
 //tasklet_async command
 cometos_error_t radioState_setChannel(uint8_t c) {
+	if (MAC_MIN_CHANNEL > c || MAC_MAX_CHANNEL < c) {
+		return MAC_ERROR_FAIL;
+	}
+
+    pendingChannel = c;
+	tasklet_schedule();
+
+	return MAC_SUCCESS;
+    /*
 	c &= AT86RF231_PHY_CC_CCA_MASK_CHANNEL;
 
 	if( cmd != CMD_NONE )
@@ -429,8 +441,10 @@ cometos_error_t radioState_setChannel(uint8_t c) {
 	tasklet_schedule();
 
 	return MAC_SUCCESS;
+    */
 }
 
+/*
 inline void changeChannel() {
 	RADIO_ASSERT( cmd == CMD_CHANNEL );
 	RADIO_ASSERT( radio_state == STATE_SLEEP || radio_state == STATE_TRX_OFF || radio_state == STATE_RX_ON );
@@ -442,6 +456,7 @@ inline void changeChannel() {
 	else
 		cmd = CMD_SIGNAL_DONE;
 }
+*/
 
 /*----------------- TURN ON/OFF -----------------*/
 
@@ -822,7 +837,7 @@ void serviceRadio() {
 	rxMsg->rxInfo.rssi = RSSI_INVALID;
 
 	if( (irq & AT86RF231_IRQ_STATUS_MASK_PLL_LOCK) != 0 ) {
-		if( cmd == CMD_TURNON || cmd == CMD_CHANNEL ) {
+		if( cmd == CMD_TURNON ) { //|| cmd == CMD_CHANNEL ) {
 			RADIO_ASSERT( radio_state == STATE_TRX_OFF_2_RX_ON );
 
 			radio_state = STATE_RX_ON;
@@ -990,9 +1005,9 @@ void tasklet_radio_run() {
 			downloadMessage();
 		} else if( CMD_TURNOFF <= cmd && cmd <= CMD_TURNON ) {
 			changeState();
-		} else if( cmd == CMD_CHANNEL ) {
+		} /*else if( cmd == CMD_CHANNEL ) {
 			changeChannel();
-		}
+		}*/
 
 		if( cmd == CMD_SIGNAL_DONE ) {
 			cmd = CMD_NONE;
@@ -1003,6 +1018,13 @@ void tasklet_radio_run() {
 	if( cmd == CMD_NONE && radio_state == STATE_RX_ON && !radioIrq ) {
 		radioSend_ready();
 	}
+
+    if( cmd == CMD_NONE && activeChannel != pendingChannel ) {
+        uint8_t reg = rf->readRegister(AT86RF231_REG_PHY_CC_CCA);
+        reg = (~AT86RF231_PHY_CC_CCA_MASK_CHANNEL & reg ) | pendingChannel;
+        rf->writeRegister(AT86RF231_REG_PHY_CC_CCA, reg);
+        activeChannel = pendingChannel;
+    }
 }
 
 /*----------------- McuPower -----------------*/
