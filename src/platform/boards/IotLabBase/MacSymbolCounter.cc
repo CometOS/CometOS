@@ -147,7 +147,8 @@ uint32_t MacSymbolCounter::getValue() {
     uint32_t result = (((uint32_t)msw) << 16) | TIM3->CNT;
     if(TIM3->SR & TIM_SR_UIF) {
         // Recent and unhandled overflow
-        result += (1 << (uint32_t)16);
+        result = (((uint32_t)msw) << 16) | TIM3->CNT; // request value again since UIF might have flipped after the read
+        result += (1 << (uint32_t)16); // increment msw since it is unhandled
     }
 
     if(lastValue > result) {
