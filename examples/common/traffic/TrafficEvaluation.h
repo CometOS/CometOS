@@ -61,7 +61,8 @@ public:
 
 	void traffic(Message *timer);
 
-	void resp(DataResponse *response);
+	void scheduleResponse(DataResponse *response);
+	void handleResponse(DataResponse *response);
 
 	virtual void handleIndication(DataIndication* msg);
 

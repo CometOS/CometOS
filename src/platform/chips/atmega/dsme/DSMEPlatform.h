@@ -75,7 +75,7 @@ public:
 
     bool setChannelNumber(uint8_t k) override;
 
-    DSMELayer* getDSME() {
+    DSMELayer& getDSME() {
         return dsme;
     }
 

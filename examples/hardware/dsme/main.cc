@@ -58,8 +58,8 @@ dsme::DSMEPlatform mac("mac");
 CsmaMac mac("mac");
 #endif
 
-//#define DSME_LOG LOG_LEVEL_ERROR
-#define DSME_LOG LOG_LEVEL_INFO
+#define DSME_LOG LOG_LEVEL_ERROR
+//#define DSME_LOG LOG_LEVEL_INFO
 
 int main() {
     TrafficEvaluation* traffic;

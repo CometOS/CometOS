@@ -249,8 +249,8 @@ void SimpleRouting::handleIndication(DataIndication* msg) {
 
 void SimpleRouting::handleResponse(DataResponse* resp) {
     DataRequest *req = ((RoutingRequestId*) resp->getRequestId())->req;
-    if (resp->success == true) {
-        req->response(new DataResponse(true));
+    if (resp->isSuccess()) {
+        req->response(new DataResponse(DataResponseStatus::SUCCESS));
         delete req;
     } else {
         NwkHeader nwk;

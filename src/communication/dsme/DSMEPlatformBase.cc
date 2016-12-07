@@ -98,7 +98,31 @@ void DSMEPlatformBase::handleDataMessageFromMCPS(DSMEMessage* msg) {
 
 void DSMEPlatformBase::handleConfirmFromMCPS(DSMEMessage* msg, DataStatus::Data_Status dataStatus) {
     if(msg->request != nullptr) {
-        msg->request->response(new cometos::DataResponse(dataStatus == DataStatus::Data_Status::SUCCESS));
+        DataResponseStatus status = DataResponseStatus::FAIL_UNKNOWN;
+        switch(dataStatus) {
+        case DataStatus::SUCCESS:
+            status = DataResponseStatus::SUCCESS;
+            break;
+        case DataStatus::INVALID_GTS:
+            status = DataResponseStatus::INVALID_GTS;
+            break;
+        case DataStatus::NO_ACK:
+            status = DataResponseStatus::NO_ACK;
+            break;
+        case DataStatus::TRANSACTION_OVERFLOW:
+            status = DataResponseStatus::QUEUE_FULL;
+            break;
+        case DataStatus::TRANSACTION_EXPIRED:
+            status = DataResponseStatus::EXPIRED;
+            break;
+        case DataStatus::CHANNEL_ACCESS_FAILURE:
+            status = DataResponseStatus::CHANNEL_ACCESS_FAILURE;
+            break;
+        default:
+            ASSERT(false);
+        }
+
+        msg->request->response(new cometos::DataResponse(status));
     }
 
     releaseMessage(msg);

@@ -248,4 +248,18 @@ typedef struct mac_ackCfg_t {
     uint16_t ackWaitDuration;
 } mac_ackCfg_t;
 
+namespace cometos {
+#if defined SWIG || defined BOARD_python
+enum macTxResult_t {
+#else
+enum macTxResult_t : uint8_t {
+#endif
+    MTR_SUCCESS,
+    MTR_CHANNEL_ACCESS_FAIL,
+    MTR_NO_ACK,
+    MTR_INVALID
+};
+}
+
+
 #endif /* MAC_CONSTANTS_H_ */

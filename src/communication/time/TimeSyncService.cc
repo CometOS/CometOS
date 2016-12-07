@@ -199,7 +199,7 @@ void TimeSyncService::handleInitialMsg(DataIndication * msg) {
 }
 
 void TimeSyncService::handleInitialResponse(DataResponse * resp) {
-    bool success = resp->success;
+    bool success = resp->isSuccess();
 
     if (success && isSync()) {
         time_ms_t txTs = ts::getTimestamp(resp);
@@ -446,7 +446,7 @@ void TimeSyncWirelessBridge::responseSerialToWireless(DataResponse* resp) {
 
         // we do not request a response to this "response" request message
         DataRequest* responseViaSerial = new DataRequest(msg->src, new Airframe());
-        responseViaSerial->set(new SerialResponse(msg->get<RequestResponseOverSerial>()->seq, resp->success));
+        responseViaSerial->set(new SerialResponse(msg->get<RequestResponseOverSerial>()->seq, resp->isSuccess()));
         responseViaSerial->set(resp->get<MacTxInfo>()->getCopy());
 
         // we rely on the SerialComm queue here and bypass the ordinary message

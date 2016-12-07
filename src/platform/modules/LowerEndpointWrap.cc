@@ -68,7 +68,7 @@ void LowerEndpointWrap::setTimer(uint16_t time) {
 
 void LowerEndpointWrap::handleRequest(DataRequest* msg) {
 	bool res = recvRequest(msg->getAirframe().getArray(), msg->dst);
-	msg->response(new DataResponse(res));
+	msg->response(new DataResponse(res ? DataResponseStatus::SUCCESS : DataResponseStatus::FAIL_UNKNOWN));
 	delete msg;
 
 }

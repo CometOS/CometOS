@@ -48,7 +48,7 @@ Define_Module(LowerEndpointExample)
 void LowerEndpointExample::handleRequest(DataRequest* msg) {
 
 	getCout() << NetworkTime::get() << "-" << getName() <<": recv req, send resp/ind" << cometos::endl;
-	msg->response(new DataResponse(true));
+	msg->response(new DataResponse(DataResponseStatus::SUCCESS));
 	sendIndication(new DataIndication(msg->decapsulateAirframe(), 1, 2), intrand(1000));
 	delete msg;
 }

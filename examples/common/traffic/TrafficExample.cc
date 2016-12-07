@@ -165,9 +165,9 @@ void TrafficExample::traffic(Message *timer) {
 };
 
 void TrafficExample::resp(DataResponse *response) {
-	LOG_INFO("finish transmission: " << response->success);
+	LOG_INFO("finish transmission: " << response->str());
 
-	if(!response->success) {
+	if(response->isFailed()) {
 		failed++;
 	}
 

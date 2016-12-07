@@ -85,7 +85,7 @@ void PeriodicTraffic::traffic(Message *timer) {
 }
 
 void PeriodicTraffic::resp(DataResponse *response) {
-	LOG_INFO("rcv rsp "<<response->success);
+	LOG_INFO("rcv rsp "<<(int)response->status);
 	delete response;
 }
 

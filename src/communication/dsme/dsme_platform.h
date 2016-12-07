@@ -47,6 +47,7 @@
 #include "palId.h"
 
 #define DSME_ASSERT(x) if(!(x)) { LOG_WARN("ASSERT"); ASSERT(false); }
+#define DSME_SIM_ASSERT(x)
 
 #include "DSMEMessage.h"
 #include "dsme_settings.h"

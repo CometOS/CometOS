@@ -39,13 +39,84 @@
 
 #include "RequestResponse.h"
 #include "DataRequest.h"
+#include "mac_definitions.h"
 
 namespace cometos {
 
+enum class DataResponseStatus {
+    SUCCESS,
+    NO_ACK,
+    QUEUE_FULL,
+    BUSY,
+    CHANNEL_ACCESS_FAILURE,
+    INVALID_ADDRESS,
+    INVALID_PARAMETER,
+    INVALID_GTS,
+    EXPIRED,
+    FAIL_UNKNOWN
+};
+
 class DataResponse: public Response {
 public:
-    DataResponse(bool success = false);
-    bool success;
+    DataResponse(DataResponseStatus status = DataResponseStatus::SUCCESS)
+    : status(status) {
+    }
+
+    DataResponse(macTxResult_t result) {
+        switch(result) {
+            case MTR_SUCCESS:
+                status = DataResponseStatus::SUCCESS;
+                break;
+            case MTR_CHANNEL_ACCESS_FAIL:
+                status = DataResponseStatus::CHANNEL_ACCESS_FAILURE;
+                break;
+            case MTR_NO_ACK:
+                status = DataResponseStatus::NO_ACK;
+                break;
+            case MTR_INVALID:
+                status = DataResponseStatus::INVALID_PARAMETER;
+                break;
+            default:
+                ASSERT(false);
+        }
+    }
+
+    DataResponseStatus status;
+
+    bool isSuccess() const {
+        return status == DataResponseStatus::SUCCESS;
+    }
+
+    bool isFailed() const {
+        return status != DataResponseStatus::SUCCESS;
+    }
+
+    const char* str() const {
+        switch(status) {
+        case DataResponseStatus::SUCCESS:
+            return "SUCCESS";
+        case DataResponseStatus::NO_ACK:
+            return "NO_ACK";
+        case DataResponseStatus::QUEUE_FULL:
+            return "QUEUE_FULL";
+        case DataResponseStatus::BUSY:
+            return "BUSY";
+        case DataResponseStatus::CHANNEL_ACCESS_FAILURE:
+            return "CHANNEL_ACCESS_FAILURE";
+        case DataResponseStatus::INVALID_ADDRESS:
+            return "INVALID_ADDRESS";
+        case DataResponseStatus::INVALID_PARAMETER:
+            return "INVALID_PARAMETER";
+        case DataResponseStatus::INVALID_GTS:
+            return "INVALID_GTS";
+        case DataResponseStatus::EXPIRED:
+            return "EXPIRED";
+        case DataResponseStatus::FAIL_UNKNOWN:
+            return "FAIL_UNKNOWN";
+        default:
+            return "";
+        }
+    }
 };
 
 

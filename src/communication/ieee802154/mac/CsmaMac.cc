@@ -112,7 +112,7 @@ void CsmaMac::txEnd(macTxResult_t result, MacTxInfo const & info) {
 
 	DataRequest* request = queue[queue.begin()];
 	queue.pop_front();
-	DataResponse * response = new DataResponse(result == MTR_SUCCESS ? true : false);
+	DataResponse * response = new DataResponse(result);
 	response->set<MacTxInfo>(new MacTxInfo(info));
 	request->response(response);
 	delete request;
@@ -160,7 +160,7 @@ void CsmaMac::sendNext() {
 
 	if (result != true) {
 		queue.pop_front();
-		DataResponse * response = new DataResponse(false);
+		DataResponse * response = new DataResponse(DataResponseStatus::FAIL_UNKNOWN);
 		response->set<MacTxInfo>(new MacTxInfo(request->dst));
 		request->response(response);
 		delete request;
@@ -174,7 +174,7 @@ void CsmaMac::handleRequest(DataRequest* msg) {
 
 	// queue packet
 	if (queue.end() == queue.push_back(msg)) {
-		msg->response(new cometos::DataResponse(false));
+		msg->response(new cometos::DataResponse(DataResponseStatus::QUEUE_FULL));
 		delete msg;
 		LOG_WARN("OVERFLOW in msg queue, discarding msg"); MAC_STATS_INC(numPacketsDroppedQueue);
 		return;

@@ -147,7 +147,7 @@ void CommAssessment::sendRttPacket() {
 }
 
 void CommAssessment::handleResponse(DataResponse *msg) {
-	if (msg->success == false) {
+	if (msg->isFailed()) {
 		failed++;
 	}
 	delete msg;

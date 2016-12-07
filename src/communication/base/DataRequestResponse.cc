@@ -39,10 +39,6 @@
 
 namespace cometos {
 
-DataResponse::DataResponse(bool success) :
-		success(success) {
-}
-
 DataRequest::DataRequest(node_t dst, Airframe* frame,
 		const TypedDelegate<DataResponse> &delegate, RequestId *rid ) :
 		Request<DataResponse>(delegate, rid), dst(dst), frame(frame) {

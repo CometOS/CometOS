@@ -72,7 +72,7 @@ void SerialMac::handleRequest(DataRequest* msg) {
             sendNext();
         }
     } else {
-        DataResponse* resp = new DataResponse(false);
+        DataResponse* resp = new DataResponse(DataResponseStatus::QUEUE_FULL);
         msg->response(resp);
         delete msg;
         LOG_ERROR("Queue full");
@@ -95,7 +95,7 @@ void SerialMac::handleIndication(DataIndication* msg) {
                 // not get here, because a new seq number is used in that case
             } else {
                 DataRequest* originalReq = reqQueue.front();
-                DataResponse* resp = new DataResponse(respFromSc->success);
+                DataResponse* resp = new DataResponse(respFromSc->success ? DataResponseStatus::SUCCESS : DataResponseStatus::FAIL_UNKNOWN);
 
                 resp->set(msg->unset<MacTxInfo>());
                 originalReq->response(resp);
@@ -127,7 +127,7 @@ void SerialMac::handleIndication(DataIndication* msg) {
 }
 
 void SerialMac::handleResponse(DataResponse* resp) {
-    if (resp->success) {
+    if (resp->isSuccess()) {
         if (currReqId == resp->getRequestId()) {
             // we get a response to the still active request, 
             // delete response, start timer and wait for response in indication
@@ -177,7 +177,7 @@ void SerialMac::responseTimeout() {
         // msg already removed, ignore timeout
     } else {
         DataRequest* originalReq = reqQueue.front();
-        originalReq->response(new DataResponse(false));
+        originalReq->response(new DataResponse(DataResponseStatus::EXPIRED));
         delete originalReq;
         reqQueue.pop();
     }

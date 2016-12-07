@@ -145,15 +145,20 @@ void TrafficEvaluation::traffic(Message *timer) {
 	ts = NetworkTime::get();
 	sendRequest(
 			new DataRequest(destination, msg,
-					createCallback(&TrafficEvaluation::resp)));
+					createCallback(&TrafficEvaluation::scheduleResponse)));
 
 	delete timer;
 };
 
-void TrafficEvaluation::resp(DataResponse *response) {
-	//LOG_INFO("finish transmission: " << response->success);
+void TrafficEvaluation::scheduleResponse(DataResponse *response) {
+    schedule(response, &TrafficEvaluation::handleResponse);
+}
 
-	if(!response->success) {
+void TrafficEvaluation::handleResponse(DataResponse *response) {
+
+	LOG_INFO("finish transmission: " << response->str());
+
+	if(response->isFailed()) {
 		failed++;
 	}
 

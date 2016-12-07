@@ -91,6 +91,6 @@ void EndpointWrap::timeout_(Message* msg) {
 }
 
 void EndpointWrap::handleResponse(DataResponse *resp) {
-	recvConfirm(resp->success);
+	recvConfirm(resp->isSuccess());
 	delete resp;
 }

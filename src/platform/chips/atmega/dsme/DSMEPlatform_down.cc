@@ -90,9 +90,7 @@ bool DSMEPlatform::startCCA() {
 }
 
 bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallback) {
-    if (msg == nullptr) {
-        return false;
-    }
+    ASSERT(msg != nullptr);
 
     palExec_atomicBegin();
     {
@@ -158,9 +156,10 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
 
     /* copy data */
     msg->frame->setLength(phy_msg->phyPayloadLen - msg->getHeader().getSerializationLength());
+    ASSERT(msg->frame->getLength() <= msg->frame->getMaxLength());
     memcpy(msg->frame->getData(), buffer, msg->frame->getLength());
 
-    instance->dsme->getAckLayer().receive(msg);
+    instance->dsme.getAckLayer().receive(msg);
 
     return phy_msg;
 }
@@ -168,7 +167,7 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
 }
 
 ISR(SCNT_CMP1_vect) {
-    dsme::DSMEPlatform::instance->getDSME()->getEventDispatcher().timerInterrupt();
+    dsme::DSMEPlatform::instance->getDSME().getEventDispatcher().timerInterrupt();
 }
 
 /**
@@ -182,7 +181,7 @@ void ccaSend_ready(mac_result_t error) {
  * Interface to tosMac
  */
 void ccaResult_ready(mac_result_t error) {
-    dsme::DSMEPlatform::instance->getDSME()->dispatchCCAResult(error == MAC_SUCCESS);
+    dsme::DSMEPlatform::instance->getDSME().dispatchCCAResult(error == MAC_SUCCESS);
     return;
 }
 
@@ -194,7 +193,11 @@ void ccaSend_sendDone(message_t * msg, mac_result_t result) {
     ASSERT(dsme::DSMEPlatform::state == dsme::DSMEPlatform::STATE_SEND);
 
 // TODO: schedule as task?
-    dsme::DSMEPlatform::txEndCallback(result == MAC_SUCCESS);
+    dsme_atomicBegin();
+    Delegate<void(bool)> cb = dsme::DSMEPlatform::txEndCallback;
+    ASSERT(cb);
+    dsme_atomicEnd();
+    cb(result == MAC_SUCCESS);
 
     dsme::DSMEPlatform::state = dsme::DSMEPlatform::STATE_READY;
     return;

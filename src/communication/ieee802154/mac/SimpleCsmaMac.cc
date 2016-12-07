@@ -54,7 +54,7 @@ void SimpleCsmaMac::txEnd(macTxResult_t result, MacTxInfo const & info) {
 
 	ASSERT(current);
 
-	DataResponse * response = new DataResponse(result == MTR_SUCCESS ? true : false);
+	DataResponse * response = new DataResponse(result);
 	response->set<MacTxInfo>(new MacTxInfo(info));
 	current->response(response);
 	delete current;
@@ -71,7 +71,7 @@ void SimpleCsmaMac::initialize() {
 void SimpleCsmaMac::handleRequest(DataRequest* msg) {
 	// already processing a packet
 	if (current) {
-		msg->response(new DataResponse(false));
+		msg->response(new DataResponse(DataResponseStatus::BUSY));
 		delete msg;
 		return;
 	} else {
@@ -80,7 +80,7 @@ void SimpleCsmaMac::handleRequest(DataRequest* msg) {
 		bool result = MacAbstractionLayer::sendAirframe(current->decapsulateAirframe(), current->dst,
 				TX_MODE_AUTO_ACK | TX_MODE_BACKOFF | TX_MODE_CCA,msg);
 		if (result != true) {
-		    msg->response(new DataResponse(false));
+		    msg->response(new DataResponse(DataResponseStatus::FAIL_UNKNOWN));
 		    current = NULL;
 		    delete msg;
 		}

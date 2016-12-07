@@ -61,7 +61,7 @@ PredefinedTreeRouting::PredefinedTreeRouting(node_t parent, bool isSink) :
 
 void PredefinedTreeRouting::handleRequest(DataRequest* msg) {
 	if (isSink) {
-		msg->response(new DataResponse(true));
+		msg->response(new DataResponse(DataResponseStatus::SUCCESS));
 		sendIndication(new DataIndication(msg->decapsulateAirframe(), palId_id(), palId_id()));
 		delete msg;
 	} else {

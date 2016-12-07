@@ -74,17 +74,6 @@ struct TimeSyncInfo {
 
 };
 
-#if defined SWIG || defined BOARD_python
-enum macTxResult_t {
-#else
-enum macTxResult_t : uint8_t {
-#endif
-    MTR_SUCCESS,
-    MTR_CHANNEL_ACCESS_FAIL,
-    MTR_NO_ACK,
-    MTR_INVALID
-};
-
 /**
  * Used by the MAC layer to provide information on retries
  * to the upper layer

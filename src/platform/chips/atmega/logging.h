@@ -57,8 +57,9 @@
 uint8_t logging_getLevel();
 const char* getName();
 
-#define LOG(level,msg) {if (level>=logging_getLevel()) cometos::getCout()<<::NetworkTime::get()<<"|"<<getName()<<"|"<<msg<<"\n";}
-#define LOG_PREFIX(level) {if (level>=logging_getLevel()) cometos::getCout()<<::NetworkTime::get()<<"|"<<getName()<<"|";}
+#define PREFIX cometos::dec<<::NetworkTime::get()<<"|"<<getName()<<"|"
+#define LOG(level,msg) {if (level>=logging_getLevel()) cometos::getCout()<<PREFIX<<msg<<"\n";}
+#define LOG_PREFIX(level) {if (level>=logging_getLevel()) cometos::getCout()<<PREFIX;}
 #define LOG_RAW(level,msg) {if (level>=logging_getLevel()) cometos::getCout()<<msg;}
 
 #ifdef LOGGING_DEBUG

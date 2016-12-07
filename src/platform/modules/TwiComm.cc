@@ -221,7 +221,7 @@ void TwiComm::txFinishedCallback(cometos_error_t result) {
 
 void TwiComm::confirm(cometos::DataRequest * req, bool result, bool addTxInfo,
 		bool isValidTxTs) {
-	cometos::DataResponse * resp = new cometos::DataResponse(result);
+	cometos::DataResponse * resp = new cometos::DataResponse(result ? DataResponseStatus::SUCCESS : DataResponseStatus::FAIL_UNKNOWN);
 	mac_dbm_t rssi;
 	if (addTxInfo) {
 		if (req->dst == MAC_BROADCAST || !result) {

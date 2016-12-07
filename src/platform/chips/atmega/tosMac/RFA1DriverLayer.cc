@@ -838,7 +838,8 @@ ISR(TRX24_RX_END_vect){
                 return;
             } else {
                 //uint32_t pcVal = (((uint32_t) (stack[0] & 0x1)) << 17) | (((uint32_t) stack[1]) << 9) | (((uint32_t) stack[2]) << 1);
-                //cometos::getCout() << cometos::dec << (uint16_t) RX_SYN << "|" << (uint16_t) radioIrq << "|" << (uint16_t) len << "|" << timer3_get()<< "|" << cometos::hex << pcVal << cometos::endl;
+                uint32_t pcVal = 0;
+                cometos::getCout() << cometos::dec << (uint16_t) RX_SYN << "|" << (uint16_t) radioIrq << "|" << (uint16_t) len << "|" << timer3_get()<< "|" << cometos::hex << pcVal << cometos::endl;
                 RADIO_ASSERT( ! radioIrq );
             }
         }

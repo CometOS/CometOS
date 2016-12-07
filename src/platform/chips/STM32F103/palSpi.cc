@@ -246,8 +246,10 @@ public:
 			spi->DR = txBuf[txPos++];
 
 			//Read from the SPI Data register as soon as data is available
+            uint16_t i = 0;
 			while (! (spi->SR & SPI_I2S_FLAG_RXNE)) {//SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE != SET)){
 				__asm("nop");
+                ASSERT(i++ < 1000);
 			}
 
 			rxBuf[rxPos++] = spi->DR;

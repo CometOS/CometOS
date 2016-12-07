@@ -253,7 +253,7 @@ void SerialComm::confirm(
 		uint8_t retries,
 		bool isValidTxTs,
 		time_ms_t txDuration) {
-	DataResponse * resp = new DataResponse(result);
+	DataResponse * resp = new DataResponse(result ? DataResponseStatus::SUCCESS : DataResponseStatus::FAIL_UNKNOWN);
 	mac_dbm_t rssi;
 	if (addTxInfo) {
 		if (req->dst == MAC_BROADCAST || !result) {

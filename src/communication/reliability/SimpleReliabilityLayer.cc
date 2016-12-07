@@ -75,7 +75,7 @@ void SimpleReliabilityLayer::finish() {
 void SimpleReliabilityLayer::handleRequest(cometos::DataRequest *msg) {
 
     if (msg->dst == MAC_BROADCAST) {
-        msg->response(new cometos::DataResponse(false));
+        msg->response(new cometos::DataResponse(DataResponseStatus::INVALID_ADDRESS));
         delete(msg);
         return;
     }
@@ -128,7 +128,7 @@ void SimpleReliabilityLayer::handleIndication(cometos::DataIndication *msg) {
         // check if ack packet matches current packet
         if (rack.counter == ack.counter) {
             cancel(ackTimeoutTimer);
-            current->response(new cometos::DataResponse(true));
+            current->response(new cometos::DataResponse(DataResponseStatus::SUCCESS));
             LOG_DEBUG("ACK for pckt w/ id " << (uintptr_t) current->getRequestId());
             delete current;
             current = NULL;
@@ -174,7 +174,7 @@ void SimpleReliabilityLayer::timeout(cometos::Message *timer) {
 
 	LOG_WARN("TIMEOUT,retryCntr=" << (int) retryCounter << " currPcktId=" << (uintptr_t) current->getRequestId());
 	if (retryCounter == 0) {
-		current->response(new cometos::DataResponse(false));
+		current->response(new cometos::DataResponse(DataResponseStatus::NO_ACK));
 		delete current;
 		current = NULL;
 	} else {
