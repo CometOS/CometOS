@@ -42,7 +42,8 @@ using namespace cometos;
 
 Define_Module(Deluge);
 
-Deluge::Deluge() : fsm_t(&Deluge::stateInit), rcvdMsg(nullptr), dataFile(SegFileFactory::CreateInstance()) {
+Deluge::Deluge() : fsm_t(&Deluge::stateInit), rcvdMsg(nullptr) {
+    dataFile = new DelugeDataFile();
     ASSERT(dataFile->getArbiter()->requestImmediately() == COMETOS_SUCCESS);
 }
 
@@ -495,8 +496,11 @@ void Deluge::handleObjectProfile() {
             }
         }
 
-        //dataFile->prepareUpdate(DELUGE_MAX_DATAFILE_SIZE, pPageComplete, CALLBACK_MET(&Deluge::finalize, *this));
-
+	palExec_atomicBegin();
+	readyy = false;
+        dataFile->prepareUpdate(fileSize, pPageComplete, CALLBACK_MET(&Deluge::ready, *this));
+	palExec_atomicEnd();
+	
         // Replace info file
         persistInfo(new DelugeInfo(versionNumber, numberOfPages, fileSize, pAgeVector, pCRCVector, pPageComplete));
 
@@ -510,6 +514,11 @@ void Deluge::handleObjectProfile() {
         }
     }
     delete frame;
+}
+
+void Deluge::ready(cometos_error_t result) {
+    ASSERT(result == COMETOS_SUCCESS);
+    readyy = true;
 }
 
 fsmReturnStatus Deluge::handlePageRequest() {
@@ -591,6 +600,8 @@ fsmReturnStatus Deluge::handleRXTimer() {
 }
 
 void Deluge::sendPageRequest() {
+    if(!readyy) return;
+
     uint8_t gamma = pInfo->getHighestCompletePage();
     if (gamma < pInfo->getNumberOfPages()-1 || gamma == 255) {
         mPageRX = (gamma==255)?0:(gamma+1);

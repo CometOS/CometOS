@@ -112,6 +112,7 @@ private:
       void sendObjectProfile();
       // handles the object profile from another node
       void handleObjectProfile();
+      void ready(cometos_error_t result);
       void reopenFile(cometos_error_t error);
       // handles a page request from another node and transitions to RX
       fsmReturnStatus handlePageRequest();
@@ -208,11 +209,12 @@ private:
     // the last received message
     DataIndication* rcvdMsg;
     // the data file of the deluge algorithm
-    SegmentedFile *dataFile;
+    DelugeDataFile *dataFile;
     // the destination filename
     AirString filename;
     file_size_t fileSize;
     bool opened = false;
+    bool readyy = false;
 };
 
 }

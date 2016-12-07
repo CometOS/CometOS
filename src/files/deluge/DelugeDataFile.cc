@@ -9,6 +9,7 @@
 
 #include "SegFileFactory.h"
 #include "DelugeInfo.h"
+#include "DelugeUtility.h"
 
 namespace cometos {
 
@@ -24,7 +25,7 @@ DelugeDataFile::~DelugeDataFile() {
 
 void DelugeDataFile::open(file_identifier_t fileIdentifier, file_size_t fileSize, Callback<void(cometos_error_t result)> finishedCallback, bool removeBeforeOpen) {
         this->completePages = new uint8_t[DelugeInfo::GetPageCompleteSize(fileSize)];
-        memset(completePages, 0xFF, sizeof(completePages));
+        memset(completePages, 0xFF, DelugeInfo::GetPageCompleteSize(fileSize));
 
         file = SegFileFactory::CreateInstance();
         ASSERT(file->getArbiter()->requestImmediately() == COMETOS_SUCCESS);
@@ -44,11 +45,11 @@ void DelugeDataFile::write(uint8_t* data, segment_size_t dataLength, num_segment
     if (DelugeInfo::IsPageComplete(completePages, page)) {
         finishedCallback(COMETOS_ERROR_FAIL);
     } else {
-        if(++currentSegment >= DELUGE_PACKETS_PER_PAGE) {
+        if(++currentSegment >= DelugeUtility::NumOfPacketsInPage(page, fileSize)) {
             currentSegment = 0;
             DelugeInfo::SetPageComplete(completePages, page, true);
         }
-        file->write(data, dataLength, segment, finishedCallback);
+        file->write(data, file->getSegmentSize(segment), segment, finishedCallback);
     }
 }
 
@@ -62,7 +63,7 @@ void DelugeDataFile::read(uint8_t* data, segment_size_t dataLength, num_segments
     uint8_t page = segment / DELUGE_PACKETS_PER_PAGE;
 
     if(DelugeInfo::IsPageComplete(completePages, page)) {
-        file->read(data, dataLength, segment, finishedCallback);
+        file->read(data, file->getSegmentSize(segment), segment, finishedCallback);
     } else {
         finishedCallback(COMETOS_ERROR_NOT_FOUND);
     }
@@ -85,10 +86,11 @@ bool DelugeDataFile::isOpen() {
 void DelugeDataFile::prepareUpdate(file_size_t fileSize, uint8_t *completePages, Callback<void(cometos_error_t result)> finishedCallback) {
     ASSERT(isOpen());
     this->fileSize = fileSize;
-    memcpy(this->completePages, completePages, sizeof(*this->completePages));
+    memcpy(this->completePages, completePages, DelugeInfo::GetPageCompleteSize(fileSize));
     this->finishedCallback = finishedCallback;
 
-    numPages = fileSize / DELUGE_PAGE_SIZE + (fileSize % DELUGE_PAGE_SIZE) ? 1 : 0;
+    numPages = (fileSize / (file_size_t)DELUGE_PAGE_SIZE) + ((fileSize % DELUGE_PAGE_SIZE) ? 1 : 0);
+    getCout() << numPages << " " << fileSize << " " << DELUGE_PAGE_SIZE << endl;
 
     currentPage = 0;
     currentSegment = 0;
@@ -101,7 +103,13 @@ void DelugeDataFile::prepareUpdate(file_size_t fileSize, uint8_t *completePages,
 }
 
 void DelugeDataFile::onTargetFileOpen(cometos_error_t) {
-    if(currentSegment >= DELUGE_PACKETS_PER_PAGE) {
+    getCout() << currentPage << " " << currentSegment << " " << numPages << " " << DelugeInfo::IsPageComplete(completePages, currentPage) << endl;
+    if(currentPage >= numPages) {
+        file->close(CALLBACK_MET(&DelugeDataFile::finishUpdate, *this));
+        return;
+    }
+
+    if(currentSegment >= DelugeUtility::NumOfPacketsInPage(currentPage, fileSize)) {
         currentPage++;
         currentSegment = 0;
     }
@@ -115,6 +123,8 @@ void DelugeDataFile::onTargetFileOpen(cometos_error_t) {
         file->read(buffer, getSegmentSize(currentSegment), currentPage*DELUGE_PACKETS_PER_PAGE + currentSegment, CALLBACK_MET(&DelugeDataFile::onOriginFileRead, *this));
     } else {
         currentPage++;
+	currentSegment=0;
+	onTargetFileOpen(COMETOS_SUCCESS);
     }
 }
 

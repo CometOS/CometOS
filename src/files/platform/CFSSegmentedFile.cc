@@ -220,7 +220,8 @@ void CFSSegmentedFile::openFile(AirString filename, bool removeBeforeOpen)
 
     opened = true;
 
-    cfs_coffee_configure_log(filename.getStr(), 60000, getMaxSegmentSize()); //TODO
+    //cfs_coffee_configure_log(filename.getStr(), 60000, getMaxSegmentSize()); //TODO
+    cfs_coffee_set_io_semantics(fd, CFS_COFFEE_IO_FLASH_AWARE);    
 
     finish(COMETOS_SUCCESS);
     return;
