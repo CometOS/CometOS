@@ -51,10 +51,11 @@
 #include "CsmaMac.h"
 #include "Module.h"
 #include "Queue.h"
-#include <util/delay.h>
 #include "palExec.h"
 #include "palLocalTime.h"
 using namespace cometos;
+
+#define MAX_OUTPUT_INTERVAL_MS 10
 
 /*MACROS---------------------------------------------------------------------*/
 
@@ -63,7 +64,7 @@ using namespace cometos;
 class SniffData : public Module {
 public:
     SniffData():
-        Module(),
+        Module("sniff"),
         dataIn(this, &SniffData::handleIndication, "dataIn")
     {}
 
@@ -72,12 +73,12 @@ public:
 
     void handleIndication(DataIndication* ind) {
         palLed_toggle(1);
-        getCout() << "X";
+        //getCout() << "X";
 
 #if 1
         palExec_atomicBegin();
         queue.push(ind);
-        reschedule(&m, &SniffData::handleMessage, 100);
+        reschedule(&m, &SniffData::handleMessage, MAX_OUTPUT_INTERVAL_MS);
         //handleMessage(&m);
         palExec_atomicEnd();
 #endif
@@ -92,17 +93,14 @@ public:
         queue.pop();
         palExec_atomicEnd();
 
-        getCout() << cometos::dec << palLocalTime_get();
-        getCout() << cometos::hex << " Frame from: 0x" << ind->src << " To: 0x" << ind->dst << cometos::endl;
-        getCout() << cometos::dec;
-        ind->getAirframe().printFrame();
-        getCout() << cometos::endl;
+        LOG_INFO(cometos::hex << " Frame from: 0x" << ind->src << " To: 0x" << ind->dst << cometos::dec);
+        ind->getAirframe().printFrame(&getCout(), true);
 
         delete ind;
 
         palExec_atomicBegin();
         if(!queue.empty()) {
-            reschedule(&m, &SniffData::handleMessage, 100);
+            reschedule(&m, &SniffData::handleMessage, MAX_OUTPUT_INTERVAL_MS);
         }
         palExec_atomicEnd();
     }
@@ -129,10 +127,12 @@ int main() {
 	initialize();
 
     mac.setPromiscuousMode(true);
+    sniff.setLogLevel(LOG_LEVEL_INFO);
+    cometos::setRootLogLevel(LOG_LEVEL_INFO);
 	
 /*START----------------------------------------------------------------------*/
 
-    getCout() << "Initialized" << endl;
+    LOG_INFO("Initialized");
 
 	run();
 	

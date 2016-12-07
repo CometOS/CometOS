@@ -71,16 +71,23 @@ public:
 	: ByteVector(buffer, AIRFRAME_MAX_SIZE) {
 	}
 
-	void printFrame(OutputStream* outputStream = NULL) const {
+	void printFrame(OutputStream* outputStream = NULL, bool prefix = false) const {
         if(outputStream == NULL) {
             outputStream = &cometos::getCout();
+        }
+        if(prefix) {
+            (*outputStream) << PREFIX;
         }
         (*outputStream) << cometos::dec;
         (*outputStream) << "len= " << (uint16_t)getSize();
         (*outputStream) << cometos::hex;
         for (uint16_t i = 0; i < getSize(); i++) {
             if (i % 16 == 0) {
-                (*outputStream) << cometos::endl << " ";
+                (*outputStream) << cometos::endl;
+                if(prefix) {
+                    (*outputStream) << PREFIX;
+                }
+                (*outputStream) << " ";
             }
             (*outputStream) << "0x";
             uint8_t d = buffer[i];
@@ -162,8 +169,8 @@ public:
 
 	Airframe& operator=(const Airframe& other);
 
-	void printFrame(OutputStream* outputStream = NULL) const {
-	    data.printFrame(outputStream);
+	void printFrame(OutputStream* outputStream = NULL, bool prefix = false) const {
+	    data.printFrame(outputStream, prefix);
 	}
 
 	template<class C>
