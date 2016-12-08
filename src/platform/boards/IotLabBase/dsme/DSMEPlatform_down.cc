@@ -109,7 +109,13 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
 
     mac_result_t result = ccaSend_send(&phy_msg);
 
-    return (result == MAC_SUCCESS);
+    if(result != MAC_SUCCESS) {
+        DSMEPlatform::state = STATE_READY;
+        return false;
+    }
+    else {
+        return true;
+    }
 }
 
 bool DSMEPlatform::sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) {
