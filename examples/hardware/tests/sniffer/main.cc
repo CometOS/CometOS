@@ -55,7 +55,7 @@
 #include "palLocalTime.h"
 using namespace cometos;
 
-#define MAX_OUTPUT_INTERVAL_MS 10
+#define MAX_OUTPUT_INTERVAL_MS 0
 
 /*MACROS---------------------------------------------------------------------*/
 
