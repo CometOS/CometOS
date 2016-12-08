@@ -106,6 +106,10 @@ void DSMEPlatform::initialize() {
 
     this->phy_pib.phyCurrentChannel = MAC_DEFAULT_CHANNEL;
 
+#ifdef USE_ONE_CHANNEL_ONLY
+    this->phy_pib.useOneChannelOnly();
+#endif
+
     this->dsmeAdaptionLayer.settings.allocationScheme = DSMEAdaptionLayerSettings::ALLOC_CONTIGUOUS_SLOT;
 
     this->dsmeAdaptionLayer.setIndicationCallback(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));

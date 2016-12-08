@@ -5,4 +5,5 @@ SConscript('../../../common/SConcript')
 env.add_sources(['main.cc'])
 
 env.conf_to_str_define(['pan_coordinator'])
+env.conf_to_bool_define(['use_one_channel_only'])
 
