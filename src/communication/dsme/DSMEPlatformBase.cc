@@ -62,7 +62,11 @@ void DSMEPlatformBase::translateMacAddress(node_t& from, IEEE802154MacAddress& t
 DSMEPlatformBase::DSMEPlatformBase(const char* service_name) :
                 cometos::MacAbstractionLayer(service_name),
                 gateReqIn(this, &DSMEPlatformBase::handleRequest, "gateReqIn"),
+#ifdef USE_ONE_CHANNEL_ONLY
+                phy_pib(10,true),
+#else
                 phy_pib(10),
+#endif
                 mac_pib(phy_pib),
 
                 mcps_sap(dsme),

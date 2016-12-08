@@ -72,7 +72,6 @@ void DSMEPlatform::initialize() {
     this->dsme.setMLME(&(this->mlme_sap));
 
     this->dsmeAdaptionLayer.initialize();
-    this->dsme.initialize(this);
 
     /* Initialize Address */
     IEEE802154MacAddress address;
@@ -106,14 +105,12 @@ void DSMEPlatform::initialize() {
 
     this->phy_pib.phyCurrentChannel = MAC_DEFAULT_CHANNEL;
 
-#ifdef USE_ONE_CHANNEL_ONLY
-    this->phy_pib.useOneChannelOnly();
-#endif
-
     this->dsmeAdaptionLayer.settings.allocationScheme = DSMEAdaptionLayerSettings::ALLOC_CONTIGUOUS_SLOT;
 
     this->dsmeAdaptionLayer.setIndicationCallback(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
     this->dsmeAdaptionLayer.setConfirmCallback(DELEGATE(&DSMEPlatform::handleConfirmFromMCPS, *this));
+
+    this->dsme.initialize(this); // should be done after adjusting all the settings
 
     mac_result_t result = RFA1Driver_init(this->mac_pib.macShortAddress, 0, this->channel, 0x00, &DSMEPlatform::ackCfg,
             &DSMEPlatform::backoffCfg);
