@@ -107,6 +107,9 @@ bool tosUtil_rxMsgToCometos(uint8_t* data,
                          mac_networkId_t & dstNwk,
                          mac_phyPacketInfo_t* & rxInfo,
                          message_t* msg) {
+    if(msg->phyFrameLen < MAC_HEADER_SIZE) {
+        return false;
+    }
     len = msg->phyFrameLen - MAC_HEADER_SIZE;
     dst = tosUtil_getDestAddr(msg);
     src = tosUtil_getSrcAddr(msg);

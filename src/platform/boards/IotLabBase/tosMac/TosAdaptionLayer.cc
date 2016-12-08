@@ -145,9 +145,10 @@ message_t* mblReceive_receive(message_t* msg) {
             EVENT_OUTPUT_WRITE(PEO_RX_DONE);
             uint8_t* originalRxBuf = frameBuf;
             bool result = tosUtil_rxMsgToCometos(frameBuf, len, dst, src, srcNwk, dstNwk, rxInfo, msg);
-            ASSERT(result);
-            frameBuf = NULL;
-            mac_cbReceive(originalRxBuf, len, dst, src, srcNwk, dstNwk, rxInfo);
+            if(result) {
+                frameBuf = NULL;
+                mac_cbReceive(originalRxBuf, len, dst, src, srcNwk, dstNwk, rxInfo);
+            }
         } else {
             EVENT_OUTPUT_WRITE(PEO_RX_DROPPED);
         }
