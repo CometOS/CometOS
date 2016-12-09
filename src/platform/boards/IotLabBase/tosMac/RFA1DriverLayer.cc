@@ -59,10 +59,6 @@ extern cometos::PhyCounts pc;
 #define RADIO_ASSERT(x) ASSERT(x)
 //#define RADIO_ASSERT(x)
 
-#ifndef MAC_DEFAULT_TX_PWR_LVL
-#define MAC_DEFAULT_TX_PWR_LVL 15
-#endif
-
 static volatile bool radioStateChangeInProgress = false;
 static cometos::Rf231* rf;
 
@@ -271,7 +267,7 @@ mac_result_t RFA1Driver_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
 
 	//Configure TX Power
 	rf->writeRegister(AT86RF231_REG_PHY_TX_PWR, RFA1_PA_BUF_LT | RFA1_PA_LT | ( txPower & AT86RF231_PHY_TX_PWR_MASK_TX_PWR));
-	radio_setTxPowerLvl(MAC_DEFAULT_TX_PWR_LVL);
+	radio_setTxPowerLvl(MAC_DEFAULT_TX_POWER_LVL);
 
 
 	//tos_channel = channel;
@@ -311,8 +307,8 @@ mac_result_t RFA1Driver_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
 		return result;
 	}
 
-	// deactivate RX_OVERRIDE feature
-	rf->writeRegister(AT86RF231_REG_RX_SYN, 0);
+	// deactivate RX_OVERRIDE feature and set sensitivity
+	rf->writeRegister(AT86RF231_REG_RX_SYN, (0 << 7) | MAC_DEFAULT_RX_PDT_LEVEL);
 
 	//radioState_turnOn();
 	// enter TRX state from TRX_OFF state

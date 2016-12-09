@@ -13,6 +13,7 @@ if env.conf.has_key('serial_comm_baudrate'):
 	env.conf_to_str_define(["serial_comm_baudrate"])
 	
 env.conf_to_str_define(['mac_default_tx_power_lvl'])
+env.conf_to_str_define(['mac_default_rx_pdt_level'])
 
 env.Append(CPPPATH=[Dir('.')])
 
