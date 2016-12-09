@@ -337,8 +337,10 @@ void DSMEPlatformBase::printSequenceChartInfo(DSMEMessage* msg) {
 // TODO: make sure ALL callers check for nullptr (BeaconManager / GTSManager)
 DSMEMessage* DSMEPlatformBase::getEmptyMessage()
 {
+    dsme_atomicBegin();
     messagesInUse++;
     DSME_ASSERT(messagesInUse <= MSG_POOL_SIZE); // TODO should return nullptr (and check everywhere!!)
+    dsme_atomicEnd();
 
     DSMEMessage* msg = messageBuffer.aquire();
     //DSMEMessage* msg = new DSMEMessage(new Airframe());
@@ -351,8 +353,10 @@ DSMEMessage* DSMEPlatformBase::getEmptyMessage()
 
 DSMEMessage* DSMEPlatformBase::getLoadedMessage(Airframe* frame)
 {
+    dsme_atomicBegin();
     messagesInUse++;
     DSME_ASSERT(messagesInUse <= MSG_POOL_SIZE); // TODO
+    dsme_atomicEnd();
     DSMEMessage* msg = messageBuffer.aquire(frame);
     //DSMEMessage* msg = new DSMEMessage(frame);
     ASSERT(msg != nullptr);
@@ -362,9 +366,11 @@ DSMEMessage* DSMEPlatformBase::getLoadedMessage(Airframe* frame)
 }
 
 void DSMEPlatformBase::releaseMessage(DSMEMessage* msg) {
+    dsme_atomicBegin();
     DSME_ASSERT(msg != nullptr);
     DSME_ASSERT(messagesInUse > 0);
     messagesInUse--;
+    dsme_atomicEnd();
 
     signalReleasedMsg(msg);
     messageBuffer.release(msg);
