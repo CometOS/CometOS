@@ -167,6 +167,7 @@ static uint8_t settings;
 volatile static uint8_t radio_state = STATE_TRX_OFF;
 volatile static uint8_t cmd;
 volatile static bool radioIrq = false;
+volatile static bool missedIrqPossible = false;
 
 volatile static  time_ms_t capturedTime;
 
@@ -801,6 +802,9 @@ void downloadMessage_successCallback()  {
 	// we moved the actual signalling code to downloadMessage to tasklet
 	// context to prevent that send can interrupt any code running in
 	// tasklet context
+	missedIrqPossible = true; // IRQs occuring during the download are not signaled,
+			          // so let serviceRadio check if its true.
+		         	  // In the worst case we spend an unnecessary call of serviceRadio.
 	tasklet_schedule();
 }
 
@@ -812,6 +816,8 @@ void downloadMessage_failCallback() {
 	cmd = CMD_NONE;
 	palExec_atomicEnd();
 
+	missedIrqPossible = true; // see downloadMessage_successCallback
+	tasklet_schedule();
 }
 
 //default tasklet_async event bool RadioReceive_header(message_t* msg)
@@ -831,6 +837,7 @@ void serviceRadio() {
 
 	palExec_atomicBegin();
 	radioIrq = false;
+	missedIrqPossible = false;
 	irq = rf->readRegister(AT86RF231_REG_IRQ_STATUS);
 	palExec_atomicEnd();
 
@@ -983,7 +990,7 @@ void handleInterrupt(){
 //tasklet_async event
 void tasklet_radio_run() {
 
-	if (radioIrq != IRQ_NONE) {
+	if (radioIrq != IRQ_NONE || missedIrqPossible) {
 		serviceRadio();
 	}
 
