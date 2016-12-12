@@ -939,7 +939,7 @@ void serviceRadio() {
 			volatile uint8_t status = rf->readRegister(AT86RF231_REG_TRX_STATUS);
 
             // Otherwise, according to the AT86RF231 datasheet 8.5.4, the CCA IRQ will fire again
-			if (!(status & AT86RF231_TRX_STATUS_MASK_CCA_DONE)){
+			if (status & AT86RF231_TRX_STATUS_MASK_CCA_DONE) {
                 //clear the receive blocking bit
                 uint8_t regVal = rf->readRegister(AT86RF231_REG_RX_SYN);
                 rf->writeRegister(AT86RF231_REG_RX_SYN, regVal & ~AT86RF231_RX_SYN_PDT_DIS_MASK);
