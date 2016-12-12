@@ -938,17 +938,18 @@ void serviceRadio() {
 
 			volatile uint8_t status = rf->readRegister(AT86RF231_REG_TRX_STATUS);
 
-			//clear the receive blocking bit
-			uint8_t regVal = rf->readRegister(AT86RF231_REG_RX_SYN);
-			rf->writeRegister(AT86RF231_REG_RX_SYN, regVal & ~AT86RF231_RX_SYN_PDT_DIS_MASK);
+            // Otherwise, according to the AT86RF231 datasheet 8.5.4, the CCA IRQ will fire again
+			if (!(status & AT86RF231_TRX_STATUS_MASK_CCA_DONE)){
+                //clear the receive blocking bit
+                uint8_t regVal = rf->readRegister(AT86RF231_REG_RX_SYN);
+                rf->writeRegister(AT86RF231_REG_RX_SYN, regVal & ~AT86RF231_RX_SYN_PDT_DIS_MASK);
 
-			RADIO_ASSERT((status & AT86RF231_TRX_STATUS_MASK_TRX_STATUS) == AT86RF231_TRX_STATUS_BUSY_RX
-					|| (status & AT86RF231_TRX_STATUS_MASK_TRX_STATUS) == AT86RF231_TRX_STATUS_RX_ON);
+                RADIO_ASSERT((status & AT86RF231_TRX_STATUS_MASK_TRX_STATUS) == AT86RF231_TRX_STATUS_BUSY_RX
+                        || (status & AT86RF231_TRX_STATUS_MASK_TRX_STATUS) == AT86RF231_TRX_STATUS_RX_ON);
 
-			cmd = CMD_NONE;
+                cmd = CMD_NONE;
 
-			cometos_error_t returnValue;
-			if (status & AT86RF231_TRX_STATUS_MASK_CCA_DONE){
+                cometos_error_t returnValue;
 				if (status & AT86RF231_TRX_STATUS_MASK_CCA_STATUS){
 					returnValue = MAC_SUCCESS;
 				}
@@ -956,9 +957,6 @@ void serviceRadio() {
 					returnValue = MAC_ERROR_BUSY;
 				}
 				radioCCA_done(returnValue);
-			}
-			else {
-				radioCCA_done(MAC_ERROR_FAIL);
 			}
 		} else {
 			LOG_ERROR("0x" << cometos::hex << cmd << " " << "0x" << radio_state);
