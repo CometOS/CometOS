@@ -17,7 +17,13 @@ class CortexToolchain:
 		self.env.Append(CPPDEFINES=['BOARD_'+self.env.conf.str('platform')])
 
 		# Compiler
-		flags='-mcpu='+self.env.conf.str('cpu')+' -mthumb -Os -fmessage-length=0 -fdata-sections -ffunction-sections -g3 -funwind-tables'
+		flags='-mcpu='+self.env.conf.str('cpu')+' -mthumb -fmessage-length=0 -fdata-sections -ffunction-sections -g3 -funwind-tables'
+
+                if self.env.conf.bool('optimize_size'):
+                    flags += ' -Os'
+                else:
+                    flags += ' -O0'
+
 		flags+= " -mfloat-abi="
 		if self.env.conf.bool('hardfloat'):
 			flags+="hard -mfpu="+self.env.conf.str('mfpu')
