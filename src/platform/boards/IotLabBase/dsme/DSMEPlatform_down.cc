@@ -143,8 +143,8 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
     bool success = msg->getHeader().deserializeFrom(buffer, phy_msg->phyPayloadLen);
 
     if(!success) {
-        DSME_ASSERT(false);
-        releaseMessage(msg);
+        instance->releaseMessage(msg);
+        return phy_msg;
     }
 
     /* copy data */
