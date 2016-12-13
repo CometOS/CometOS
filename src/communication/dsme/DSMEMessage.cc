@@ -49,6 +49,7 @@ void DSMEMessage::prependFrom(DSMEMessageElement* me) {
     // TODO better fill buffer from the end (but this is not how it works in CometOS)
     ASSERT(this->frame->getLength()+me->getSerializationLength() <= this->frame->getMaxLength());
     memmove(this->frame->getData()+me->getSerializationLength(), this->frame->getData(), this->frame->getLength());
+    ASSERT(this->frame->getLength()+(uint16_t)me->getSerializationLength() < this->frame->getMaxLength());
     this->frame->setLength(this->frame->getLength()+me->getSerializationLength());
     Serializer s(this->frame->getData(), SERIALIZATION);
     me->serialize(s);
@@ -57,6 +58,7 @@ void DSMEMessage::prependFrom(DSMEMessageElement* me) {
 
 void DSMEMessage::decapsulateTo(DSMEMessageElement* me) {
     me->copyFrom(this);
+    ASSERT(this->frame->getLength() >= me->getSerializationLength());
     this->frame->setLength(this->frame->getLength()-me->getSerializationLength());
     memmove(this->frame->getData(), this->frame->getData()+me->getSerializationLength(), this->frame->getLength());
 }
