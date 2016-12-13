@@ -767,7 +767,7 @@ void LowpanAdaptionLayer::receiveMACResponse(cometos::DataResponse *resp) {
 
     // this section assumes uint16_t for stats.avgDuration
     LAL_VECTOR_REC(MacFrameDurationVector, duration);
-    if (duration < LowpanAdaptionLayerStats::DURATION_FACTOR && resp->success) {
+    if (duration < LowpanAdaptionLayerStats::DURATION_FACTOR && resp->isSuccess()) {
         if (stats.avgDuration == 0) {
             stats.avgDuration = duration << LowpanAdaptionLayerStats::DURATION_FACTOR_SHIFT;
         } else {
@@ -776,7 +776,7 @@ void LowpanAdaptionLayer::receiveMACResponse(cometos::DataResponse *resp) {
         }
     }
 
-    if (resp->success) {
+    if (resp->isSuccess()) {
         LAL_SCALAR_INC(sentFrames);
         LOG_INFO("low->MAC succ");
     } else {

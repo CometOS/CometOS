@@ -175,7 +175,7 @@ void TCPWY::timedReport(Message *timer) {
 }
 
 void TCPWY::resp(DataResponse *response) {
-    bool wasSuccess = response->success;
+    bool wasSuccess = response->isSuccess();
     sendControl(TCPWY_CONTROL_SEND, wasSuccess);
     //ignore it'll be fine :)
 	delete response;

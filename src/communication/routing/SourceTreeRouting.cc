@@ -80,7 +80,7 @@ void SourceTreeRouting::handleRequest(cometos::DataRequest* msg) {
 
     if (isSink) {
         if (paths.count(msg->dst) == 0) {
-            msg->response(new DataResponse(false));
+            msg->response(new DataResponse(DataResponseStatus::NO_ROUTE));
             delete msg;
             return;
         }LOG_INFO("send source message to "<<msg->dst);
@@ -109,7 +109,7 @@ void SourceTreeRouting::handleInnerRequest(cometos::DataRequest* msg) {
     ///  currently not supported
     if (msg->dst == BROADCAST ) {
         LOG_WARN("roouting message failed");
-        msg->response(new DataResponse(false));
+        msg->response(new DataResponse(DataResponseStatus::NO_ROUTE));
         delete msg;
         return;
     }
@@ -120,7 +120,7 @@ void SourceTreeRouting::handleInnerRequest(cometos::DataRequest* msg) {
 
     if (p->path.getSize() == p->path.getMaxSize()) {
         LOG_WARN(" path length insufficient");
-        msg->response(new DataResponse(false));
+        msg->response(new DataResponse(DataResponseStatus::NO_ROUTE));
         delete msg;
         return;
     }

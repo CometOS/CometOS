@@ -92,7 +92,7 @@ void AODV::handleTimeout(DataRequest* msg) {
     LOG_INFO("delete message after timeout");
 
     queue.erase(queue.find(msg));
-    msg->response(new DataResponse(false));
+    msg->response(new DataResponse(DataResponseStatus::EXPIRED));
     delete msg;
 }
 
@@ -113,7 +113,7 @@ void AODV::forwardRequest(DataRequest* msg) {
 #ifdef ROUTING_ENABLE_STATS
         queueOverflow++;
 #endif
-        msg->response(new DataResponse(false));
+        msg->response(new DataResponse(DataResponseStatus::QUEUE_FULL));
         delete msg;
         return;
     }
@@ -341,15 +341,15 @@ void AODV::handleResponse(DataResponse* resp) {
     // remove packet from queue not needed
     // queue.erase(queue.find(req));
 
-    if (resp->success == true) {
-        req->response(new DataResponse(true));
+    if (resp->isSuccess() == true) {
+        req->response(new DataResponse(DataResponseStatus::SUCCESS));
     } else {
         NwkHeader nwk;
         req->getAirframe() >> nwk;
         table.erase(table.find(nwk.dst));
         std::cout << getId() << " DELETE ENTRY " << nwk.dst << " "
                 << getNextHop(nwk.dst) << endl;
-        req->response(new DataResponse(false));
+        req->response(new DataResponse(DataResponseStatus::FAIL_UNKNOWN));
     }
 
     delete req;

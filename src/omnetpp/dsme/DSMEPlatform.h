@@ -104,20 +104,20 @@ public:
     /**
      * Send an ACK message, delay until aTurnaRoundTime after reception_time has expired
      */
-    bool sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback);
+    bool sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) override;
 
     /**
      * Directly send packet without delay and without CSMA
      * but keep the message (the caller has to ensure that the message is eventually released)
      * This might lead to an additional memory copy in the platform
      */
-    bool sendCopyNow(DSMEMessage *msg, Delegate<void(bool)> txEndCallback);
+    bool sendCopyNow(DSMEMessage *msg, Delegate<void(bool)> txEndCallback) override;
 
     bool setChannelNumber(uint8_t k) override;
 
 protected:
-    virtual void signalNewMsg(DSMEMessage* msg);
-    virtual void signalReleasedMsg(DSMEMessage* msg);
+    virtual void signalNewMsg(DSMEMessage* msg) override;
+    virtual void signalReleasedMsg(DSMEMessage* msg) override;
 
     uint16_t msgId;
     std::map<DSMEMessage*, uint16_t> msgMap;

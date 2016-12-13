@@ -113,7 +113,7 @@ getCout() << "Send " << remoteFilename.getStr() << endl;
 void SimpleFileTransfer::handleResponse(DataResponse* resp) {
     arbiter.assertRunning();
 
-    if(!resp->success) {
+    if(!resp->isSuccess()) {
         close(COMETOS_ERROR_FAIL);
         delete(resp);
         return;

@@ -46,7 +46,7 @@ void ProbabilisticFlooding::handleRequest(DataRequest* msg, NwkHeader& nwk) {
 	if (intrand(100) < prob || nwk.src == getId()) {
 		Routing::handleRequest(msg, nwk);
 	} else {
-		msg->response(new DataResponse(false));
+		msg->response(new DataResponse(DataResponseStatus::FAIL_UNKNOWN));
 		delete msg;
 	}
 }

@@ -44,6 +44,7 @@
 #include "primitives.h"
 #include "templates.h"
 #include "OutputStream.h"
+#include "logging.h"
 /*TYPES----------------------------------------------------------------------*/
 
 

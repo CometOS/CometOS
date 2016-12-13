@@ -47,7 +47,7 @@ void ClusterBasedFlooding::handleRequest(DataRequest* msg, NwkHeader& nwk) {
 	if (force || dom || nwk.src == getId()) {
 		Routing::handleRequest(msg, nwk);
 	} else {
-		msg->response(new DataResponse(false));
+		msg->response(new DataResponse(DataResponseStatus::FAIL_UNKNOWN));
 		delete msg;
 	}
 }

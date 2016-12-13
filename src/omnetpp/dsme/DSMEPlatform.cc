@@ -55,10 +55,10 @@ namespace dsme {
 void DSMEPlatform::initialize() {
     DSMEPlatformBase::initialize();
 
-    this->dsme->setPHY_PIB(&(this->phy_pib));
-    this->dsme->setMAC_PIB(&(this->mac_pib));
-    this->dsme->setMCPS(&(this->mcps_sap));
-    this->dsme->setMLME(&(this->mlme_sap));
+    this->dsme.setPHY_PIB(&(this->phy_pib));
+    this->dsme.setMAC_PIB(&(this->mac_pib));
+    this->dsme.setMCPS(&(this->mcps_sap));
+    this->dsme.setMLME(&(this->mlme_sap));
 
     this->dsmeAdaptionLayer.initialize();
 
@@ -93,12 +93,10 @@ void DSMEPlatform::initialize() {
 
     this->mac_pib.recalculateDependentProperties();
 
-    settings->isPANCoordinator = par("isPANCoordinator");
-
-    settings->isCoordinator = (par("isCoordinator") || settings->isPANCoordinator);
+    this->mac_pib.macIsPANCoord = par("isPANCoordinator");
+    this->mac_pib.macIsCoord = (par("isCoordinator") ||  this->mac_pib.macIsPANCoord);
 
     this->phy_pib.phyCurrentChannel = par("commonChannel");
-    settings->optimizations = par("optimizations");
 
     if (strcmp(par("allocationScheme").stringValue(), "random") == 0) {
         this->dsmeAdaptionLayer.settings.allocationScheme = DSMEAdaptionLayerSettings::ALLOC_RANDOM;
@@ -111,9 +109,9 @@ void DSMEPlatform::initialize() {
 }
 
 void DSMEPlatform::finish() {
-    recordScalar("numUpperPacketsForCAP", dsme->getMessageDispatcher().getNumUpperPacketsForCAP());
-    recordScalar("numUpperPacketsForGTS", dsme->getMessageDispatcher().getNumUpperPacketsForGTS());
-    recordScalar("numUpperPacketsDroppedFullQueue", dsme->getMessageDispatcher().getNumUpperPacketsDroppedFullQueue());
+    recordScalar("numUpperPacketsForCAP", dsme.getMessageDispatcher().getNumUpperPacketsForCAP());
+    recordScalar("numUpperPacketsForGTS", dsme.getMessageDispatcher().getNumUpperPacketsForGTS());
+    recordScalar("numUpperPacketsDroppedFullQueue", dsme.getMessageDispatcher().getNumUpperPacketsDroppedFullQueue());
 }
 
 bool DSMEPlatform::sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) {
@@ -149,17 +147,17 @@ void DSMEPlatform::receiveLowerData(cMessage *msg) {
                             + 2*4 // Preamble
                             + 2*1; // SFD
 
-    dsme->getAckLayer().receive(dsmemsg);
+    dsme.getAckLayer().receive(dsmemsg);
 }
 
 void DSMEPlatform::handleMessage(cMessage* msg) {
     if(msg == timer) {
-        dsme->getEventDispatcher().timerInterrupt();
+        dsme.getEventDispatcher().timerInterrupt();
     }
     else if(msg == ccaTimer) {
         bool isIdle = !isChannelBusy();
         LOG_DEBUG("CCA isIdle " << isIdle);
-        dsme->dispatchCCAResult(isIdle);
+        dsme.dispatchCCAResult(isIdle);
     }
     else if(strcmp(msg->getName(),"acktimer") == 0) {
         //LOG_INFO("send ACK")

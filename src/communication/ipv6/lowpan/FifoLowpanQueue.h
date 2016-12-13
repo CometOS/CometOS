@@ -96,7 +96,7 @@ public:
                     txInfo = &dummyInfo;
                 }
 
-                QueueObject::response_t qor = qo->response(resp->success, *txInfo);
+                QueueObject::response_t qor = qo->response(resp->isSuccess(), *txInfo);
                 if (qor == QueueObject::QUEUE_DELETE_OBJECT || qor == QueueObject::QUEUE_PACKET_FINISHED) {
                     removeQueueHead();
                 } else if (qor == QueueObject::QUEUE_DELETE_SIMILAR) {
@@ -104,9 +104,9 @@ public:
                     removeObjects();
                 }
 
-                if (resp->success && qor == QueueObject::QUEUE_PACKET_FINISHED) {
+                if (resp->isSuccess() && qor == QueueObject::QUEUE_PACKET_FINISHED) {
                     ret = LOWPANQUEUE_PACKET_FINISHED;
-                } else if (!(resp->success)) {
+                } else if (!(resp->isSuccess())) {
                     ret = LOWPANQUEUE_PACKET_DROPPED;
                 }
             } else {

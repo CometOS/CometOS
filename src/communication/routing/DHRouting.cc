@@ -453,7 +453,7 @@ DataRequest * DHRouting::addRoutingInformation(DataRequest *req, bool force) {
             //ASSERT(layer->getGateway() !=BROADCAST);
             // TODO HERE IS SOME ERROR (or strange state), which is currently not fixed
             if (layer->getGateway() == BROADCAST ) {
-                req->response(new DataResponse(false));
+                req->response(new DataResponse(DataResponseStatus::FAIL_UNKNOWN));
                 delete req;
                 return NULL;
             }
@@ -464,7 +464,7 @@ DataRequest * DHRouting::addRoutingInformation(DataRequest *req, bool force) {
             return addRoutingInformation(req, level, 0);
 
         } else {
-            req->response(new DataResponse(false));
+            req->response(new DataResponse(DataResponseStatus::FAIL_UNKNOWN));
             delete req;
             return NULL;
         }

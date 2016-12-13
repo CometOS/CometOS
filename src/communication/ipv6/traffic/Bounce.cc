@@ -89,7 +89,7 @@ void Bounce::handleMACRequest(DataRequest *macrequest) {
                << " " << std::hex << (int)macrequest->getAirframe().getData()[29]
                << " " << std::hex << (int)macrequest->getAirframe().getData()[30]
                << " " << std::hex << (int)macrequest->getAirframe().getData()[31]);
-    macrequest->response(new DataResponse(true));
+    macrequest->response(new DataResponse(DataResponseStatus::SUCCESS));
 //    for (uint8_t i = 0; i < macrequest->getAirframe().getLength(); i++) {
 //        printf("%02X ", macrequest->getAirframe().getData()[i]);
 //        if (i%16 == 15) printf("\n");

@@ -73,7 +73,7 @@ void TreeRouting::finish() {
 
 void TreeRouting::handleRequest(DataRequest* msg) {
     if (isSink) {
-        msg->response(new DataResponse(true));
+        msg->response(new DataResponse(DataResponseStatus::SUCCESS));
         sendIndication(new DataIndication(msg->decapsulateAirframe(), getId(), getId()));
         delete msg;
     } else {
@@ -196,7 +196,7 @@ void TreeRouting::handleRequest(DataRequest* msg, NwkHeader& nwk) {
         msg->dst = BROADCAST;
     } else {
         if (parent==BROADCAST) {
-            msg->response(new DataResponse(false));
+            msg->response(new DataResponse(DataResponseStatus::NO_ROUTE));
             delete msg;
             return;
         }

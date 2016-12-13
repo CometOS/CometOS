@@ -94,7 +94,7 @@ void AsyncTcpComm::handleRequest(cometos::DataRequest* msg) {
 
 	if (conn.begin() == conn.end()) {
 		LOG_DEBUG("TCP not connected; response false");
-		msg->response(new DataResponse(false));
+		msg->response(new DataResponse(DataResponseStatus::FAIL_UNKNOWN));
 		delete (msg);
 		return;
 	}
@@ -105,7 +105,7 @@ void AsyncTcpComm::handleRequest(cometos::DataRequest* msg) {
 //	std::cout << "toTCP: dst=" << desti << "|src=" << srci << endl;
 	MacTxInfo * mti = new MacTxInfo(desti, 0, MacRxInfo::RSSI_EMULATED,
 			MacRxInfo::RSSI_EMULATED);
-	DataResponse * response = new DataResponse(true);
+	DataResponse * response = new DataResponse(DataResponseStatus::SUCCESS);
 	response->set(mti);
 	msg->response(response);
 	LOG_DEBUG("toTCP: dst=" << desti << "|src=" << srci << "; confirm sent to " << msg->getRequestId());

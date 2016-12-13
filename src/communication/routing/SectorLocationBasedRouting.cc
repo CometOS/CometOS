@@ -301,7 +301,7 @@ void SectorLocationBasedRouting::sendToCandidate() {
 
 void SectorLocationBasedRouting::finishProcessing(bool success) {
     ASSERT(currentRequest!=NULL);
-    currentRequest->response(new DataResponse(success));
+    currentRequest->response(new DataResponse(success ? DataResponseStatus::SUCCESS : DataResponseStatus::FAIL_UNKNOWN));
     delete currentRequest;
     currentRequest = NULL;
     startProcessing();
@@ -315,7 +315,7 @@ void SectorLocationBasedRouting::handleRequest(DataRequest* msg,
     msg->dst = nwk.dst;
 
     if (queue.size() >= QUEUE_SIZE || msg->dst == BROADCAST ) {
-        msg->response(new DataResponse(false));
+        msg->response(new DataResponse(DataResponseStatus::QUEUE_FULL));
         LOG_WARN("queue overflow, discard packet");
         delete msg;
         return;
@@ -458,7 +458,7 @@ void SectorLocationBasedRouting::addCandidate(node_t dst, position_t& posDst,
 }
 
 void SectorLocationBasedRouting::handleResponseCandidate(DataResponse *resp) {
-    if (!resp->success) {
+    if (!resp->isSuccess()) {
         candidates.erase(currentCandidate);
         sendToCandidate();
     } else {
@@ -479,7 +479,7 @@ void SectorLocationBasedRouting::handleResponseCandidate(DataResponse *resp) {
 }
 
 void SectorLocationBasedRouting::handleResponse(DataResponse *resp) {
-    if (!resp->success) {
+    if (!resp->isSuccess()) {
         LOG_ERROR("Sending failed");
 
         ASSERT(currentSectors.first<MAX_SECTORS);
@@ -510,11 +510,11 @@ void SectorLocationBasedRouting::handleResponse(DataResponse *resp) {
 }
 
 void SectorLocationBasedRouting::handleResponseDirect(DataResponse *resp) {
-    if (!resp->success) {
+    if (!resp->isSuccess()) {
         LOG_ERROR("Sending direct failed");
     }
 
-    finishProcessing(resp->success);
+    finishProcessing(resp->isSuccess());
     delete resp;
 }
 

@@ -109,7 +109,7 @@ public:
 
     void releaseMessage(DSMEMessage* msg) override;
 
-    void scheduleStartOfCFP();
+    void scheduleStartOfCFP() override;
 
     void start();
 

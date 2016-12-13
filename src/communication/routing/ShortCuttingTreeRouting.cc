@@ -93,7 +93,7 @@ void ShortCuttingTreeRouting::finish() {
 
 void ShortCuttingTreeRouting::handleRequest(DataRequest* msg) {
     if (isSink) {
-        msg->response(new DataResponse(true));
+        msg->response(new DataResponse(DataResponseStatus::SUCCESS));
         sendIndication(new DataIndication(msg->decapsulateAirframe(), getId(), getId()));
         delete msg;
     } else {
@@ -325,7 +325,7 @@ void ShortCuttingTreeRouting::handleRequest(DataRequest* msg, NwkHeader& nwk) {
     ASSERT(nwk.dst != BROADCAST);
 
     if (queue.size() >= QUEUE_SIZE) {
-        msg->response(new DataResponse(false));
+        msg->response(new DataResponse(DataResponseStatus::QUEUE_FULL));
 #ifdef ROUTING_ENABLE_STATS
         lossQueue++;
 #endif
@@ -390,13 +390,13 @@ void ShortCuttingTreeRouting::handleResponse(DataResponse* response) {
     //std::cout<<"SEND "<<simTime().dbl()<< " with INDEX " <<(int)currentShortCutIndex <<std::endl;
     isSending = false;
 
-    if (!response->success) {
+    if (!response->isSuccess()) {
         if (currentShortCutIndex == 0) {
             //currentShortCutIndex = 0xff;
             //currentParent = BROADCAST;
 
             // delete packet to avoid accumulation of packets
-            (*queue.begin())->response(new DataResponse(false));
+            (*queue.begin())->response(new DataResponse(response->status));
             delete *queue.begin();
             queue.pop_front();
 
@@ -410,7 +410,7 @@ void ShortCuttingTreeRouting::handleResponse(DataResponse* response) {
     } else {
         LOG_WARN("sending succeed");
         ASSERT(queue.size()>0);
-        (*queue.begin())->response(new DataResponse(true));
+        (*queue.begin())->response(new DataResponse(DataResponseStatus::SUCCESS));
         delete *queue.begin();
         queue.pop_front();
 

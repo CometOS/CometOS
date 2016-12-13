@@ -53,7 +53,8 @@ enum class DataResponseStatus {
     INVALID_PARAMETER,
     INVALID_GTS,
     EXPIRED,
-    FAIL_UNKNOWN
+    FAIL_UNKNOWN,
+    NO_ROUTE
 };
 
 class DataResponse: public Response {

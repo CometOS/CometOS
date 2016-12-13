@@ -276,7 +276,7 @@ public:
             } else {
                 txInfo = &dummyInfo;
             }
-            QueueObject::response_t res = lastObjectRetrieved->response(resp->success, *txInfo);
+            QueueObject::response_t res = lastObjectRetrieved->response(resp->isSuccess(), *txInfo);
             LOG_DEBUG("got response " << (int) res << " from inOrderDg");
             switch(res) {
                 case QueueObject::QUEUE_DELETE_OBJECT: {

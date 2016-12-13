@@ -63,16 +63,17 @@ inline void cometos_logRaw(uint8_t level, node_t channel, const char* str) {
     getLogger().log(getName(), channel, level, ss.str());
 }
 
+#define PREFIX omnetpp::simTime().dbl()<<"|"<<getFullName()<<"|"<<__func__<<"|"
 
 #define LOG(level,channel,msg) { \
     std::stringstream ss; ss.precision(9);\
-    ss<<omnetpp::simTime().dbl()<<"|"<<getFullName()<<"|0x"<<std::hex<<channel<<std::dec<<"|"<<__func__<<"|"<<msg<<std::endl; \
+    ss << PREFIX; \
     getLogger().log(getName(), channel , level, ss.str()); \
 }
 
 #define LOG_PREFIX(level, channel) {\
     std::stringstream ss;\
-    ss<<omnetpp::simTime().dbl()<<"|"<<getFullName()<<"|0x"<<std::hex<<channel<<std::dec<<"|"<<__func__<<"|";\
+    ss << PREFIX;\
     getLogger().log(getName(), channel, level, ss.str());\
 }
 

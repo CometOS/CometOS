@@ -291,7 +291,7 @@ void LWT::resp(DataResponse *response) {
 //    }
 //    info->
 //    getCout() << "MAC_V;rssi=" << (int)mac_getRssi() << ";tx=" << (int)mac_getTxPower() << "!\n";
-    bool wasSuccess = response->success;
+    bool wasSuccess = response->isSuccess();
     mAlgoAnalysis->countMessage(wasSuccess);
     mAlgoAnalysis->countState(mAlgo->getLocalState(), NetworkTime::get());
     if(!wasSuccess) {

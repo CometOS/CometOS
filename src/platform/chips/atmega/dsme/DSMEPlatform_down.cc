@@ -152,7 +152,13 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
     msg->startOfFrameDelimiterSymbolCounter = sfdTimestamp;
 
     /* deserialize header */
-    buffer >> msg->getHeader();
+    bool success = msg->getHeader().deserializeFrom(buffer, phy_msg->phyPayloadLen);
+
+    if(!success) {
+        DSME_ASSERT(false);
+        releaseMessage(msg);
+    }
+
 
     /* copy data */
     msg->frame->setLength(phy_msg->phyPayloadLen - msg->getHeader().getSerializationLength());

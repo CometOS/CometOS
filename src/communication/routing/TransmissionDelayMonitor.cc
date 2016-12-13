@@ -109,7 +109,7 @@ void TransmissionDelayMonitor::handleResponse(DataResponse* resp) {
     statsDelay.collect(delay);
 
     ASSERT(req!=NULL);
-    req->response(new DataResponse(resp->success));
+    req->response(new DataResponse(resp->status));
     delete req;
     delete resp;
 }

@@ -272,7 +272,7 @@ void RNGT::handleIndication(DataIndication* msg) {
 }
 
 void RNGT::resp(DataResponse *response) {
-    bool wasSuccess = response->success;
+    bool wasSuccess = response->isSuccess();
     mAlgoAnalysis->countMessage(wasSuccess);
     mAlgoAnalysis->countState(mAlgo->getLocalState(), NetworkTime::get());
     delete response;
