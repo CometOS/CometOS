@@ -147,6 +147,14 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
         return phy_msg;
     }
 
+    if(msg->getHeader().getSrcAddrMode() == NO_ADDRESS && msg->getHeader().getFrameType() == IEEE802154eMACHeader::COMMAND) {
+        for(int i = 0; i < phy_msg->phyPayloadLen; i++) {
+            cometos::getCout() << "0x" << cometos::hex << phy_msg->data[i] << " ";
+        }
+        cometos::getCout() << cometos::endl;
+	ASSERT(false);
+    }
+
     /* copy data */
     ASSERT(phy_msg->phyPayloadLen >= msg->getHeader().getSerializationLength());
     msg->frame->setLength(phy_msg->phyPayloadLen - msg->getHeader().getSerializationLength());
