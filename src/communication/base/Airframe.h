@@ -76,18 +76,22 @@ public:
         if(outputStream == NULL) {
             outputStream = &cometos::getCout();
         }
+#ifdef ENABLE_LOGGING
         if(prefix) {
             (*outputStream) << PREFIX;
         }
+#endif
         (*outputStream) << cometos::dec;
         (*outputStream) << "len= " << (uint16_t)getSize();
         (*outputStream) << cometos::hex;
         for (uint16_t i = 0; i < getSize(); i++) {
             if (i % 16 == 0) {
                 (*outputStream) << cometos::endl;
+#ifdef ENABLE_LOGGING
                 if(prefix) {
                     (*outputStream) << PREFIX;
                 }
+#endif
                 (*outputStream) << " ";
             }
             (*outputStream) << "0x";
