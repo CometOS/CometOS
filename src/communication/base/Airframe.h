@@ -92,7 +92,7 @@ public:
                     (*outputStream) << PREFIX;
                 }
 #endif
-                (*outputStream) << " ";
+                (*outputStream) << cometos::hex << " ";
             }
             (*outputStream) << "0x";
             uint8_t d = buffer[i];
