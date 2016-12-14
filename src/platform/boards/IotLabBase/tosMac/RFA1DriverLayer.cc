@@ -350,15 +350,15 @@ void radio_setTxPowerLvl(mac_power_t lvl)
 
 }
 
-void radio_setCCAMode(mac_ccaMode_t ccaMode)
+void radio_setCCAMode(mac_ccaMode_t newCcaMode)
 {
-	uint8_t regValue = ccaMode << AT86RF231_PHY_CC_CCA_MODE0;
+	uint8_t regValue = newCcaMode << AT86RF231_PHY_CC_CCA_MODE0;
 
-	if (regValue != ccaMode )
+	if (regValue != newCcaMode )
 	{
 		palExec_atomicBegin();
 		settings |= SET_CCA_MODE;
-		ccaMode = regValue;
+		cca_mode = regValue;
 		palExec_atomicEnd();
 	}
 }
