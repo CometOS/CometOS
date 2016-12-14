@@ -64,12 +64,14 @@ if env.conf.bool('pal_twi_slave'):
 	env.add_sources(['palTwiSlave.cc'])
 
 if env.conf.bool('pal_mac'):
-	mc = env.conf.str('mac', valid_values=['original','tos','dsme'])
+	mc = env.conf.str('mac', valid_values=['original','tos','dsme','pure_sniffer'])
 	if mc == 'original':
 		SConscript("mac/SConscript")
 	elif mc == 'tos':
 		SConscript("tosMac/SConscript")
 		env.add_sources(['timer1.cc'])
+	elif mc == 'pure_sniffer':
+		SConscript("tosMac/SConscript")
 	elif mc == 'dsme':
  		env.Append(CPPDEFINES=["DSME"])
 		SConscript("dsme/SConscript")

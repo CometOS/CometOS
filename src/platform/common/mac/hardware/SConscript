@@ -2,12 +2,6 @@ Import('env')
 
 env.Append(CPPPATH=[Dir('.')])
 
-SConscript("tosMac/SConscript")
-
-env.add_sources([
-'MacAbstractionLayer.cc'
-])
-
 env.conf_to_str_define([
 'mac_default_channel',
 'MAC_DEFAULT_NWK_ID',
@@ -19,3 +13,21 @@ env.conf_to_str_define([
 'MAC_DEFAULT_MAX_BE',
 'MAC_DEFAULT_TX_POWER_LVL'
 ])
+
+if env.conf.str('mac') in ['tos','dsme','pure_sniffer']:
+    SConscript("tosMac/SConscript")
+
+if env.conf.bool('pal_mac'):
+    env.add_sources([
+    'MacAbstractionLayer.cc'
+    ])
+
+if env.conf.str('mac') in ['pure_sniffer','dsme']:
+    env.add_sources([
+    'MacDummy.cc'
+    ])
+
+if env.conf.str('mac') in ['pure_sniffer']:
+    env.add_sources([
+    'PureSniffer.cc'
+    ])

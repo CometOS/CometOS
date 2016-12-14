@@ -31,66 +31,36 @@
  */
 
 /*INCLUDES-------------------------------------------------------------------*/
-
-#include "mac_interface.h"
-#include "mac_definitions.h"
-#include "atrf_hardware.h"
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <util/delay.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "palExec.h"
-#include "palRand.h"
-#include "palLocalTime.h"
-
-#include "pinEventOutput.h"
-
+ 
 #include "cometos.h"
+ 
+#include "palLed.h"
 
-mac_result_t mac_setBackoffConfig(const mac_backoffCfg_t *cfg) {
-    ASSERT(false);
-    return 0;
+#include "Module.h"
+#include "palExec.h"
+#include "palLocalTime.h"
+using namespace cometos;
+
+#include "PureSniffer.h"
+
+void print(uint8_t* data, uint8_t length) {
+    getCout() << hex;
+    for(int i = 0; i < length; i++) {
+        getCout() << "0x" << data[i] << " ";
+    }
+    getCout() << endl;
 }
 
-void mac_setPromiscuousMode(bool value) {
-}
+int main() {
+	initialize();
+    cometos::setRootLogLevel(LOG_LEVEL_INFO);
+	
+    auto& sniffer = PureSniffer::getInstance();
+    sniffer.init(CALLBACK_FUN(print));
 
-bool mac_getPromiscuousMode() {
-    return false;
-}
+    getCout() << "Booted" << endl;
 
-void mac_getAutoAckConfig(mac_ackCfg_t *cfg) {
-    ASSERT(false);
-}
-
-void mac_getBackoffConfig(mac_backoffCfg_t *cfg) {
-    ASSERT(false);
-}
-
-mac_result_t mac_setAutoAckConfig(const mac_ackCfg_t *cfg) {
-    return true;
-}
-
-mac_result_t mac_sendToNetwork(uint8_t const* data, mac_payloadSize_t length,
-        mac_nodeId_t dst, mac_networkId_t dstNwk) {
-    ASSERT(false);
-    return MAC_ERROR_FAIL;
-}
-
-mac_result_t mac_send(uint8_t const* data, mac_payloadSize_t length,
-        mac_nodeId_t dst) {
-    ASSERT(false);
-    return MAC_ERROR_FAIL;
-}
-
-mac_result_t mac_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
-        mac_channel_t channel, mac_txMode_t mode, mac_ackCfg_t *ackCfg,
-        mac_backoffCfg_t *backoffCfg) {
-    return MAC_SUCCESS;
-}
-
-mac_result_t mac_setReceiveBuffer(uint8_t *buffer) {
-    return MAC_SUCCESS;
+	run();
+	
+	return 0;
 }

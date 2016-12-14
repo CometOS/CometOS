@@ -34,9 +34,9 @@ SConscript("../../chips/N25Q128A/SConscript")
 if env.conf.bool('pal_mac'):
 	SConscript("mac_common/SConscript")
 
-	mc = env.conf.str('mac', valid_values=['tos','dsme'])
+	mc = env.conf.str('mac', valid_values=['tos','dsme','pure_sniffer'])
 
-	if mc == 'tos':
+	if mc == 'tos' or mc == 'pure_sniffer':
 	    SConscript("tosMac/SConscript")
 	elif mc == 'dsme':
  		env.Append(CPPDEFINES=["DSME"])

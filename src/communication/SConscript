@@ -30,7 +30,7 @@ if env.conf.bool('pal_mac'):
     if env.conf.has_key('neighborhood') and env.conf.bool('neighborhood'):
         SConscript('neighborhood/SConscript')
 
-    if env.conf.str('mac', valid_values=['original','tos','dsme']) == 'dsme':
+    if env.conf.str('mac', valid_values=['original','tos','dsme','pure_sniffer']) == 'dsme':
         SConscript('dsme/SConscript')
     
     
