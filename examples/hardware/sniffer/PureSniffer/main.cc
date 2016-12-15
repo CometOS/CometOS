@@ -37,30 +37,97 @@
 #include "palLed.h"
 
 #include "Module.h"
+#include "Queue.h"
+//#include "palSerial.h"
 #include "palExec.h"
 #include "palLocalTime.h"
 using namespace cometos;
 
 #include "PureSniffer.h"
 
-void print(uint8_t* data, uint8_t length) {
-    getCout() << hex;
-    for(int i = 0; i < length; i++) {
-        getCout() << "0x" << data[i] << " ";
+//PalSerial* serial;
+
+class OutputBuffer {
+public:
+    char output[129*2+3];
+    uint8_t x;
+};
+
+#define BUFFERS 100
+OutputBuffer buffers[BUFFERS];
+Queue<OutputBuffer*,BUFFERS> waiting;
+Queue<OutputBuffer*,BUFFERS> empty;
+
+inline char numToHex(uint8_t num) {
+    if(num <= 9) {
+      return num+'0';
     }
-    getCout() << endl;
+    else {
+      return num-10+'A';
+    }
+}
+
+void push(uint8_t* data, uint8_t length) {
+    palExec_atomicBegin();
+    OutputBuffer* b = empty.front();
+    empty.pop();
+    palExec_atomicEnd();
+
+    b->output[b->x++] = 'P';
+    b->output[b->x++] = 'K';
+    b->output[b->x++] = 'T';
+    for(int i = 0; i < length; i++) {
+        uint8_t v = data[i];
+        b->output[b->x++] = numToHex(v >> 4);
+        b->output[b->x++] = numToHex(v & 0xF);
+    }
+    b->output[b->x++] = '\n';
+    
+    palExec_atomicBegin();
+    waiting.push(b);
+    palExec_atomicEnd();
+}
+
+void print();
+SimpleTask printTask(print);
+void print() {
+    palExec_atomicBegin();
+    while(!waiting.empty()) {
+        OutputBuffer* b = waiting.front();
+        waiting.pop();
+
+        palExec_atomicEnd();
+        //serial->write(b->output,b->x);
+        b->output[b->x++] = '\0';
+        getCout() << b->output;
+        b->x = 0;
+        palExec_atomicBegin();
+
+        empty.push(b);
+    }
+    palExec_atomicEnd();
+
+    getScheduler().add(printTask);
 }
 
 int main() {
-	initialize();
-    cometos::setRootLogLevel(LOG_LEVEL_INFO);
+    initialize();
+
+    for(int i = 0; i < BUFFERS; i++) {
+        empty.push(&buffers[i]);
+    }
+
+    //serial = PalSerial::getInstance<int>(1);
 	
     auto& sniffer = PureSniffer::getInstance();
-    sniffer.init(CALLBACK_FUN(print));
+    sniffer.init(CALLBACK_FUN(push));
 
-    getCout() << "Booted" << endl;
+    //serial->write((const uint8_t*)"BOOT\n",5);
+    getCout() << "BOOTING" << endl;
 
-	run();
+    getScheduler().add(printTask);
+
+    run();
 	
-	return 0;
+    return 0;
 }

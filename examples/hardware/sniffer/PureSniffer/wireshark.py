@@ -28,23 +28,35 @@ fdesc = PcapWriter(FIFONAME);
 for line in fileinput.input():
     data = ""
     #try:
-    if True:
+    if False:
         if "m3" in line:
             # Probably IotLab log
             # TODO parse time
             #m = re.search(';(.*)',line)
-            m = re.search(";.*;(.*)",line)
+            m = re.search(";.*;(0x.*)",line)
             if m:
                 line = m.group(1)
+            else:
+                continue
                 #print line
-    print line
-            
-    data = ''.join(map(lambda x: chr(int(x,16)), filter(lambda x: "0x" in x, line.split(" "))))
-    #except:
-    #    pass # could not decode
 
-    if data != "":
-        d=IEEE802154(data=data)
-        fdesc.write(d)
-        fdesc.flush()
+    m = re.search("PKT(.*)",line)
+    if m:
+        line = m.group(1)
+        
+        print line
+
+        data = []
+        for i in range(0,len(line)-1,2):
+            data.append("0x"+line[i:i+2])
+
+        data = ''.join(map(lambda x: chr(int(x,16)), data))
+
+        #except:
+        #    pass # could not decode
+
+        if data != "":
+            d=IEEE802154(data=data)
+            fdesc.write(d)
+            fdesc.flush()
 
