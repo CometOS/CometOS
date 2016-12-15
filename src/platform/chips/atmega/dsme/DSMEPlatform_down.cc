@@ -111,7 +111,7 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
     uint8_t *buffer = DSMEPlatform::data;
 
     /* serialize header */
-    buffer << msg->getHeader();
+    msg->getHeader().serializeTo(buffer);
 
     /* copy data */
     memcpy(buffer, msg->frame->getData(), msg->frame->getLength());
