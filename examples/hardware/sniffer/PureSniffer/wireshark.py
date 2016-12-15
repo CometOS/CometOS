@@ -3,6 +3,8 @@ from scapy.all import *
 import time
 import subprocess
 import fileinput
+import os
+import re
 
 FIFONAME = '/tmp/802154fifo'
 
@@ -22,13 +24,24 @@ bind_layers( IEEE802154, LLC, type=2 )
 conf.l2types.register(195, IEEE802154)
 
 fdesc = PcapWriter(FIFONAME);
+
 for line in fileinput.input():
-    print line,
     data = ""
-    try:
-        data = ''.join(map(lambda x: chr(int(x,16)), filter(lambda x: "0x" in x, line.split(" "))))
-    except:
-        pass # could not decode
+    #try:
+    if True:
+        if "m3" in line:
+            # Probably IotLab log
+            # TODO parse time
+            #m = re.search(';(.*)',line)
+            m = re.search(";.*;(.*)",line)
+            if m:
+                line = m.group(1)
+                #print line
+    print line
+            
+    data = ''.join(map(lambda x: chr(int(x,16)), filter(lambda x: "0x" in x, line.split(" "))))
+    #except:
+    #    pass # could not decode
 
     if data != "":
         d=IEEE802154(data=data)
