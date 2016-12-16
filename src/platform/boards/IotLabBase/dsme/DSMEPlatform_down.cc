@@ -148,7 +148,7 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
     }
 
     if(msg->getHeader().getSrcAddrMode() == NO_ADDRESS && msg->getHeader().getFrameType() == IEEE802154eMACHeader::COMMAND) {
-        for(int i = 0; i < phy_msg->phyPayloadLen; i++) {
+        for(int i = 0; i < phy_msg->phyPayloadLen+2; i++) {
             cometos::getCout() << "0x" << cometos::hex << phy_msg->data[i] << " ";
         }
         cometos::getCout() << cometos::endl;
