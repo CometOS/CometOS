@@ -30,6 +30,9 @@
  * SUCH DAMAGE.
  */
 
+#ifndef MACSYMBOLCOUNTER_H
+#define MACSYMBOLCOUNTER_H
+
 #include "Callback.h"
 
 namespace cometos {
@@ -53,3 +56,5 @@ private:
 };
 
 }
+
+#endif

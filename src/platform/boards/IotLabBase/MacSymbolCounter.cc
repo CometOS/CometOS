@@ -102,13 +102,13 @@ void MacSymbolCounter::interrupt() {
     bool overflow = false;
 
 	if(TIM3->SR & TIM_SR_UIF){
-		TIM3->SR &= (uint16_t) ~TIM_SR_UIF;
+		TIM3->SR = ~TIM_SR_UIF;
         overflow = true;
         msw++;
 	}
 
     if(TIM3->SR & TIM_SR_CC1IF) {
-		TIM3->SR &= (uint16_t) ~TIM_SR_CC1IF;
+		TIM3->SR = ~TIM_SR_CC1IF;
 
         uint16_t compareMSW = msw;
 
@@ -124,7 +124,7 @@ void MacSymbolCounter::interrupt() {
     }
     
     if(TIM3->SR & TIM_SR_CC3IF) {
-		TIM3->SR &= (uint16_t) ~TIM_SR_CC3IF;
+		TIM3->SR = ~TIM_SR_CC3IF;
 
         uint16_t captureLSW = TIM3->CCR3;
         uint16_t captureMSW = msw;
@@ -151,10 +151,9 @@ uint32_t MacSymbolCounter::getValue() {
         result += (1 << (uint32_t)16); // increment msw since it is unhandled
     }
 
-    if(lastValue > result) {
-        __builtin_trap();
-        ASSERT(false);
-    }
+    ASSERT((TIM3->SR & 0xFF00) == 0); // no overcapture
+    ASSERT(lastValue <= result); // TODO remove to allow for overflows of the 32 bit counter
+
     lastValue = result;
     palExec_atomicEnd();
     return result;
