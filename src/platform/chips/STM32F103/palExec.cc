@@ -33,6 +33,7 @@
 #include "palExec.h"
 #include "palLocalTime.h"
 #include "cometosAssert.h"
+#include "AtomicStatistics.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -125,11 +126,18 @@ void palExec_atomicBegin() {
     ASSERT(inAtomic < UINT8_MAX);
 
     if(inAtomic == 0 && (primask & 1)) {
-        // We are already in an atomic section (e.g. ISR)
-	alreadyAtomic = true;
+        // We are already in an atomic section (however for IRQ handler this bit is not set)
+        alreadyAtomic = true;
     }
 
     ++inAtomic;
+
+/*
+    if(inAtomic == 1 && !alreadyAtomic) {
+        // only for that atomicBegin that has actually disabled the interrupts
+        cometos::AtomicStatistics::begin(cometos::AtomicStatistics::ATOMIC_BLOCK);
+    }
+*/
 }
 
 void palExec_atomicEnd() {
@@ -141,7 +149,8 @@ void palExec_atomicEnd() {
             alreadyAtomic = false;
         }
         else {
-	    __enable_irq();
+            //cometos::AtomicStatistics::end(cometos::AtomicStatistics::ATOMIC_BLOCK);
+            __enable_irq();
         }
     }
 }
