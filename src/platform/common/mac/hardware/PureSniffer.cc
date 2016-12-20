@@ -43,3 +43,7 @@ void tasklet_messageBufferLayer_run() {
 void radioSend_sendDone(message_t*, unsigned char) {
     /* Do nothing. */
 }
+
+void tasklet_radioAlarm_run() {
+    /* Do nothing. */
+}

@@ -228,3 +228,8 @@ void tasklet_messageBufferLayer_run() {
     /* Do nothing. */
     return;
 }
+
+void tasklet_radioAlarm_run() {
+    /* Do nothing. */
+    return;
+}
