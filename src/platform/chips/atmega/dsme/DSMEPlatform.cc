@@ -71,8 +71,9 @@ void DSMEPlatform::initialize() {
     /* Enable message timestamping (ATmega256RFR2 documentation, 10.11.34) */
     SCCR0 |= (1 << SCTSE);
 
-    this->dsmeAdaptionLayer.initialize();
-    this->dsme.initialize(this);
+    channelList_t scanChannels;
+    scanChannels.add(MAC_DEFAULT_CHANNEL);
+    this->dsmeAdaptionLayer.initialize(scanChannels);
 
     /* Initialize Address */
     IEEE802154MacAddress address;
@@ -110,6 +111,8 @@ void DSMEPlatform::initialize() {
 
     this->dsmeAdaptionLayer.setIndicationCallback(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
     this->dsmeAdaptionLayer.setConfirmCallback(DELEGATE(&DSMEPlatform::handleConfirmFromMCPS, *this));
+
+    this->dsme.initialize(this); // should be done after adjusting all the settings
 
     mac_result_t result = RFA1Driver_init(this->mac_pib.macShortAddress, 0, this->channel, 0x00, &DSMEPlatform::ackCfg,
             &DSMEPlatform::backoffCfg);

@@ -194,7 +194,7 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
             (void) rssi; // avoid warning if logging is disabled
         }
 
-	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!R!" << type << "!" << dec << remoteSequenceNumber);
+	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!" << "!R!" << type << "!" << dec << remoteSequenceNumber << "!0x" << hex << palId_id() << "!" << dec << rssi);
         LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
 
         palLed_toggle(2);

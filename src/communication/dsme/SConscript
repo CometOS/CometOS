@@ -20,6 +20,7 @@ env.add_sources(map(lambda x: 'openDSME/'+x, [
 'mac_services/mlme_sap/DSME_GTS.cc',
 'mac_services/mlme_sap/DISASSOCIATE.cc',
 'mac_services/mlme_sap/SCAN.cc',
+'mac_services/mlme_sap/SYNC.cc',
 'mac_services/mlme_sap/ASSOCIATE.cc',
 'mac_services/mcps_sap/MCPS_SAP.cc',
 'mac_services/mcps_sap/DATA.cc',
