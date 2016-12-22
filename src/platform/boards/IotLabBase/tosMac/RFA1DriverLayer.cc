@@ -799,7 +799,11 @@ inline void downloadMessage()
 }
 
 void downloadMessage_successCallback()  {
-	RADIO_ASSERT(radio_state == STATE_RX_ON && cmd == CMD_DOWNLOAD);
+	//RADIO_ASSERT(radio_state == STATE_RX_ON && cmd == CMD_DOWNLOAD);
+        if(!(radio_state == STATE_RX_ON && cmd == CMD_DOWNLOAD)) {
+            LOG_ERROR(radio_state << " " << cmd);
+            RADIO_ASSERT(false);
+        }
 	// we moved the actual signalling code to downloadMessage to tasklet
 	// context to prevent that send can interrupt any code running in
 	// tasklet context

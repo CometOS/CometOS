@@ -61,6 +61,7 @@ private:
 	uint16_t txBufferLength;
 	uint16_t rxBufferLength;
 
+	bool inTransmitBlocking = 0;
 
 public:
 	cometos_error_t init(bool asMaster, uint32_t freq, palSpi_mode_t mode, bool lsbFirst){
@@ -191,6 +192,7 @@ public:
 	void disable()
 	{
 		palExec_atomicBegin();
+		ASSERT(!inTransmitBlocking);
 		SPI_Cmd(spi, DISABLE);
 
 		if (csActiveLow){
@@ -235,8 +237,12 @@ public:
 	};
 
 	cometos_error_t transmitBlocking(const uint8_t *txBuf, uint8_t* rxBuf, uint16_t len){
+		ASSERT(enabled);
+
 		uint16_t txPos = 0;
 		uint16_t rxPos = 0;
+
+		inTransmitBlocking = true;
 
 		while (txPos < len){
 			//Write to the SPI Data register as soon as free
@@ -249,18 +255,23 @@ public:
             uint16_t i = 0;
 			while (spi->SR & SPI_I2S_FLAG_BSY) {
 				__asm("nop");
-                ASSERT(i++ < 1000);
+				ASSERT(i++ < 10000);
+				ASSERT(enabled);
 			}
 
 			// Read from the SPI Data register as soon as data is available
             i = 0;
 			while (! (spi->SR & SPI_I2S_FLAG_RXNE)) {//SPI_I2S_GetFlagStatus(spi, SPI_I2S_FLAG_RXNE != SET)){
 				__asm("nop");
-                ASSERT(i++ < 1000);
+				ASSERT(i++ < 10000);
+				ASSERT(enabled);
 			}
 
 			rxBuf[rxPos++] = spi->DR;
 		}
+
+		inTransmitBlocking = false;
+
 		return COMETOS_SUCCESS;
 	}
 
