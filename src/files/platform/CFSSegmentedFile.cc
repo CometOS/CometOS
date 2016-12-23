@@ -118,7 +118,9 @@ void CFSSegmentedFile::writeSegment(uint8_t* data, num_segments_t segment)
     }
 
     segment_size_t segmentSize = getSegmentSize(segment);
+    palWdt_pause();
     ret = cfs_write(fd, data, segmentSize);
+    palWdt_resume();
     if(ret != segmentSize) {
         LOG_INFO("cfs_write returned " << ret << " instead of " << segmentSize);
         finish(COMETOS_ERROR_FAIL);
@@ -220,8 +222,8 @@ void CFSSegmentedFile::openFile(AirString filename, bool removeBeforeOpen)
 
     opened = true;
 
-    //cfs_coffee_configure_log(filename.getStr(), 60000, getMaxSegmentSize()); //TODO
-    cfs_coffee_set_io_semantics(fd, CFS_COFFEE_IO_FLASH_AWARE);    
+    cfs_coffee_configure_log(filename.getStr(), 65536, getMaxSegmentSize()); 
+    //cfs_coffee_set_io_semantics(fd, CFS_COFFEE_IO_FLASH_AWARE);    
 
     finish(COMETOS_SUCCESS);
     return;

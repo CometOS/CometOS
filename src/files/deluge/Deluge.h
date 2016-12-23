@@ -207,14 +207,13 @@ private:
     // The file the info is written to
     DelugeInfoFile mInfoFile;
     // the last received message
-    DataIndication* rcvdMsg;
+    DataIndication *rcvdMsg;
     // the data file of the deluge algorithm
-    DelugeDataFile *dataFile;
+    SegmentedFile *dataFile;
     // the destination filename
     AirString filename;
     file_size_t fileSize;
     bool opened = false;
-    bool readyy = false;
 };
 
 }

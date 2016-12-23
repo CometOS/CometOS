@@ -123,7 +123,20 @@ void CachedSegmentedFile::write(uint8_t* data, segment_size_t dataLength, num_se
 }
 
 void CachedSegmentedFile::flush(Callback<void(cometos_error_t result)> finishedCallback) {
-    finishedCallback(COMETOS_SUCCESS);
+    ASSERT_RUNNING(getArbiter());
+
+    if(!this->setStateIfIdle(&CachedSegmentedFile::stateIdle, &CachedSegmentedFile::stateWriteIfNecessary)) {
+        ASSERT(false); // not possible when using arbiter correctly
+    }
+
+    LOG_INFO("CachedSegmentedFile: Flushing the cache");
+
+    currentOperation = OPERATION::WRITE_CACHE;
+
+    externalCallback = finishedCallback;
+
+    dispatchTask.load(COMETOS_SUCCESS);
+    getScheduler().add(dispatchTask);
 }
 
 void CachedSegmentedFile::read(uint8_t* data, segment_size_t dataLength, num_segments_t segment,

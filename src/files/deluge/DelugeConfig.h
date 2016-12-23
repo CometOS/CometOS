@@ -34,22 +34,22 @@
 #define DELUGECONFIG_H
 
 
-#define DELUGE_OUTPUT
+//#define DELUGE_OUTPUT
 
 /***
  * Value that defines the packet size
  */
-#define DELUGE_PACKET_SEGMENT_SIZE      70
+#define DELUGE_PACKET_SEGMENT_SIZE      92
 
 /***
  * Value that defines the page size
  */
-#define DELUGE_PAGE_SIZE                2100
+#define DELUGE_PAGE_SIZE                2944
 
 /**
  *
  */
-#define DELUGE_PAGES_BEFORE_FLUSH         20
+#define DELUGE_PAGES_BEFORE_FLUSH         4
 
 /**
  * value that defines how many packets are inside a page
@@ -115,7 +115,7 @@
 /***
  * Defines the time RX waits until leaving RX state because of no receipt
  */
-#define DELUGE_RX_NO_RECEIPT_DELAY 1000
+#define DELUGE_RX_NO_RECEIPT_DELAY 500
 
 /***
  * Defines the time TX waits between sending two packets

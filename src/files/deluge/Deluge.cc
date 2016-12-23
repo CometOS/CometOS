@@ -43,8 +43,6 @@ using namespace cometos;
 Define_Module(Deluge);
 
 Deluge::Deluge() : fsm_t(&Deluge::stateInit), rcvdMsg(nullptr) {
-    dataFile = new DelugeDataFile();
-    ASSERT(dataFile->getArbiter()->requestImmediately() == COMETOS_SUCCESS);
 }
 
 Deluge::~Deluge() {
@@ -57,8 +55,8 @@ void Deluge::initialize() {
     palWdt_resume();
 #endif
 
-    //Start the state machine
-   // run();
+    dataFile = SegFileFactory::CreateInstance();
+    ASSERT(dataFile->getArbiter()->requestImmediately() == COMETOS_SUCCESS);
 }
 
 void Deluge::setFileCompleteCallback(Callback<void(uint16_t version, uint8_t pages)> finishedCallback) {
@@ -428,10 +426,6 @@ void Deluge::sendObjectProfile() {
 #endif
 }
 
-void Deluge::reopenFile(cometos_error_t error) {
-    dataFile->open(filename, fileSize, CALLBACK_MET(&Deluge::finalize, *this), true);
-}
-
 void Deluge::handleObjectProfile() {
     // Extract crc code
     Airframe *frame = rcvdMsg->decapsulateAirframe();
@@ -495,11 +489,6 @@ void Deluge::handleObjectProfile() {
                 }
             }
         }
-
-	palExec_atomicBegin();
-	readyy = false;
-        dataFile->prepareUpdate(fileSize, pPageComplete, CALLBACK_MET(&Deluge::ready, *this));
-	palExec_atomicEnd();
 	
         // Replace info file
         persistInfo(new DelugeInfo(versionNumber, numberOfPages, fileSize, pAgeVector, pCRCVector, pPageComplete));
@@ -514,11 +503,6 @@ void Deluge::handleObjectProfile() {
         }
     }
     delete frame;
-}
-
-void Deluge::ready(cometos_error_t result) {
-    ASSERT(result == COMETOS_SUCCESS);
-    readyy = true;
 }
 
 fsmReturnStatus Deluge::handlePageRequest() {
@@ -600,8 +584,6 @@ fsmReturnStatus Deluge::handleRXTimer() {
 }
 
 void Deluge::sendPageRequest() {
-    if(!readyy) return;
-
     uint8_t gamma = pInfo->getHighestCompletePage();
     if (gamma < pInfo->getNumberOfPages()-1 || gamma == 255) {
         mPageRX = (gamma==255)?0:(gamma+1);
@@ -750,12 +732,12 @@ void Deluge::onPageCheck(cometos_error_t result) {
 
         if(finished) {
             if (this->mCallback) {
-                this->mCallback(pInfo->getVersion(), pInfo->getNumberOfPages());
+               this->mCallback(pInfo->getVersion(), pInfo->getNumberOfPages());
             }
         }
 
         static uint8_t counter = 0;
-        if(counter++ == DELUGE_PAGES_BEFORE_FLUSH) {
+        if(++counter == DELUGE_PAGES_BEFORE_FLUSH) {
               dataFile->flush(CALLBACK_MET(&Deluge::finalize, *this));
               counter = 0;
         }
