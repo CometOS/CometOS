@@ -361,8 +361,8 @@ void SectorLocationBasedRouting::initialize() {
     discoveries=0;
 #endif
 
-    ownPosition.first = palLocation_getCartesianX();
-    ownPosition.second = palLocation_getCartesianY();
+    ownPosition.first = PalLocation::getInstance()->getOwnCoordinates().x;
+    ownPosition.second = PalLocation::getInstance()->getOwnCoordinates().y;
 
     waitingForReply = false;
 

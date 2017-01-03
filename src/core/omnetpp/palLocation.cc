@@ -30,18 +30,37 @@
  * SUCH DAMAGE.
  */
 
-#ifndef PALLOCATION_H_
-#define PALLOCATION_H_
-
-#include "types.h"
-
-#define palLocation_init()
-
-#define palLocation_getCartesianX() ((int64_t)(((double)getParentModule()->getSubmodule("mobility")->par("x"))*1000.0))
-
-#define palLocation_getCartesianY()  ((int64_t)(((double)getParentModule()->getSubmodule("mobility")->par("y"))*1000.0))
-
-#define palLocation_getCartesianZ()  ((int64_t)(((double)getParentModule()->getSubmodule("mobility")->par("z"))*1000.0))
+#include "palLocation.h"
+#include "Module.h"
 
 
-#endif /* PALLOCATION_H_ */
+namespace cometos {
+
+class PalLocationImpl : public PalLocation, public Module {
+    virtual void init() {
+    }
+
+    virtual Coordinates getOwnCoordinates() {
+        auto module = getParentModule()->getSubmodule("mobility");
+        int16_t scale = 1000; // 1 coordinate unit = 1 mm
+#if LOCATION_COORDINATE_BYTES == 2
+        scale = 100; // 1 coordinate unit = 1 cm
+#endif
+        CoordinateType x = ((double)module->par("x"))*scale;
+        CoordinateType y = ((double)module->par("y"))*scale;
+#if LOCATION_DIMENSIONS == 3
+        CoordinateType z = ((double)module->par("z"))*scale;
+        return {x,y,z};
+#else
+        return {x,y};
+#endif
+    }
+};
+
+PalLocation* PalLocation::getInstance() {
+    // Instantiate class
+    static PalLocationImpl location;
+    return &location;
+}
+
+}

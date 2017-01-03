@@ -46,7 +46,7 @@
 #include "palFirmware.h"
 #include "palId.h"
 #ifdef SIM_API
-#include "src/core/omnetpp/palLocation.h"
+#include "palLocation.h"
 #endif
 //#include "palLocation.h"
 #include "DistAlgoAnalysis.h"
@@ -190,7 +190,7 @@ void RNGT::initialize() {
     schedule(new Message, &RNGT::timedReport, RNGT_REPORT_INIT_TIME);
 /* OWN FORMAT */
 #ifdef SIM_API
-    getCout() << (long)NetworkTime::get() << ";TRF_P;v[" << (int)palId_id() << "];{x=" << palLocation_getCartesianX() << ",y=" << palLocation_getCartesianY() << "}!\n";
+    getCout() << (long)NetworkTime::get() << ";TRF_P;v[" << (int)palId_id() << "];{x=" << PalLocation::getInstance()->getOwnCoordinates().x << ",y=" << PalLocation::getInstance()->getOwnCoordinates().y << "}!\n";
 #else
     getCout() << (long)NetworkTime::get() << ";TRF_P;v[" << (int)palId_id() << "];{x=" << (int)palId_id() << ",y=" << (int)70*intrand((int)palId_id) << "}!\n";
 #endif

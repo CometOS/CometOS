@@ -35,6 +35,10 @@ module Node154 like INode
         scheduler: SchedulerModule {
             @display("p=251,313;i=device/cpu");
         }
+        
+        location: LocationModule {
+        }
+        
     connections:
         radioIn --> nic.radioIn;
 }

@@ -32,9 +32,9 @@
 
 /**
  * CometOS Platform Abstraction Layer for the retrieving the location of a node.
- * THIS INTERFACE IS NOT FINAL
  *
  * @author Stefan Unterschuetz
+ * @author Florian Meier (as class)
  */
 
 #ifndef PALLOCATION_H_
@@ -42,36 +42,58 @@
 
 #include "types.h"
 
+namespace cometos {
 
-
-#ifdef __cplusplus
-extern "C" {
+#ifndef LOCATION_DIMENSIONS
+#define LOCATION_DIMENSIONS 3
 #endif
 
-/**
- * Initializes module.
- */
-void palLocation_init(void);
+#ifndef LOCATION_COORDINATE_BYTES
+#define LOCATION_COORDINATE_BYTES 8
+#endif
 
-/**@param x coordinate of node using cartesian coordinates (unit millimeter)
- */
-int64_t palLocation_getCartesianX();
+#if LOCATION_COORDINATE_BYTES == 2
+typedef int16_t CoordinateType;
+#elif LOCATION_COORDINATE_BYTES == 8
+typedef int64_t CoordinateType;
+#else
+#error "Other coordinate byte widths than 2 and 8 are not yet supported"
+#endif
 
+class Coordinates {
+public:
+    CoordinateType x;
+    CoordinateType y;
+#if LOCATION_DIMENSIONS == 3
+    CoordinateType z;
+#endif
+};
 
-/**@param y coordinate of node using cartesian coordinates (unit millimeter)
- */
-int64_t palLocation_getCartesianY();
+class PalLocation {
+public:
+    /**
+     * Initializes module.
+     * Set reference point and scale so all coordinates fit into int16_t.
+     * The parameters have to be equal for all nodes in the network!
+     *
+     * @param refX X reference coordinate in cartesian coordinates (unit millimeter)
+     * @param refY Y reference coordinate in cartesian coordinates (unit millimeter)
+     * @param refZ Z reference coordinate in cartesian coordinates (unit millimeter)
+     * @param scale Scale factor in mm per scaled unit
+     */
+    virtual void init() = 0;
 
+    /**
+     * @return coordinates of node
+     */
+    virtual Coordinates getOwnCoordinates() = 0;
 
-/**@param z coordinate of node using cartesian coordinates (unit millimeter)
- */
-int64_t palLocation_getCartesianZ();
+    static PalLocation* getInstance();
 
+protected:
+    PalLocation() {};
+};
 
-
-#ifdef __cplusplus
 }
-#endif
-
 
 #endif /* PALLOCATION_H_ */
