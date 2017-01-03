@@ -314,7 +314,7 @@ public:
 	}
 
 	bool isConnected() {
-	    return out != NULL;
+	    return (out != NULL && out->isConnected());
 	}
 
 	omnetpp::cGate * out;

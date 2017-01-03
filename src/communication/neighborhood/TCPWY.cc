@@ -228,10 +228,12 @@ void TCPWY::handleRequest(DataRequest* msg){
 
 void TCPWY::sendControl(uint8_t controlType, node_t targetId) {
     //Sending out whenever needed
-    Airframe *msg = new Airframe();
-    TCPWYControlHeader header(controlType, targetId);
-    (*msg) << header;
-    pGateControlOut.send(new DataIndication(msg,palId_id(),palId_id()));
+    if(pGateControlOut.isConnected()) {
+        Airframe *msg = new Airframe();
+        TCPWYControlHeader header(controlType, targetId);
+        (*msg) << header;
+        pGateControlOut.send(new DataIndication(msg,palId_id(),palId_id()));
+    }
 }
 
 void TCPWY::handleControl(DataRequest* msg) {

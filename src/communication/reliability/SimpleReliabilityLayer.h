@@ -41,7 +41,9 @@
 #include "DuplicateFilter.h"
 #ifdef PAL_MAC
 #include "mac_definitions.h"
-#else
+#endif
+
+#ifndef MAC_BROADCAST
 #define MAC_BROADCAST 0xFFFF
 #endif
 
