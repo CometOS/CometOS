@@ -108,6 +108,8 @@ void DSMEPlatform::initialize() {
 
     this->dsmeAdaptionLayer.setIndicationCallback(DELEGATE(&DSMEPlatform::handleDataMessageFromMCPS, *this));
     this->dsmeAdaptionLayer.setConfirmCallback(DELEGATE(&DSMEPlatform::handleConfirmFromMCPS, *this));
+
+    this->dsme.initialize(this); // should be done after adjusting all the settings
 }
 
 void DSMEPlatform::finish() {

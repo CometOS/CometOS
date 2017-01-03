@@ -83,6 +83,7 @@ public:
     virtual void txDone(cometos::macTxResult_t result) override;
 
     bool startCCA() override {
+        ASSERT(!ccaTimer->isScheduled());
         channelInactive = true;
         LOG_DEBUG("CCA start");
         scheduleAt(omnetpp::simTime() + 8*symbolDuration, ccaTimer);
