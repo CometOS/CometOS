@@ -31,17 +31,18 @@
  */
 
 #include "palLocation.h"
-#include "Module.h"
-
+#include "BaseModule.h"
+#include "BaseMobility.h"
 
 namespace cometos {
 
-class PalLocationImpl : public PalLocation, public Module {
+class PalLocationImpl : public PalLocation, public BaseModule {
     virtual void init() {
     }
 
     virtual Coordinates getOwnCoordinates() {
-        auto module = getParentModule()->getSubmodule("mobility");
+        BaseMobility* module = FindModule<BaseMobility*>::findSubModule(findHost());
+        //auto module = getParentModule()->getSubmodule("mobility");
         int16_t scale = 1000; // 1 coordinate unit = 1 mm
 #if LOCATION_COORDINATE_BYTES == 2
         scale = 100; // 1 coordinate unit = 1 cm
