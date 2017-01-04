@@ -2,6 +2,3 @@ Import('env')
 
 
 SConscript("../IotLabBase/SConscript")
-
-
-
