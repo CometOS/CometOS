@@ -104,6 +104,11 @@ public:
         this->inputGate = inputGate;
     }
 
+    void removeBoundedDelegate() {
+        this->owner = nullptr;
+        this->delegate_.unset();
+    }
+
     template<typename... params>
     Callback<void(params...)> getCallback() {
         return TOLERANT_CALLBACK(&Message::invoke,*this, params...);

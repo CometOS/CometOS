@@ -151,6 +151,7 @@ void TrafficEvaluation::traffic(Message *timer) {
 };
 
 void TrafficEvaluation::scheduleResponse(DataResponse *response) {
+    response->removeBoundedDelegate();
     schedule(response, &TrafficEvaluation::handleResponse);
 }
 

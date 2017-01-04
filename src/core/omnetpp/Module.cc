@@ -164,8 +164,10 @@ bool Module::isScheduled(Message *msg) {
 
 void Module::check(Message *msg) {
 	//ASSERT(msg->inputGate==NULL);
-	//ASSERT(msg->msgOwner==NULL);
 
+	// Do not use schedule for a message with an attached delegate!
+	// The attached delegate would be called and not the new gate handler!
+	ASSERT(msg->owner==NULL);
 }
 
 void Module::handleMessage(cMessage *msg) {
@@ -178,6 +180,7 @@ void Module::handleMessage(cMessage *msg) {
 	if (m->owner != NULL) {
 		ASSERT(msg->isSelfMessage());
 		ASSERT( m->owner==this);
+		ASSERT(handler == NULL);
 		m->delegate_(this, m);
 		return;
 	}
