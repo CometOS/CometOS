@@ -9,10 +9,9 @@ module Node extends Node154Flat
         traffic: TrafficEvaluation {
             @display("p=156,36");
         }
-    connections:
+        
+    connections allowunconnected:
         mac.gateIndOut --> traffic.gateIndIn;
         traffic.gateReqOut --> mac.gateReqIn;
-
-        mac.gateSnoopIndOut --> traffic.gateSnoopIn;
 }
 

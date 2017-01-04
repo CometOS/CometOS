@@ -8,10 +8,8 @@ simple TrafficEvaluation extends Endpoint
         int destination = default(-1);
         int msgSize = default(60);
         int meanInterval @unit(ms);
-        int warmup @unit(ms) = default(0ms);
+        int warmupDuration @unit(ms) = default(0ms);
+        int cooldownDuration @unit(ms) = default(0ms);
         int maxMeasurementPackets = default(100);
         @class(cometos::TrafficEvaluation);
-
-    gates:
-        input gateSnoopIn;
 }
