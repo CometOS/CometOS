@@ -192,14 +192,18 @@ void TrafficExample::handleIndication(DataIndication* msg) {
 	uint16_t sentCrc;
 	msg->getAirframe() >> sentCrc;
 	uint8_t * data = msg->getAirframe().getData();
-	if (msg->getAirframe().getLength() == msgSize - sizeof(myCrc) - sizeof(sequenceNumber)) {
-        for (uint8_t i = 0; i < msgSize + 2 - sizeof(myCrc) - sizeof(sequenceNumber); i++) {
-            crc = palFirmware_crc_update(crc, data[i]);
-        }
-        crc = palFirmware_crc_update(crc, (uint8_t) crc >> 8);
-        crc = palFirmware_crc_update(crc, (uint8_t) crc & 0xFF);
+	if (msg->getAirframe().getLength() != msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/) {
+	    palLed_toggle(4);
+	    LOG_WARN("too short frame received");
+        delete msg;
+        return;
+    }
+    
+    for (uint8_t i = 0; i < msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/; i++) {
+        crc = palFirmware_crc_update(crc, data[i]);
 	}
-	if (crc != 0) {
+
+	if (crc != sentCrc) {
 	    palLed_toggle(4);
 #ifdef OMNETPP
 	    target->second.corrupted++;

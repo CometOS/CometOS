@@ -178,14 +178,18 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
 	uint16_t sentCrc;
 	msg->getAirframe() >> sentCrc;
 	uint8_t * data = msg->getAirframe().getData();
-	if (msg->getAirframe().getLength() == msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/) {
-        for (uint8_t i = 0; i < msgSize + 2 - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/; i++) {
-            crc = palFirmware_crc_update(crc, data[i]);
-        }
-        crc = palFirmware_crc_update(crc, (uint8_t) crc >> 8);
-        crc = palFirmware_crc_update(crc, (uint8_t) crc & 0xFF);
+	if (msg->getAirframe().getLength() != msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/) {
+	    palLed_toggle(4);
+	    LOG_WARN("too short frame received");
+        delete msg;
+        return;
+    }
+    
+    for (uint8_t i = 0; i < msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/; i++) {
+        crc = palFirmware_crc_update(crc, data[i]);
 	}
-	if (crc != 0) {
+
+	if (crc != sentCrc) {
 	    palLed_toggle(4);
 	    LOG_WARN("corrupted frame received");
 	} else {
@@ -196,7 +200,7 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
         }
 
 	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!" << "!R!" << type << "!" << dec << remoteSequenceNumber << "!0x" << hex << palId_id() << "!" << dec << rssi);
-        LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
+        //LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
 
         palLed_toggle(2);
 
