@@ -169,6 +169,8 @@ void TrafficEvaluation::handleResponse(DataResponse *response) {
 }
 
 void TrafficEvaluation::handleIndication(DataIndication* msg) {
+    ASSERT(msg->src != palId_id());
+
     int64_t remoteSequenceNumber;
     char type;
     msg->getAirframe() >> type;
