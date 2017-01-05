@@ -101,6 +101,7 @@ public:
     virtual Object* getCopy() const {
         return new MacTxInfo(this->destination,
                              this->numRetries,
+                             this->numCCARetries,
                              this->remoteRssi,
                              this->ackRssi,
                              this->txDuration,
