@@ -112,6 +112,11 @@ public:
 		this->inputGate = inputGate;
 	}
 
+    void removeBoundedDelegate() {
+		this->owner = nullptr;
+		this->delegate_.unset();
+    }
+
 	UnboundedDelegate &getDelegate() {
 		return delegate_;
 	}
