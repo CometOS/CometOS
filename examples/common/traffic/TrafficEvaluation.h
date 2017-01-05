@@ -89,6 +89,26 @@ private:
     int16_t maxMeasurementPackets;
 
     time_ms_t lastHotReception;
+
+#ifdef OMNETPP
+	class Reception {
+	public:
+	    Reception()
+	    : corrupted(0),
+	      uniques(0),
+	      duplicates(0),
+	      lastSeqNum(-1)
+	    {
+	    }
+
+	    unsigned int corrupted;
+	    unsigned int uniques;
+	    unsigned int duplicates;
+	    int64_t lastSeqNum;
+	};
+
+	std::map<node_t, Reception> receptions;
+#endif
 };
 
 } // namespace cometos

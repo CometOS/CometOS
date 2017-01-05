@@ -47,6 +47,10 @@
 #include <math.h>
 #include "palId.h"
 #include "palLocalTime.h"
+#ifdef OMNETPP
+#include <sstream>
+#include <iomanip>
+#endif
 
 /*METHOD DEFINITION----------------------------------------------------------*/
 
@@ -107,6 +111,20 @@ void TrafficEvaluation::initialize() {
 
 void TrafficEvaluation::finish() {
     recordScalar("sent", counter);
+
+#ifdef OMNETPP
+    for(auto rec : receptions) {
+        std::stringstream ss;
+        ss << "received_corrupted_" << std::setfill('0') << std::setw(3) << rec.first;
+        recordScalar(ss.str().c_str(), rec.second.corrupted);
+        std::stringstream ss2;
+        ss2 << "received_unique_" << std::setfill('0') << std::setw(3) << rec.first;
+        recordScalar(ss2.str().c_str(), rec.second.uniques);
+        std::stringstream ss3;
+        ss3 << "received_duplicate_" << std::setfill('0') << std::setw(3) << rec.first;
+        recordScalar(ss3.str().c_str(), rec.second.duplicates);
+    }
+#endif
 }
 
 void TrafficEvaluation::traffic(Message *timer) {
@@ -171,6 +189,14 @@ void TrafficEvaluation::handleResponse(DataResponse *response) {
 void TrafficEvaluation::handleIndication(DataIndication* msg) {
     ASSERT(msg->src != palId_id());
 
+#ifdef OMNETPP
+    auto target = receptions.find(msg->src);
+    if(target == receptions.end()) {
+        receptions[msg->src] = Reception();
+        target = receptions.find(msg->src);
+    }
+#endif
+
     int64_t remoteSequenceNumber;
     char type;
     msg->getAirframe() >> type;
@@ -193,6 +219,9 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
 
 	if (crc != sentCrc) {
 	    palLed_toggle(4);
+#ifdef OMNETPP
+	    target->second.corrupted++;
+#endif
 	    LOG_WARN("corrupted frame received");
 	} else {
         int16_t rssi = RSSI_INVALID;
@@ -203,6 +232,17 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
 
 	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!" << "!R!" << type << "!" << dec << remoteSequenceNumber << "!0x" << hex << palId_id() << "!" << dec << rssi);
         //LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
+
+
+#ifdef OMNETPP
+        if(remoteSequenceNumber > target->second.lastSeqNum) {
+            target->second.uniques++;
+            target->second.lastSeqNum = remoteSequenceNumber;
+        }
+        else {
+            target->second.duplicates++;
+        }
+#endif
 
         palLed_toggle(2);
 
