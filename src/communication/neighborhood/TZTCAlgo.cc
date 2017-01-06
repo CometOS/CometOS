@@ -50,7 +50,7 @@ void TZTCAlgo::initialize(node_t ownId){
     for(uint8_t i=0; i<NEIGHBORLISTSIZE + STANDBYLISTSIZE;i++){
         neighborView[i].id= TZ_INVALID_ID;
         neighborView[i].lastSeqNum = 0;
-        neighborView[i].receivedMsg = false;
+        neighborView[i].receivedSinceLastUpdate = 0;
         neighborView[i].ccID = TZ_INVALID_ID;
         neighborView[i].qualityST = 0;
         neighborView[i].qualityLT = 0;
@@ -76,7 +76,8 @@ void TZTCAlgo::handle(node_t idIn, TCPWYHeader headerIn, timestamp_t timeIn){
     //QUALITY
     uint8_t index = getIndexOf(idIn);
     if (index != TZ_INVALID_U8){
-        neighborView[index].receivedMsg = true;
+        // this assumes that during the TCA interval, only a single packet with TCA header (either beacon or piggybacked) is sent
+        neighborView[index].receivedSinceLastUpdate++;
 //        // updates quality value for neighbor
 //        neighborView[index].updateQuality(headerIn.seqNum, headerIn.ccID, headerIn.ccDist, timeIn);
 //        neighborView[index].updateQuality();
@@ -108,8 +109,6 @@ void TZTCAlgo::updateAllQuality() {
         if(neighborView[i].id != TZ_INVALID_ID) {
             // update quality
             neighborView[i].updateQuality();
-            // reset flag for receiving msg
-            neighborView[i].receivedMsg = false;
             // if neighbor is on NL and below tolerance minimum it gets kicked
             if(neighborView[i].onNL) {
                 if(neighborView[i].qualityLT < Q_TOL) {

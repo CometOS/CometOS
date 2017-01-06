@@ -48,7 +48,7 @@ void TZTCAElement::updateQuality(){
     //          else it decreases the quality
     // for calculations see paper Renner,'Prediction Accuracy of Link-Quality Estimators'
     // calc: Q_st = alpha * Q_st + (1 - alpha) * receivedMsg
-    uint16_t qualityIncrease = (Q_SCALE - Q_ALPHA) * receivedMsg;
+    uint16_t qualityIncrease = (Q_SCALE - Q_ALPHA) * receivedSinceLastUpdate;
     uint32_t temp = (Q_ALPHA * qualityST) / Q_SCALE;
     qualityST = (uint16_t)temp + qualityIncrease;
     // calc: Q_lt = beta * Q_lt + (1 - beta) * Q_st
@@ -56,9 +56,13 @@ void TZTCAElement::updateQuality(){
     qualityLT = (uint16_t)temp;
     temp = ((Q_SCALE - Q_BETA) * qualityST) / Q_SCALE;
     qualityLT += temp;
+
+    receivedSinceLastUpdate = 0;
 }
 
 void TZTCAElement::updateQuality(uint8_t seqNumIn, node_t ccIDIn, node_t ccDistIn, timestamp_t timeIn){
+    ASSERT(false); // might not work as expected, use updateQuality() instead
+
     bool isLastCalc = false;
     // check whether received sequence number is next after latest
     if(seqNumIn == (uint8_t)(lastSeqNum + (uint8_t)1)) {
@@ -115,7 +119,7 @@ void TZTCAElement::add(node_t idIn, TCPWYHeader headerIn, timestamp_t timeIn){
         neighbors[i] = headerIn.neighbor[i];
     }
     lastSeqNum = headerIn.seqNum;
-    receivedMsg = false;
+    receivedSinceLastUpdate = 1; // the add is only called for a received packet
     ccID = headerIn.ccID;
     ccDist = headerIn.ccDist;
     qualityST = Q_INIT; // we start @ 0.3, i.e., 3000"/10000" to make the start-up phase a little shorter
@@ -146,7 +150,7 @@ void TZTCAElement::remove(){
         neighbors[i] = TZ_INVALID_ID;
     }
     lastSeqNum = 0;
-    receivedMsg = false;
+    receivedSinceLastUpdate = 0;
     ccID = TZ_INVALID_ID;
     ccDist = TZ_INVALID_ID;
     qualityST = 0; // we start @ 0.3 to make the start-up phase a little shorter

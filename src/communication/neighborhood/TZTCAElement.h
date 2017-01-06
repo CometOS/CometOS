@@ -69,7 +69,7 @@ public:
     node_t id;
     node_t neighbors[NEIGHBORLISTSIZE];
     uint8_t lastSeqNum;
-    bool receivedMsg; // has a msg been received by this neighbor within the last time frame?
+    uint16_t receivedSinceLastUpdate;
     node_t ccID;
     uint16_t ccDist;
     uint16_t qualityST;
