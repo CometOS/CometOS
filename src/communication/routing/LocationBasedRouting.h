@@ -38,6 +38,7 @@
 #define LocationBasedRouting_H_
 
 #include "Layer.h"
+#include "TCPWY.h"
 
 namespace cometos {
 
@@ -55,6 +56,11 @@ public:
 
     /**@inherit Layer*/
     virtual void handleIndication(DataIndication* msg);
+
+    void setNeighborhood(TCPWY* neighborhood);
+
+private:
+    TCPWY* neighborhood = nullptr;
 };
 
 } /* namespace cometos */

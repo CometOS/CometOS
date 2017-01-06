@@ -33,7 +33,6 @@
 #include "LocationBasedRouting.h"
 #include "palLocation.h"
 
-
 namespace cometos {
 
 Define_Module(LocationBasedRouting);
@@ -43,9 +42,38 @@ LocationBasedRouting::LocationBasedRouting()
 }
 
 void LocationBasedRouting::handleRequest(DataRequest* msg) {
-    getCout() << "handleRequest to " << msg->dst << endl;
-    msg->getAirframe() << msg->dst;
-    sendRequest(msg);
+    ASSERT(msg->dst != MAC_BROADCAST); // do not allow network broadcasts
+
+    getCout() << "handleRequest at " << palId_id() << " to " << msg->dst << " --------------- \t ";
+
+    node_t nextHop = MAC_BROADCAST;
+
+    ASSERT(neighborhood != nullptr);
+    for(uint8_t i = 0; i < NEIGHBORLISTSIZE + STANDBYLISTSIZE; i++) {
+        if(neighborhood->tca.neighborView[i].hasBidirectionalLink()) {
+            node_t id = neighborhood->tca.neighborView[i].id;
+            getCout() << id << " ";
+            if(id == msg->dst) {
+                // direct neighbor, just send
+                nextHop = id;
+                break;
+            }
+        }
+    }
+
+    if(nextHop == MAC_BROADCAST) { // no next hop found
+        getCout() << " throw away!" << endl;
+        msg->response(new DataResponse(DataResponseStatus::NO_ROUTE));
+        delete msg;
+    }
+    else {
+        getCout() << " next hop " << nextHop;
+        getCout() << endl;
+        msg->getAirframe() << msg->dst;
+        msg->dst = nextHop;
+        sendRequest(msg);
+    }
+
 }
 
 void LocationBasedRouting::finish() {
@@ -54,6 +82,25 @@ void LocationBasedRouting::finish() {
 
 void LocationBasedRouting::initialize() {
     Layer::initialize();
+
+#ifdef OMNETPP
+    omnetpp::cModule* module = (omnetpp::cSimulation::getActiveSimulation())->getContextModule();
+    omnetpp::cModule* neighborhoodMod = NULL;
+
+    while(module) {
+        neighborhoodMod = module->getSubmodule("neighborhood");
+        if(neighborhoodMod) {
+            break;
+        }
+        module = module->getParentModule();
+    }
+
+    neighborhood = dynamic_cast<TCPWY*>(neighborhoodMod);
+#endif
+}
+
+void LocationBasedRouting::setNeighborhood(TCPWY* neighborhood) {
+    this->neighborhood = neighborhood;
 }
 
 void LocationBasedRouting::handleIndication(DataIndication* pkt) {
@@ -64,6 +111,7 @@ void LocationBasedRouting::handleIndication(DataIndication* pkt) {
     if (palId_id() == pkt->dst) {
         sendIndication(pkt);
     } else {
+        ASSERT(pkt->dst != MAC_BROADCAST); // do not allow network broadcasts
         handleRequest(new DataRequest(pkt->dst, pkt->decapsulateAirframe()));
         delete pkt;
     }

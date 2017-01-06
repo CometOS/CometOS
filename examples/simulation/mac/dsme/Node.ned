@@ -13,10 +13,10 @@ module Node extends Node154Flat
             @display("p=156,36");
         }
         
-       // routing: LocationBasedRouting {
-       // }
+        routing: LocationBasedRouting {
+        }
         
-        neighbourhood: TCPWY {
+        neighborhood: TCPWY {
             @display("p=174,36");
         }
         
@@ -32,13 +32,13 @@ module Node extends Node154Flat
         // branch of the layer tree so it does not use
         // piggybacking with strange side effects and instead
         // uses broadcast beacons only.
-        neighbourhood.gateReqOut --> macDisp.gateReqIn[1];
-        macDisp.gateIndOut[1] --> neighbourhood.gateIndIn;
+        neighborhood.gateReqOut --> macDisp.gateReqIn[1];
+        macDisp.gateIndOut[1] --> neighborhood.gateIndIn;
         
-        traffic.gateReqOut --> macDisp.gateReqIn[2];
-        macDisp.gateIndOut[2] --> traffic.gateIndIn;
+        routing.gateReqOut --> macDisp.gateReqIn[2];
+        macDisp.gateIndOut[2] --> routing.gateIndIn;
         
-//        routing.gateIndOut --> traffic.gateIndIn;
-//        traffic.gateReqOut --> routing.gateReqIn;
+        routing.gateIndOut --> traffic.gateIndIn;
+        traffic.gateReqOut --> routing.gateReqIn;
 }
 
