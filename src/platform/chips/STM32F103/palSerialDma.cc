@@ -377,26 +377,21 @@ public:
 		configureDMA((uint32_t) data, length);
 
 		//Clear DMA ItPendingBit
-		switch((uint32_t)txDmaChannel)
-		{
-		case (uint32_t)DMA1_Channel4:
+		if(txDmaChannel == DMA1_Channel4) {
 			NVIC_EnableIRQ(DMA1_Channel4_IRQn);
 			DMA_ClearITPendingBit(DMA1_IT_TC4);
-			break;
-		case (uint32_t) DMA1_Channel2:
+		}
+		else if(txDmaChannel == DMA1_Channel2) {
 			NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 			DMA_ClearITPendingBit(DMA1_IT_TC2);
-			break;
-		case (uint32_t) DMA1_Channel7:
+		}
+		else if(txDmaChannel == DMA1_Channel7) {
 			DMA_ClearITPendingBit(DMA1_IT_TC7);
 			NVIC_EnableIRQ(DMA1_Channel7_IRQn);
-			break;
-		case (uint32_t) DMA2_Channel5:
+		}
+		else if(txDmaChannel == DMA2_Channel5) {
 			DMA_ClearITPendingBit(DMA2_IT_TC5);
 			NVIC_EnableIRQ(DMA2_Channel4_5_IRQn);
-			break;
-		default:
-			break;
 		}
 
 		//Enable DMA
