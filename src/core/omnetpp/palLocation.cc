@@ -36,25 +36,61 @@
 
 namespace cometos {
 
-class PalLocationImpl : public PalLocation, public BaseModule {
+Coordinates Coordinates::INVALID_COORDINATES{std::numeric_limits<CoordinateType>::max(),std::numeric_limits<CoordinateType>::max(),std::numeric_limits<CoordinateType>::max()};
+
+class PalLocationImpl : public PalLocation {
     virtual void init() {
     }
 
-    virtual Coordinates getOwnCoordinates() {
-        BaseMobility* module = FindModule<BaseMobility*>::findSubModule(findHost());
-        //auto module = getParentModule()->getSubmodule("mobility");
+    Coordinates getCoordinateForModule(omnetpp::cModule* context) {
+        BaseMobility* module = nullptr;
+
+        while(context) {
+            module = FindModule<BaseMobility*>::findSubModule(context);
+            if(module) {
+                break;
+            }
+            context = context->getParentModule();
+        }
+
+        ASSERT(module);
+
         int16_t scale = 1000; // 1 coordinate unit = 1 mm
 #if LOCATION_COORDINATE_BYTES == 2
         scale = 100; // 1 coordinate unit = 1 cm
 #endif
-        CoordinateType x = ((double)module->par("x"))*scale;
-        CoordinateType y = ((double)module->par("y"))*scale;
+        Coord coord = module->getMove().getPositionAt(omnetpp::simTime());
+        CoordinateType x = ((double)coord.getX())*scale;
+        CoordinateType y = ((double)coord.getY())*scale;
 #if LOCATION_DIMENSIONS == 3
-        CoordinateType z = ((double)module->par("z"))*scale;
+        CoordinateType z = ((double)coord.getZ())*scale;
         return {x,y,z};
 #else
         return {x,y};
 #endif
+    }
+
+    virtual Coordinates getOwnCoordinates() {
+        omnetpp::cModule* context = (omnetpp::cSimulation::getActiveSimulation())->getContextModule();
+        return getCoordinateForModule(context);
+    }
+
+    virtual Coordinates getCoordinatesForNode(node_t node) {
+        omnetpp::cModule* root = (omnetpp::cSimulation::getActiveSimulation())->getContextModule();
+
+        while(root->getParentModule()) {
+            root = root->getParentModule();
+        }
+
+        omnetpp::cModule* host;
+        for(omnetpp::cModule::SubmoduleIterator it(root); !it.end(); ++it) {
+            if((*it)->hasPar("id") && ((node_t)(*it)->par("id")) == node) {
+               host = *it;
+               break;
+            }
+        }
+
+        return getCoordinateForModule(host);
     }
 };
 

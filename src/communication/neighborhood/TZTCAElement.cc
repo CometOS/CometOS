@@ -127,6 +127,10 @@ void TZTCAElement::add(node_t idIn, TCPWYHeader headerIn, timestamp_t timeIn){
     timestamp = timeIn;
     onNL = false;
     tries = 0;
+
+#ifdef LOCATION_IN_TCPWYHeader
+    coordinates = headerIn.coordinates;
+#endif
 }
 
 void TZTCAElement::update(TCPWYHeader headerIn, timestamp_t timeIn){
@@ -137,6 +141,10 @@ void TZTCAElement::update(TCPWYHeader headerIn, timestamp_t timeIn){
     ccDist = headerIn.ccDist;
     lastSeqNum = headerIn.seqNum;
     timestamp = timeIn;
+
+#ifdef LOCATION_IN_TCPWYHeader
+    coordinates = headerIn.coordinates;
+#endif
 }
 
 void TZTCAElement::join() {

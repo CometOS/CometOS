@@ -45,6 +45,11 @@
 #include "MacAbstractionBase.h"
 #include "TZTypes.h"
 
+//#define LOCATION_IN_TCPWYHeader
+
+#ifdef LOCATION_IN_TCPWYHeader
+#include "palLocation.h"
+#endif
 
 namespace cometos {
 
@@ -65,6 +70,9 @@ public:
     node_t ccDist;
     node_t neighbor[NEIGHBORLISTSIZE];
     uint8_t currentIndex;
+#ifdef LOCATION_IN_TCPWYHeader
+    Coordinates coordinates;
+#endif
 };
 
 

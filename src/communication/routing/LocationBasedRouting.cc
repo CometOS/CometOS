@@ -37,26 +37,60 @@ namespace cometos {
 
 Define_Module(LocationBasedRouting);
 
+Airframe& operator<<(Airframe& frame, LocationBasedRoutingHeader& value) {
+    return frame << value.nlSrc << value.nlDst;
+}
+
+Airframe& operator>>(Airframe& frame, LocationBasedRoutingHeader& value) {
+    return frame >> value.nlDst >> value.nlSrc;
+}
+
 LocationBasedRouting::LocationBasedRouting()
 {
 }
 
 void LocationBasedRouting::handleRequest(DataRequest* msg) {
+    // from upper layer
     ASSERT(msg->dst != MAC_BROADCAST); // do not allow network broadcasts
+    LocationBasedRoutingHeader hdr;
+    hdr.nlDst = msg->dst;
+    hdr.nlSrc = palId_id();
+    forwardRequest(msg, hdr);
+}
 
-    getCout() << "handleRequest at " << palId_id() << " to " << msg->dst << " --------------- \t ";
+void LocationBasedRouting::forwardRequest(DataRequest* msg, LocationBasedRoutingHeader& hdr) {
+    getCout() << "handleRequest at " << palId_id() << " to " << hdr.nlDst << " --------------- \t ";
+
+    Coordinates destinationCoordinates = PalLocation::getInstance()->getCoordinatesForNode(hdr.nlDst);
+    if(destinationCoordinates == Coordinates::INVALID_COORDINATES) {
+        getCout() << " throw away!" << endl;
+        msg->response(new DataResponse(DataResponseStatus::INVALID_ADDRESS));
+        delete msg;
+        return;
+    }
 
     node_t nextHop = MAC_BROADCAST;
+    CoordinateType minDistance = destinationCoordinates.getSquaredDistance(PalLocation::getInstance()->getOwnCoordinates());
 
     ASSERT(neighborhood != nullptr);
     for(uint8_t i = 0; i < NEIGHBORLISTSIZE + STANDBYLISTSIZE; i++) {
         if(neighborhood->tca.neighborView[i].hasBidirectionalLink()) {
             node_t id = neighborhood->tca.neighborView[i].id;
-            getCout() << id << " ";
-            if(id == msg->dst) {
+            //getCout() << id << "/" << coordinates.x << "/" << coordinates.y << "-";
+            if(id == hdr.nlDst) {
                 // direct neighbor, just send
                 nextHop = id;
                 break;
+            }
+            else {
+                Coordinates coordinates = PalLocation::getInstance()->getCoordinatesForNode(id);
+                if(coordinates != Coordinates::INVALID_COORDINATES) {
+                    CoordinateType distance = destinationCoordinates.getSquaredDistance(coordinates);
+                    if(distance < minDistance) {
+                        nextHop = id;
+                        minDistance = distance;
+                    }
+                }
             }
         }
     }
@@ -69,7 +103,7 @@ void LocationBasedRouting::handleRequest(DataRequest* msg) {
     else {
         getCout() << " next hop " << nextHop;
         getCout() << endl;
-        msg->getAirframe() << msg->dst;
+        msg->getAirframe() << hdr;
         msg->dst = nextHop;
         sendRequest(msg);
     }
@@ -105,14 +139,16 @@ void LocationBasedRouting::setNeighborhood(TCPWY* neighborhood) {
 
 void LocationBasedRouting::handleIndication(DataIndication* pkt) {
     ASSERT(pkt->dst == palId_id() || pkt->dst == MAC_BROADCAST);
-    pkt->getAirframe() >> pkt->dst;
-    getCout() << "handleIndication from " << pkt->src << " to " << pkt->dst << endl;
+    LocationBasedRoutingHeader hdr;
+    pkt->getAirframe() >> hdr;
+    getCout() << "handleIndication from " << pkt->src << " to " << pkt->dst << " at " << palId_id() << endl;
 
-    if (palId_id() == pkt->dst) {
+    if (palId_id() == hdr.nlDst) {
+        pkt->src = hdr.nlSrc;
+        pkt->dst = hdr.nlDst;
         sendIndication(pkt);
     } else {
-        ASSERT(pkt->dst != MAC_BROADCAST); // do not allow network broadcasts
-        handleRequest(new DataRequest(pkt->dst, pkt->decapsulateAirframe()));
+        forwardRequest(new DataRequest(0 /* is ignored */, pkt->decapsulateAirframe()), hdr);
         delete pkt;
     }
 }

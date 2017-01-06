@@ -41,6 +41,7 @@
 #define PALLOCATION_H_
 
 #include "types.h"
+#include "Airframe.h"
 
 namespace cometos {
 
@@ -67,7 +68,43 @@ public:
 #if LOCATION_DIMENSIONS == 3
     CoordinateType z;
 #endif
+
+    CoordinateType getSquaredDistance(const Coordinates& other) const {
+        CoordinateType dist = (x-other.x)*(x-other.x)+(y-other.y)*(y-other.y);
+#if LOCATION_DIMENSIONS == 3
+        dist += (z-other.z)*(z-other.z);
+#endif
+        return dist;
+    }
+
+    static Coordinates INVALID_COORDINATES;
+
+    bool operator==(const Coordinates& other) const {
+        return (other.x == x && other.y == y && other.z == z);
+    }
+
+    bool operator!=(const Coordinates& other) const {
+        return !operator==(other);
+    }
 };
+
+inline cometos::Airframe& operator<<(cometos::Airframe& frame, Coordinates& value) {
+    frame << value.x;
+    frame << value.y;
+#if LOCATION_DIMENSIONS == 3
+    frame << value.z;
+#endif
+    return frame;
+}
+
+inline cometos::Airframe& operator>>(cometos::Airframe& frame, Coordinates& value) {
+#if LOCATION_DIMENSIONS == 3
+    frame >> value.z;
+#endif
+    frame >> value.y;
+    frame >> value.x;
+    return frame;
+}
 
 class PalLocation {
 public:
@@ -87,6 +124,8 @@ public:
      * @return coordinates of node
      */
     virtual Coordinates getOwnCoordinates() = 0;
+
+    virtual Coordinates getCoordinatesForNode(node_t node) = 0;
 
     static PalLocation* getInstance();
 

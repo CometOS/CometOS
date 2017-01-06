@@ -51,6 +51,10 @@
 #define TCA_REPORT_INIT_TIME 1000
 #define TCA_REPORT_TIMER 1000  // default: 1000
 
+#ifdef LOCATION_IN_TCPWYHeader
+#include "palLocation.h"
+#endif
+
 //#define OUTPUT_WEIGELT
 //#define OUTPUT_KOTTBUS
 /*METHOD DEFINITION----------------------------------------------------------*/
@@ -258,6 +262,10 @@ void TCPWY::setHeaderData(TCPWYHeader &header){
         }
     }
     seqNum++;
+
+#ifdef LOCATION_IN_TCPWYHeader
+    header.coordinates = PalLocation::getInstance()->getOwnCoordinates();
+#endif
 }
 
 bool TCPWY::checkMsgType(Airframe& msg) {

@@ -79,6 +79,9 @@ public:
     bool onNL;
     uint8_t tries;
 
+#ifdef LOCATION_IN_TCPWYHeader
+    Coordinates coordinates;
+#endif
 };
 }
 

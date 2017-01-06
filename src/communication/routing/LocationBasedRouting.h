@@ -42,6 +42,12 @@
 
 namespace cometos {
 
+class LocationBasedRoutingHeader {
+public:
+    node_t nlSrc;
+    node_t nlDst;
+};
+
 class LocationBasedRouting: public Layer {
 public:
 
@@ -61,6 +67,8 @@ public:
 
 private:
     TCPWY* neighborhood = nullptr;
+
+    void forwardRequest(DataRequest* msg, LocationBasedRoutingHeader& hdr);
 };
 
 } /* namespace cometos */
