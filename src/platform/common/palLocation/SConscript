@@ -1,0 +1,11 @@
+Import('env')
+
+env.Append(CPPPATH=[Dir('.')])
+
+if env.conf.str('location') == "predefined":
+    env.add_sources([
+    'palLocationPredefined.cc'
+    ])
+
+    env.conf_to_str_define(['location_num_positions','location_positions'])
+

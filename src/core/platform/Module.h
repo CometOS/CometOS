@@ -116,6 +116,10 @@ public:
 
 	void cancel(Message *msg);
 
+    void finish() {
+        ASSERT(false); // should never be called, only for omnet compatibility
+    }
+
 	template<class M, class C>
 	void schedule(M* msg, void(C::*method)(M*), timeOffset_t ms = 0) {
 		msg->setBoundedDelegate(UnboundedDelegate(method), this);

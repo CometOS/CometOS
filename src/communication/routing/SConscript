@@ -5,7 +5,8 @@ env.Append(CPPPATH=[Dir('.')])
 env.add_sources([
 'Routing.cc',
 'SimpleRouting.cc',
-'PredefinedTreeRouting.cc'
+'PredefinedTreeRouting.cc',
+'LocationBasedRouting.cc'
 ])
 
 if env.get_platform() == 'omnet':
@@ -15,7 +16,6 @@ if env.get_platform() == 'omnet':
 	'CounterBasedFlooding.cc',
 	'DHRouting.cc',
 #	'GreedyLocationBasedRouting.cc',  ## removed due to multiple warnings
-#	'LocationBasedRouting.cc',        ## removed due to multiple warnings
 	'ProbabilisticFlooding.cc',
 	'SectorLocationBasedRouting.cc',
 	'ShortCuttingTreeRouting.cc',

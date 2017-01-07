@@ -32,6 +32,7 @@
 
 #include "LocationBasedRouting.h"
 #include "palLocation.h"
+#include "palId.h"
 
 namespace cometos {
 
