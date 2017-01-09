@@ -39,6 +39,7 @@
 
 #include "Layer.h"
 #include "TCPWY.h"
+#include "palLocation.h"
 
 namespace cometos {
 
@@ -46,6 +47,11 @@ class LocationBasedRoutingHeader {
 public:
     node_t nlSrc;
     node_t nlDst;
+    node_t faceStart;
+
+    bool isGreedy() {
+        return faceStart == MAC_BROADCAST;
+    }
 };
 
 class LocationBasedRouting: public Layer {
@@ -69,6 +75,9 @@ private:
     TCPWY* neighborhood = nullptr;
 
     void forwardRequest(DataRequest* msg, LocationBasedRoutingHeader& hdr);
+    node_t getNextGreedyHop(Coordinates& destinationCoordinates, node_t dst);
+    node_t getNextFaceHop(Coordinates& ownCoordinates, Coordinates& destinationCoordinates, node_t dst);
+    bool isPlanarNeighbor(Coordinates& uCoord, Coordinates& vCoord, node_t v);
 };
 
 } /* namespace cometos */

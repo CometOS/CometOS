@@ -31,7 +31,6 @@
  */
 
 #include "LocationBasedRouting.h"
-#include "palLocation.h"
 #include "palId.h"
 
 namespace cometos {
@@ -39,11 +38,11 @@ namespace cometos {
 Define_Module(LocationBasedRouting);
 
 Airframe& operator<<(Airframe& frame, LocationBasedRoutingHeader& value) {
-    return frame << value.nlSrc << value.nlDst;
+    return frame << value.nlSrc << value.nlDst << value.faceStart;
 }
 
 Airframe& operator>>(Airframe& frame, LocationBasedRoutingHeader& value) {
-    return frame >> value.nlDst >> value.nlSrc;
+    return frame >> value.nlDst >> value.nlSrc >> value.faceStart;
 }
 
 LocationBasedRouting::LocationBasedRouting()
@@ -56,21 +55,11 @@ void LocationBasedRouting::handleRequest(DataRequest* msg) {
     LocationBasedRoutingHeader hdr;
     hdr.nlDst = msg->dst;
     hdr.nlSrc = palId_id();
+    hdr.faceStart = MAC_BROADCAST;
     forwardRequest(msg, hdr);
 }
 
-void LocationBasedRouting::forwardRequest(DataRequest* msg, LocationBasedRoutingHeader& hdr) {
-    LOG_INFO_PREFIX;
-    LOG_INFO_PURE("handleRequest at 0x" << hex << palId_id() << " to 0x" << hdr.nlDst << " --------------- \t ");
-
-    Coordinates destinationCoordinates = PalLocation::getInstance()->getCoordinatesForNode(hdr.nlDst);
-    if(destinationCoordinates == Coordinates::INVALID_COORDINATES) {
-        LOG_INFO_PURE(" coordinates not found - throw away!" << dec << endl);
-        msg->response(new DataResponse(DataResponseStatus::INVALID_ADDRESS));
-        delete msg;
-        return;
-    }
-
+node_t LocationBasedRouting::getNextGreedyHop(Coordinates& destinationCoordinates, node_t dst) {
     node_t nextHop = MAC_BROADCAST;
     CoordinateType minDistance = destinationCoordinates.getSquaredDistance(PalLocation::getInstance()->getOwnCoordinates());
 
@@ -78,7 +67,7 @@ void LocationBasedRouting::forwardRequest(DataRequest* msg, LocationBasedRouting
     for(uint8_t i = 0; i < NEIGHBORLISTSIZE + STANDBYLISTSIZE; i++) {
         if(neighborhood->tca.neighborView[i].hasBidirectionalLink()) {
             node_t id = neighborhood->tca.neighborView[i].id;
-            if(id == hdr.nlDst) {
+            if(id == dst) {
                 // direct neighbor, just send
                 nextHop = id;
                 break;
@@ -94,6 +83,82 @@ void LocationBasedRouting::forwardRequest(DataRequest* msg, LocationBasedRouting
                 }
             }
         }
+    }
+
+    return nextHop;
+}
+
+bool LocationBasedRouting::isPlanarNeighbor(Coordinates& uCoord, Coordinates& vCoord, node_t v) {
+    // Relative Neighborhood Graph (RNG)
+    CoordinateType duv = uCoord.getSquaredDistance(vCoord);
+    for(uint8_t i = 0; i < NEIGHBORLISTSIZE + STANDBYLISTSIZE; i++) {
+        if(neighborhood->tca.neighborView[i].hasBidirectionalLink()) {
+            node_t w = neighborhood->tca.neighborView[i].id;
+            if(v == w) {
+                continue;
+            }
+            else {
+                Coordinates wCoord = PalLocation::getInstance()->getCoordinatesForNode(w);
+                CoordinateType duw = uCoord.getSquaredDistance(wCoord);
+                CoordinateType dvw = vCoord.getSquaredDistance(wCoord);
+                CoordinateType mx = (duw > dvw)?duw:dvw;
+                if(duv > mx) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+node_t LocationBasedRouting::getNextFaceHop(Coordinates& ownCoordinates, Coordinates& destinationCoordinates, node_t dst) {
+    for(uint8_t i = 0; i < NEIGHBORLISTSIZE + STANDBYLISTSIZE; i++) {
+        if(neighborhood->tca.neighborView[i].hasBidirectionalLink()) {
+            node_t v = neighborhood->tca.neighborView[i].id;
+            Coordinates vCoord = PalLocation::getInstance()->getCoordinatesForNode(v);
+            if(isPlanarNeighbor(ownCoordinates, vCoord, v)) {
+            }
+        }
+    }
+    
+    return MAC_BROADCAST;
+}
+
+void LocationBasedRouting::forwardRequest(DataRequest* msg, LocationBasedRoutingHeader& hdr) {
+    LOG_INFO_PREFIX;
+    LOG_INFO_PURE("handleRequest at 0x" << hex << palId_id() << " to 0x" << hdr.nlDst << " --------------- \t ");
+
+    Coordinates ownCoordinates = PalLocation::getInstance()->getOwnCoordinates();
+    Coordinates destinationCoordinates = PalLocation::getInstance()->getCoordinatesForNode(hdr.nlDst);
+    if(destinationCoordinates == Coordinates::INVALID_COORDINATES) {
+        LOG_INFO_PURE(" coordinates not found - throw away!" << dec << endl);
+        msg->response(new DataResponse(DataResponseStatus::INVALID_ADDRESS));
+        delete msg;
+        return;
+    }
+
+    // Switch from face routing to greedy routing?
+    if(!hdr.isGreedy()) {
+        Coordinates faceStartCoordinates = PalLocation::getInstance()->getCoordinatesForNode(hdr.faceStart);
+        if(destinationCoordinates.getSquaredDistance(ownCoordinates)
+            < destinationCoordinates.getSquaredDistance(faceStartCoordinates)) {
+            // We are closer to the sink as the face start -> Switch to greedy routing
+            hdr.faceStart = MAC_BROADCAST;
+        }
+    }
+
+    node_t nextHop = MAC_BROADCAST;
+    if(hdr.isGreedy()) {
+        nextHop = getNextGreedyHop(destinationCoordinates, hdr.nlDst);
+        if(nextHop == MAC_BROADCAST) {
+            // No greedy hop found -> Switch to face routing
+            hdr.faceStart = palId_id();
+        }
+    }
+
+    if(!hdr.isGreedy()) {
+        nextHop = getNextFaceHop(ownCoordinates, destinationCoordinates, hdr.nlDst);
     }
 
     if(nextHop == MAC_BROADCAST) { // no next hop found
