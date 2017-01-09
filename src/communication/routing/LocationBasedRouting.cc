@@ -60,11 +60,12 @@ void LocationBasedRouting::handleRequest(DataRequest* msg) {
 }
 
 void LocationBasedRouting::forwardRequest(DataRequest* msg, LocationBasedRoutingHeader& hdr) {
-    getCout() << "handleRequest at " << palId_id() << " to " << hdr.nlDst << " --------------- \t ";
+    LOG_INFO_PREFIX;
+    LOG_INFO_PURE("handleRequest at 0x" << hex << palId_id() << " to 0x" << hdr.nlDst << " --------------- \t ");
 
     Coordinates destinationCoordinates = PalLocation::getInstance()->getCoordinatesForNode(hdr.nlDst);
     if(destinationCoordinates == Coordinates::INVALID_COORDINATES) {
-        getCout() << " throw away!" << endl;
+        LOG_INFO_PURE(" coordinates not found - throw away!" << dec << endl);
         msg->response(new DataResponse(DataResponseStatus::INVALID_ADDRESS));
         delete msg;
         return;
@@ -77,7 +78,6 @@ void LocationBasedRouting::forwardRequest(DataRequest* msg, LocationBasedRouting
     for(uint8_t i = 0; i < NEIGHBORLISTSIZE + STANDBYLISTSIZE; i++) {
         if(neighborhood->tca.neighborView[i].hasBidirectionalLink()) {
             node_t id = neighborhood->tca.neighborView[i].id;
-            //getCout() << id << "/" << coordinates.x << "/" << coordinates.y << "-";
             if(id == hdr.nlDst) {
                 // direct neighbor, just send
                 nextHop = id;
@@ -97,18 +97,18 @@ void LocationBasedRouting::forwardRequest(DataRequest* msg, LocationBasedRouting
     }
 
     if(nextHop == MAC_BROADCAST) { // no next hop found
-        getCout() << " throw away!" << endl;
+        LOG_INFO_PURE(" no next hop found - throw away!" << endl);
         msg->response(new DataResponse(DataResponseStatus::NO_ROUTE));
         delete msg;
     }
     else {
-        getCout() << " next hop " << nextHop;
-        getCout() << endl;
+        LOG_INFO_PURE(" next hop 0x" << nextHop << "." << endl);
         msg->getAirframe() << hdr;
         msg->dst = nextHop;
         sendRequest(msg);
     }
 
+    LOG_INFO_PURE(dec);
 }
 
 void LocationBasedRouting::finish() {
@@ -142,7 +142,8 @@ void LocationBasedRouting::handleIndication(DataIndication* pkt) {
     ASSERT(pkt->dst == palId_id() || pkt->dst == MAC_BROADCAST);
     LocationBasedRoutingHeader hdr;
     pkt->getAirframe() >> hdr;
-    getCout() << "handleIndication from " << pkt->src << " to " << pkt->dst << " at " << palId_id() << endl;
+    LOG_INFO_PREFIX;
+    LOG_INFO_PURE("handleIndication from 0x" << hex << pkt->src << " to 0x" << pkt->dst << " at 0x" << palId_id() << dec << endl);
 
     if (palId_id() == hdr.nlDst) {
         pkt->src = hdr.nlSrc;
