@@ -58,7 +58,7 @@ public:
                 char* numstr = &str[pos];
                 for(; pos < maxlen; pos++) {
                     // find next token
-                    if(str[pos] == ',' or str[pos] == ';') {
+                    if(str[pos] == ',' or str[pos] == ':') {
                         break;
                     } 
                 }
@@ -74,6 +74,7 @@ public:
             node_t id = vals[0];
             Coordinates coord{vals[1],vals[2],vals[3]};
             positions.set(id,coord);
+            getCout() << id << " " << vals[1] << " " << vals[2] << " " << vals[3] << endl;
         }
     }
 

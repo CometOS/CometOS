@@ -34,8 +34,8 @@
  * @author Florian Kauer
  */
 
-#ifndef LocationBasedRouting_H_
-#define LocationBasedRouting_H_
+#ifndef GPSR_H_
+#define GPSR_H_
 
 #include "Layer.h"
 #include "TCPWY.h"
@@ -43,21 +43,22 @@
 
 namespace cometos {
 
-class LocationBasedRoutingHeader {
+class GPSRHeader {
 public:
     node_t nlSrc;
     node_t nlDst;
     node_t faceStart;
+    node_t faceFirstHop;
 
     bool isGreedy() {
         return faceStart == MAC_BROADCAST;
     }
 };
 
-class LocationBasedRouting: public Layer {
+class GPSR: public Layer {
 public:
 
-    LocationBasedRouting();
+    GPSR();
 
     void initialize();
 
@@ -74,12 +75,13 @@ public:
 private:
     TCPWY* neighborhood = nullptr;
 
-    void forwardRequest(DataRequest* msg, LocationBasedRoutingHeader& hdr);
-    node_t getNextGreedyHop(Coordinates& destinationCoordinates, node_t dst);
-    node_t getNextFaceHop(Coordinates& ownCoordinates, Coordinates& destinationCoordinates, node_t dst);
-    bool isPlanarNeighbor(Coordinates& uCoord, Coordinates& vCoord, node_t v);
+    void forwardRequest(DataRequest* msg, GPSRHeader& hdr, node_t prevHop);
+    node_t getNextGreedyHop(const Coordinates& destinationCoordinates, node_t dst);
+    node_t getNextFaceHop(const Coordinates& ownCoordinates, const Coordinates& destinationCoordinates, node_t& faceStart, node_t& faceFirstHop, node_t prevHop);
+    bool isPlanarNeighbor(const Coordinates& uCoord, const Coordinates& vCoord, node_t v);
+    node_t getNextPlanarNeighborCounterClockwise(const Coordinates& ownCoordinates, const Coordinates& referenceTarget, Coordinates& nextHopCoordinates);
 };
 
 } /* namespace cometos */
 
-#endif /* LocationBasedRouting_H_ */
+#endif /* GPSR_H_ */
