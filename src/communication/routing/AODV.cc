@@ -84,7 +84,11 @@ void AODV::initialize() {
     // start timer for periodic updates of routing table, also initializes array
     schedule(new Message, &AODV::tableUpdate);
 
+#ifdef OMNETPP
     sendingOffset = par("sendingOffset");
+#else
+    sendingOffset = 100;
+#endif
 }
 
 void AODV::handleTimeout(DataRequest* msg) {
@@ -121,14 +125,14 @@ void AODV::forwardRequest(DataRequest* msg) {
     node_t nextHop = getNextHop(msg->dst);
 
     if (nextHop == BROADCAST && msg->dst != BROADCAST ) {
-        LOG_INFO("send rreq to "<<msg->dst);
+        LOG_INFO("send rreq to 0x"<<hex<<msg->dst<<dec);
         //request can currently not processed add packet to queue
         queue.push_back(msg);
         schedule(msg, &AODV::handleTimeout, ROUTING_TIMEOUT);
         //INITIATE DISCOVERY
         // send route reply
         DataRequest *req = new DataRequest(BROADCAST, new Airframe);
-        NwkHeader nwk(msg->dst, getId(), seq++, 0);
+        NwkHeader nwk(msg->dst, palId_id(), seq++, 0);
         req->getAirframe() << nwk;
 
 #ifdef ROUTING_ENABLE_STATS
@@ -136,7 +140,7 @@ void AODV::forwardRequest(DataRequest* msg) {
 #endif
         rreqReqOut.send(req, intrand(sendingOffset));
     } else {
-        LOG_INFO("send message to "<<msg->dst << " via "<<nextHop);
+        LOG_INFO("send message to 0x"<<hex<<msg->dst << " via 0x"<<nextHop<<dec);
         msg->dst = nextHop;
         ASSERT(!isScheduled(msg));
 
@@ -207,7 +211,7 @@ void AODV::handleRreqIndication(DataIndication* msg) {
             DataRequest *req = new DataRequest(nextHop, new Airframe);
             nwk.dst = nwk.src;
             ASSERT(nwk.dst!=BROADCAST);
-            nwk.src = getId();
+            nwk.src = palId_id();
             nwk.hops = 0;
             nwk.seq = seq++;
             req->getAirframe() << nwk;
@@ -215,12 +219,12 @@ void AODV::handleRreqIndication(DataIndication* msg) {
             control++;
 #endif
             // send route reply
-            LOG_INFO("send rrep");
+            LOG_INFO("send rrep to 0x"<<hex<<nwk.dst<<dec);
             rrepReqOut.send(req);
         }
 
     } else {
-        LOG_INFO("forward rreq to "<<nwk.dst);
+        LOG_INFO("forward rreq to 0x"<<hex<<nwk.dst<<" from 0x"<<nwk.src<<dec);
         // forward route request
         DataRequest *req = new DataRequest(BROADCAST,
                 msg->decapsulateAirframe());
@@ -246,7 +250,8 @@ void AODV::handleRrepIndication(DataIndication* msg) {
     updateRoutingTable(msg->src, nwk.src, nwk.hops);
 
     if (nwk.dst == palId_id()) {
-        LOG_INFO("received rrep from "<<nwk.src);ASSERT(getNextHop(nwk.src)!=BROADCAST);
+        LOG_INFO("received rrep from 0x"<<hex<<nwk.src<<dec);
+        ASSERT(getNextHop(nwk.src)!=BROADCAST);
 
         for (uint8_t it = queue.begin(); it != queue.end();) {
 
@@ -262,7 +267,7 @@ void AODV::handleRrepIndication(DataIndication* msg) {
     } else {
         node_t nextHop = getNextHop(nwk.dst);
         if (nextHop != BROADCAST ) {
-            LOG_INFO("forward rrep to "<<nwk.dst<<" via "<<nextHop<<" from "<<nwk.src);
+            LOG_INFO("forward rrep to 0x"<<hex<<nwk.dst<<" via 0x"<<nextHop<<" from 0x"<<nwk.src<<dec);
             // forward route reply
             DataRequest *req = new DataRequest(nextHop,
                     msg->decapsulateAirframe());
@@ -307,7 +312,7 @@ void AODV::handleIndication(DataIndication* msg) {
     updateRoutingTable(msg->src, nwk.src, nwk.hops);
 
     if (nwk.dst == palId_id()) {
-        LOG_INFO("receive from "<<nwk.src);
+        LOG_INFO("receive from 0x"<<hex<<nwk.src<<dec);
         msg->src = nwk.src;
         msg->dst = nwk.dst;
         msg->set(new RoutingInfo(nwk.hops));
@@ -347,8 +352,7 @@ void AODV::handleResponse(DataResponse* resp) {
         NwkHeader nwk;
         req->getAirframe() >> nwk;
         table.erase(table.find(nwk.dst));
-        std::cout << getId() << " DELETE ENTRY " << nwk.dst << " "
-                << getNextHop(nwk.dst) << endl;
+        LOG_INFO("DELETE ENTRY 0x" << hex << nwk.dst << " " << getNextHop(nwk.dst) << dec);
         req->response(new DataResponse(DataResponseStatus::FAIL_UNKNOWN));
     }
 
