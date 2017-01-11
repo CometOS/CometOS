@@ -37,12 +37,12 @@ namespace cometos {
 
 Define_Module(GPSR);
 
-Airframe& operator<<(Airframe& frame, GPSRHeader& value) {
-    return frame << value.nlSrc << value.nlDst << value.faceStart;
+Airframe& operator<<(Airframe& frame, const GPSRHeader& value) {
+    return frame << value.nlSrc << value.nlDst << value.faceStart << value.faceFirstHop;
 }
 
 Airframe& operator>>(Airframe& frame, GPSRHeader& value) {
-    return frame >> value.nlDst >> value.nlSrc >> value.faceStart;
+    return frame >> value.faceFirstHop >> value.faceStart >> value.nlDst >> value.nlSrc;
 }
 
 GPSR::GPSR()
