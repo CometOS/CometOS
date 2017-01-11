@@ -43,7 +43,7 @@ Airframe& operator<<(Airframe& frame, TCPWYHeader& value) {
     for(uint8_t i=0; i<NEIGHBORLISTSIZE; i++){
         frame << value.neighbor[i];
     }
-#if LOCATION_IN_TCPWYHeader
+#ifdef LOCATION_IN_TCPWYHeader
     frame << value.coordinates;
 #endif
 	return frame << value.seqNum << value.ccID << value.ccDist << value.msgType;
@@ -53,7 +53,7 @@ Airframe& operator<<(Airframe& frame, TCPWYHeader& value) {
  */
 Airframe& operator>>(Airframe& frame, TCPWYHeader& value) {
     frame >> value.msgType >> value.ccDist >> value.ccID >> value.seqNum;
-#if LOCATION_IN_TCPWYHeader
+#ifdef LOCATION_IN_TCPWYHeader
     frame >> value.coordinates;
 #endif
     for(uint8_t i=NEIGHBORLISTSIZE-1; i<255; i--){

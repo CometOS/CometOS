@@ -83,7 +83,7 @@ void TCPWY::initialize() {
     tca.initialize(palId_id());
     time_t randomBackoff = intrand(TCA_RANDOM_BACKOFF);
 	schedule(new Message, &TCPWY::neighborDataUpdateTimer, TCA_TIME_INTERVAL + randomBackoff);
-    //schedule(new Message, &TCPWY::timedReport, intrand(TCA_REPORT_INIT_TIME));
+    schedule(new Message, &TCPWY::timedReport, intrand(TCA_REPORT_INIT_TIME));
 
 }
 
@@ -159,21 +159,32 @@ void TCPWY::neighborDataUpdateTimer(Message *timer) {
 
 void TCPWY::timedReport(Message *timer) {
     schedule(new Message, &TCPWY::timedReport, TCA_REPORT_TIMER);
-    getCout() << (long)NetworkTime::get() << ";TCA_T;v[" << (int)palId_id()
-            << "];c={";
+    LOG_INFO_PREFIX;
+    LOG_INFO_PURE("TCA_T;v[0x" << hex << (int)palId_id() << dec << "];c={");
     bool atLeastOne = false;
     for(uint8_t i = 0; i < NEIGHBORLISTSIZE+STANDBYLISTSIZE; i++) {
         if(tca.neighborView[i].id != TZ_INVALID_ID) {
-            if(!tca.neighborView[i].onNL) {
-                if(atLeastOne) {
-                    getCout() << ",";
-                }
-                getCout() << "(" << (int)tca.neighborView[i].id << "," << (int)tca.neighborView[i].qualityLT << ")";
-                atLeastOne = true;
+            if(atLeastOne) {
+                LOG_INFO_PURE(",");
             }
+            atLeastOne = true;
+
+            char open = '(';
+            char close = ')';
+            if(tca.neighborView[i].onNL) {
+                if(tca.neighborView[i].hasBidirectionalLink()) {
+                    open = '<';
+                    close = '>';
+                }
+                else {
+                    open = '[';
+                    close = ']';
+                }
+            }
+            LOG_INFO_PURE(open << "0x" << hex << (int)tca.neighborView[i].id << ":" << dec << (int)tca.neighborView[i].qualityLT << close);
         }
     }
-    getCout() << "}!\n";
+    LOG_INFO_PURE("}!" << endl);
 
     delete timer;
 }
