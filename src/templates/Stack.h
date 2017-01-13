@@ -50,10 +50,14 @@ public:
 		return array[index];
 	}
 
-	inline void push(C& value) {
+	inline bool push(C& value) {
 		if (size < SIZE) {
 			array[size] = value;
 			size++;
+			return true;
+		}
+		else {
+		    return false;
 		}
 	}
 

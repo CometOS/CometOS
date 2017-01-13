@@ -119,7 +119,8 @@ void DSMEMessageBuffer::release(DSMEMessage* message) {
                 frame->clear();
                 frame->removeAll();
             }
-            airframeStack.push(frame);
+            bool result = airframeStack.push(frame);
+            ASSERT(result);
         }
         else if(frame) {
             frame.deleteObject(); // the stack is full anyway
