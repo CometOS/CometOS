@@ -115,7 +115,7 @@ void RemoteAccess::handleIndication(DataIndication* msg) {
 				(*resp) << (uint8_t) (RA_SUCCESS);
 			}
 		} else {
-			if (!mod->remoteWriteVariable(&msg->getAirframe(), var.getStr())) {
+			if (!mod->remoteWriteVariable(msg->decapsulateAirframe(), var.getStr())) {
 				(*resp) << (uint8_t) (RA_ERROR_NO_SUCH_VARIABLE);
 			} else {
 				(*resp) << (uint8_t) (RA_SUCCESS);

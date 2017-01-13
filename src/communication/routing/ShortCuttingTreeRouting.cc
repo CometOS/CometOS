@@ -380,7 +380,7 @@ void ShortCuttingTreeRouting::sendNext() {
     ASSERT(currentShortCutIndex<parents.getSize());
 
     DataRequest *req = new DataRequest(parents[currentShortCutIndex],
-            (*queue.begin())->getAirframe().getDeepCopy(),
+            AirframePtr((*queue.begin())->getAirframe().getDeepCopy()),
             createCallback(&ShortCuttingTreeRouting::handleResponse));
     sendRequest(req, sendingBackoff);
     sendingBackoff = 0;

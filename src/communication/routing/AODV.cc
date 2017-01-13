@@ -146,7 +146,7 @@ void AODV::forwardRequest(DataRequest* msg) {
         schedule(msg, &AODV::handleTimeout, ROUTING_TIMEOUT);
         //INITIATE DISCOVERY
         // send route reply
-        DataRequest *req = new DataRequest(BROADCAST, new Airframe);
+        DataRequest *req = new DataRequest(BROADCAST, make_checked<Airframe>());
         NwkHeader nwk(msg->dst, palId_id(), seq++, 0);
         req->getAirframe() << nwk;
 
@@ -165,7 +165,7 @@ void AODV::forwardRequest(DataRequest* msg) {
         }
 
         sendRequest(
-                new DataRequest(nextHop, msg->getAirframe().getCopy(),
+                new DataRequest(nextHop, AirframePtr(msg->getAirframe().getCopy()),
                         createCallback(&AODV::handleResponse),
                         new AODVRoutingRequestId(msg)), offset);
     }
@@ -223,7 +223,7 @@ void AODV::handleRreqIndication(DataIndication* msg) {
         node_t nextHop = getNextHop(nwk.src);
         if (nextHop != BROADCAST ) {
 
-            DataRequest *req = new DataRequest(nextHop, new Airframe);
+            DataRequest *req = new DataRequest(nextHop, make_checked<Airframe>());
             nwk.dst = nwk.src;
             ASSERT(nwk.dst!=BROADCAST);
             nwk.src = palId_id();
@@ -336,7 +336,7 @@ void AODV::handleIndication(DataIndication* msg) {
     }
 
     // forward request
-    DataRequest *req = new DataRequest(nwk.dst, msg->getAirframe().getCopy());
+    DataRequest *req = new DataRequest(nwk.dst, AirframePtr(msg->getAirframe().getCopy()));
     req->getAirframe() << nwk;
     forwardRequest(req);
 

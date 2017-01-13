@@ -75,7 +75,7 @@ void AssociationService::timeout(Message *msg) {
 		} else {
 			this->currInterval *= 2;
 		}
-		sendRequest(new DataRequest(BASESTATION_ADDR, new Airframe()));
+		sendRequest(new DataRequest(BASESTATION_ADDR, make_checked<Airframe>()));
 
 	}
 }

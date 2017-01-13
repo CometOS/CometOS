@@ -368,7 +368,7 @@ void DHRouting::timeout(Message *timer) {
 #ifdef ROUTING_ENABLE_STATS
         control++;
 #endif
-        discoveryReqOut.send(new DataRequest(BROADCAST, new Airframe),
+        discoveryReqOut.send(new DataRequest(BROADCAST, make_checked<Airframe>()),
                 intrand(DHROUTING_BASE_TIME));
 
     }

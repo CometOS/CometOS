@@ -110,7 +110,7 @@ void SimpleReliabilityLayer::handleIndication(cometos::DataIndication *msg) {
     if (0 == rack.direction) {
 //        std::cout << "data " << endl;
         // send ack back
-        cometos::DataRequest *ackPkt = new cometos::DataRequest(msg->src, new cometos::Airframe());
+        cometos::DataRequest *ackPkt = new cometos::DataRequest(msg->src, cometos::make_checked<cometos::Airframe>());
         rack.direction = 1;
 
         ackPkt->getAirframe() << rack;
@@ -185,8 +185,7 @@ void SimpleReliabilityLayer::timeout(cometos::Message *timer) {
 
 void SimpleReliabilityLayer::sendCopy(cometos::DataRequest* & msg) {
     cometos::DataRequest * req =
-            new cometos::DataRequest(msg->dst,
-                                     msg->getAirframe().getCopy(),
+            new cometos::DataRequest(msg->dst, cometos::AirframePtr(msg->getAirframe().getCopy()),
                                      createCallback(&SimpleReliabilityLayer::handleConfirm));
 //    std::cout << "send message of len " << (int) req->getAirframe().getLength() << endl;
     // TODO metadata is lost here

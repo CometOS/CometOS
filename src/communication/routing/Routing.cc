@@ -93,7 +93,7 @@ void Routing::handleIndication(DataIndication* pkt, NwkHeader& nwk) {
 
 	// check whether copy of packet should be sent to upper layer
 	if (nwk.dst == palId_id() || nwk.dst == BROADCAST) {
-		DataIndication * ind= new DataIndication( pkt->getAirframe().getCopy(), nwk.src, nwk.dst);
+		DataIndication * ind= new DataIndication(AirframePtr(pkt->getAirframe().getCopy()), nwk.src, nwk.dst);
 		ind->set(new RoutingInfo(nwk.hops));
 		sendIndication(ind);
 

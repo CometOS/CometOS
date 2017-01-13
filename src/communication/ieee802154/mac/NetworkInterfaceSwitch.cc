@@ -62,8 +62,7 @@ void NetworkInterfaceSwitch::handleRequest(cometos::DataRequest* msg) {
 	msg->set(createAddrMetaData(msg));
 
 	if (msg->dst == MAC_BROADCAST) {
-	    cometos::DataRequest * msg2 = new cometos::DataRequest(msg->dst,
-				msg->getAirframe().getCopy());
+	    cometos::DataRequest * msg2 = new cometos::DataRequest(msg->dst,cometos::AirframePtr(msg->getAirframe().getCopy()));
 		msg2->set(createAddrMetaData(msg));
 		cniReqOut.send(msg);
 		nniReqOut.send(msg2);

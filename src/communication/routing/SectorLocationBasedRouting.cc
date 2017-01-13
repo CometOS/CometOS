@@ -161,9 +161,8 @@ void SectorLocationBasedRouting::forward() {
 #endif
         sendRequest(
                 new DataRequest(currentRequest->dst,
-                        currentRequest->getAirframe().getDeepCopy(),
-                        createCallback(
-                                &SectorLocationBasedRouting::handleResponseDirect)));
+                        AirframePtr(currentRequest->getAirframe().getDeepCopy()),
+                        createCallback(&SectorLocationBasedRouting::handleResponseDirect)));
 
         return;
     }
@@ -190,9 +189,8 @@ void SectorLocationBasedRouting::forward() {
             //cout << " " << backoff << endl;
             sendRequest(
                     new DataRequest(nextHops[i],
-                            currentRequest->getAirframe().getDeepCopy(),
-                            createCallback(
-                                    &SectorLocationBasedRouting::handleResponse)),
+                            AirframePtr(currentRequest->getAirframe().getDeepCopy()),
+                            createCallback(&SectorLocationBasedRouting::handleResponse)),
                     backoff);
 
             return;
@@ -293,9 +291,8 @@ void SectorLocationBasedRouting::sendToCandidate() {
     LOG_INFO("send reply");
 
     sendRequest(
-            new DataRequest(dst, currentRequest->getAirframe().getDeepCopy(),
-                    createCallback(
-                            &SectorLocationBasedRouting::handleResponseCandidate)));
+            new DataRequest(dst, AirframePtr(currentRequest->getAirframe().getDeepCopy()),
+                    createCallback(&SectorLocationBasedRouting::handleResponseCandidate)));
 
 }
 

@@ -445,7 +445,7 @@ void TimeSyncWirelessBridge::responseSerialToWireless(DataResponse* resp) {
     if (msg->has<RequestResponseOverSerial>()) {
 
         // we do not request a response to this "response" request message
-        DataRequest* responseViaSerial = new DataRequest(msg->src, new Airframe());
+        DataRequest* responseViaSerial = new DataRequest(msg->src, make_checked<Airframe>());
         responseViaSerial->set(new SerialResponse(msg->get<RequestResponseOverSerial>()->seq, resp->isSuccess()));
         responseViaSerial->set(resp->get<MacTxInfo>()->getCopy());
 

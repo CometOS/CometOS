@@ -60,7 +60,7 @@ void EndpointExample::traffic(Message *msg) {
 
 	uint16_t simpleHeader = 1234;
 
-	DataRequest *request = new DataRequest(0, new Airframe,
+	DataRequest *request = new DataRequest(0, make_checked<Airframe>(),
 			createCallback(&EndpointExample::handleResponse));
 
 	// serialize header to airframe

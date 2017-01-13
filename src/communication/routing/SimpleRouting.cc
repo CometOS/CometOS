@@ -114,7 +114,7 @@ void SimpleRouting::handleRequest(DataRequest* msg) {
     } else {
         // sending is done with response handler
         sendRequest(
-                new DataRequest(nextHop, msg->getAirframe().getCopy(),
+                new DataRequest(nextHop, AirframePtr(msg->getAirframe().getCopy()),
                         createCallback(&SimpleRouting::handleResponse),
                         new SimpleRoutingRequestId(msg)));
     }
@@ -220,7 +220,7 @@ void SimpleRouting::handleIndication(DataIndication* msg) {
     }
 
     DataRequest *req = new DataRequest(getNextHop(nwk.dst),
-            msg->getAirframe().getCopy());
+            AirframePtr(msg->getAirframe().getCopy()));
     req->getAirframe() << nwk;
 
     // no route reply, if nextHop can not addressed directly
@@ -246,7 +246,7 @@ void SimpleRouting::handleIndication(DataIndication* msg) {
     } else {
         LOG_INFO("forward to "<<nwk.dst<<" via "<<req->dst);
         sendRequest(
-                new DataRequest(req->dst, req->getAirframe().getCopy(),
+                new DataRequest(req->dst, AirframePtr(req->getAirframe().getCopy()),
                         createCallback(&SimpleRouting::handleResponse),
                         new SimpleRoutingRequestId(req)));
     }
