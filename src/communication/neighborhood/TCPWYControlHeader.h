@@ -35,7 +35,7 @@
  */
 
 #ifndef TCPWYCONTROLDATA_H_
-#define TCPWYCONTORLDATA_H_
+#define TCPWYCONTROLDATA_H_
 
 
 #include "Airframe.h"
@@ -77,4 +77,4 @@ Airframe& operator>>(Airframe& frame,TCPWYControlHeader& value);
 
 
 } /* namespace cometos */
-#endif /* TCPWYHEADER_H_ */
+#endif /* TCPWYCONTROLDATA_H_ */
