@@ -82,7 +82,7 @@ TrafficEvaluation::TrafficEvaluation(uint8_t msgSize,
 
 TrafficEvaluation::~TrafficEvaluation() {
     if(frame) {
-        frame.deleteObject();
+        frame.delete_object();
     }
 }
 

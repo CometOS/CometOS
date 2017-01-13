@@ -129,6 +129,8 @@ protected:
     PHY_PIB phy_pib;
     MAC_PIB mac_pib;
 
+    DSMEMessageBuffer messageBuffer;
+
     DSMELayer dsme;
 
     mcps_sap::MCPS_SAP mcps_sap;
@@ -143,8 +145,6 @@ protected:
     cometos::Message* timer;
     cometos::Message* ccaTimer;
     Delegate<void(bool)> txEndCallback;
-
-    DSMEMessageBuffer messageBuffer;
 
     /** @brief the bit rate at which we transmit */
     double bitrate;

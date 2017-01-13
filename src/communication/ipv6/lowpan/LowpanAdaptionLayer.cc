@@ -527,7 +527,7 @@ void LowpanAdaptionLayer::handleMACIndication(LowpanIndication *ind) {
     }
 
     delete ind;
-    frame.deleteObject();
+    frame.delete_object();
 }
 
 

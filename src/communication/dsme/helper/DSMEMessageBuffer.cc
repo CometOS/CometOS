@@ -55,7 +55,7 @@ DSMEMessageBuffer::~DSMEMessageBuffer() {
         AirframePtr p = airframeStack.top();
         airframeStack.top().reset();
         airframeStack.pop();
-        p.deleteObject();
+        p.delete_object();
     }
 }
 
@@ -123,7 +123,7 @@ void DSMEMessageBuffer::release(DSMEMessage* message) {
             ASSERT(result);
         }
         else if(frame) {
-            frame.deleteObject(); // the stack is full anyway
+            frame.delete_object(); // the stack is full anyway
         }
     }
     palExec_atomicEnd();

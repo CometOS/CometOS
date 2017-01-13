@@ -137,8 +137,9 @@ bool DSMEPlatform::sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg,
 
 void DSMEPlatform::receiveLowerData(cMessage *msg) {
     // Get data from Mac Packet
-    MacPacket *pktMac = check_and_cast<MacPacket*>(msg);
+    checked_ptr<MacPacket> pktMac(check_and_cast<MacPacket*>(msg));
     AirframePtr pkt = pktMac->decapsulateNewAirframe();
+    pktMac.delete_object();
 
     // Remove the FCS (only dummy bytes since the actual bit error calculation is not based on the FCS itself)
     uint16_t fcs;
@@ -183,7 +184,7 @@ void DSMEPlatform::txDone(macTxResult_t result) {
 
     MacTxInfo info(0, 0);
 
-    txPkt.deleteObject();
+    txPkt.delete_object();
 
     if (result == MTR_SUCCESS)
         sendingSucceed++;
@@ -204,31 +205,6 @@ void DSMEPlatform::receiveLowerControl(cMessage *msg) {
         dispatch(e);
     } else if (msg->getKind() == BaseDecider::PACKET_DROPPED) {
         //ASSERT(phy->getRadioState() == Radio::RX);
-        MacPacket *pktMac = check_and_cast<MacPacket*>(msg);
-        AirframePtr pkt = pktMac->decapsulateNewAirframe();
-
-        /* TODO
-         MacHeader header;
-         (*pkt) >> header;
-
-         DeciderResult* dr = check_and_cast<PhyToMacControlInfo*>(pktMac->getControlInfo())->getDeciderResult();
-
-         // use dynamic casts to check if the decider result provides some information
-         // about interference status during reception
-         DeciderResultEmpiric802154 * dre = dynamic_cast<DeciderResultEmpiric802154*>(dr);
-
-         LOG_INFO("DROPPED pckt for " << header.dst << " from " << header.src);
-         if (header.type == MAC_TYPE_DATA) {
-         if (header.dst == getId() || header.dst == MAC_BROADCAST) {
-         handleRxDrop("data", header.dst, header.src, dre, dataFrames);
-         }
-         } else if (header.type == MAC_TYPE_ACK) {
-         if (header.src == getId()) {
-         handleRxDrop("ack", header.src, header.dst, dre, ackFrames);
-         }
-         }
-         */
-        pkt.deleteObject();
 
         // we additionally dispatch a frame dropped event to handle a situation
         // in which we waited with TX for RX of a frame which then failed --
@@ -301,12 +277,12 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
     currTxPower = txPower;
 
     if (txPkt) {
-        frame.deleteObject();
+        frame.delete_object();
         return false;
     }
 
     if (enable == false) {
-        frame.deleteObject();
+        frame.delete_object();
         return false;
     }
 

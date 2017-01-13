@@ -366,7 +366,7 @@ fsmReturnStatus Deluge::handleSummary() {
     uint8_t gamma;
     (*frame) >> versionNumber;
     (*frame) >> gamma;
-    frame.deleteObject();
+    frame.delete_object();
 
 #ifdef DELUGE_OUTPUT
     getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received summary (v=" << versionNumber << ",g=" << static_cast<uint16_t>(gamma) << ")" << endl;
@@ -502,7 +502,7 @@ void Deluge::handleObjectProfile() {
             mActive = true;
         }
     }
-    frame.deleteObject();
+    frame.delete_object();
 }
 
 fsmReturnStatus Deluge::handlePageRequest() {
@@ -511,7 +511,7 @@ fsmReturnStatus Deluge::handlePageRequest() {
     AirframePtr frame = rcvdMsg->decapsulateAirframe();
     (*frame) >> requestedPage;
     (*frame) >> requestedPackets;
-    frame.deleteObject();
+    frame.delete_object();
 
     // Check availability of page
     uint8_t gamma = pInfo->getHighestCompletePage();
@@ -629,7 +629,7 @@ void Deluge::handlePacket() {
     (*frame) >> packet;
     (*frame) >> crc;
     (*frame) >> this->mBuffer;
-    frame.deleteObject();
+    frame.delete_object();
 
     if (page != this->mPageRX) {
 #ifdef DELUGE_OUTPUT
@@ -844,7 +844,7 @@ void Deluge::handlePageRequestTX() {
     uint32_t requestedPackets;
     (*frame) >> requestedPage;
     (*frame) >> requestedPackets;
-    frame.deleteObject();
+    frame.delete_object();
 
     if(mPageTX == requestedPage) {
         mRequestedPackets |= requestedPackets;

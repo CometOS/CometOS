@@ -136,7 +136,7 @@ private:
 
     virtual ~DSMEMessage() override {
         if (frame) {
-            frame.deleteObject();
+            frame.delete_object();
         }
 
         if (request != nullptr) {

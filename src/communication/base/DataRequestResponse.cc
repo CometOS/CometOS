@@ -46,7 +46,7 @@ DataRequest::DataRequest(node_t dst, AirframePtr frame,
 
 DataRequest::~DataRequest() {
 	if (this->frame) {
-	    this->frame.deleteObject();
+	    this->frame.delete_object();
 	}
 }
 

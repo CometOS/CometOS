@@ -220,7 +220,7 @@ public:
 #endif
 		RemoteMethod *method = remoteFindMethod(name);
 		if (method == NULL) {
-			frame.deleteObject();
+			frame.delete_object();
 		}
 
 		return method->invoke(frame);

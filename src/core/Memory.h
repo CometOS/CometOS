@@ -140,6 +140,22 @@ public:
         }
     }
 
+    T* decapsulate() {
+        if(this->wrapped_object) {
+            ASSERT(unique());
+
+            T* temp = this->wrapped_object->raw_instance;
+
+            this->wrapped_object->raw_instance = nullptr;
+            delete this->wrapped_object;
+            this->wrapped_object = nullptr;
+
+            return temp;
+        } else {
+            return nullptr;
+        }
+    }
+
     T& operator*() {
         ASSERT(this->wrapped_object != nullptr);
         ASSERT(this->wrapped_object->raw_instance != nullptr);
@@ -177,7 +193,7 @@ public:
         return use_count() == 1;
     }
 
-    void deleteObject() {
+    void delete_object() {
         ASSERT(unique());
 
         if(this->wrapped_object) {

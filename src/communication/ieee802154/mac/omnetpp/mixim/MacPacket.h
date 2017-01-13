@@ -37,6 +37,7 @@
 
 #include "Airframe.h"
 #include "ObjectContainer.h"
+#include "Memory.h"
 
 /*PROTOTYPES-----------------------------------------------------------------*/
 
@@ -59,7 +60,7 @@ public:
 
 	MacPacket(const MacPacket& other);
 
-	virtual MacPacket *dup() const {
+	virtual MacPacket* dup() const override {
 		return new MacPacket(*this);
 	}
 

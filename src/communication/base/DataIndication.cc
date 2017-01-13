@@ -45,7 +45,7 @@ DataIndication::DataIndication(AirframePtr frame, node_t src, node_t dst) :
 
 DataIndication::~DataIndication() {
     if (frame) {
-        frame.deleteObject();
+        frame.delete_object();
     }
 }
 

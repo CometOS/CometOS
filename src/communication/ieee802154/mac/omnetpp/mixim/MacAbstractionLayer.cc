@@ -406,7 +406,7 @@ fsmReturnStatus MacAbstractionLayer::stateCCA(MacEvent& e) {
 
 			txPkt->removeAll(); // remove all meta data
 
-			MacPacket *macPkt = new MacPacket();
+			checked_ptr<MacPacket> macPkt = make_checked<MacPacket>();
 			macPkt->encapsulateArray(txPkt->getData(), txPkt->getLength());
 
 			// possibly need meta data for empirical physical layer
@@ -428,11 +428,10 @@ fsmReturnStatus MacAbstractionLayer::stateCCA(MacEvent& e) {
 			// now use the more realistic RX-TX switch time (during which 
 			// the RadioStateAnalougeModel should set the attenuation factor to
 			// 0.0 (meaning the incoming signal has a power of 0 Watt)
-            attachSignal(macPkt, simTime() + switchTime, currTxPower);
-            sendDelayed(macPkt, switchTime, lowerGateOut);
+            attachSignal(macPkt.get(), simTime() + switchTime, currTxPower);
+            sendDelayed(macPkt.decapsulate(), switchTime, lowerGateOut);
 
 			return transition(&MacAbstractionLayer::stateTransmitFrame);
-			
 		}
 	}
 	// receiving frame during cca
@@ -642,7 +641,7 @@ void MacAbstractionLayer::receiveLowerControl(cMessage *msg) {
 		dispatch(e);
 	} else if (msg->getKind() == BaseDecider::PACKET_DROPPED) {
 		//ASSERT(phy->getRadioState() == Radio::RX);
-        MacPacket *pktMac = check_and_cast<MacPacket*>(msg);
+        checked_ptr<MacPacket> pktMac(check_and_cast<MacPacket*>(msg));
         AirframePtr pkt = pktMac->decapsulateNewAirframe();
 
         MacHeader header;
@@ -664,7 +663,7 @@ void MacAbstractionLayer::receiveLowerControl(cMessage *msg) {
                 handleRxDrop("ack", header.src, header.dst, dre, ackFrames);
             }
         }
-        pkt.deleteObject();
+        pkt.delete_object();
 
 		// we additionally dispatch a frame dropped event to handle a situation
 		// in which we waited with TX for RX of a frame which then failed --
@@ -729,7 +728,7 @@ void MacAbstractionLayer::handleDataFromLower(
                 << header.dst << " nwkId="
                 << (int) header.dstNwkId
                 << " supprRxWhileTx=" <<suppressRxWhileTxPending)
-        pkt.deleteObject();
+        pkt.delete_object();
         if (phy->getChannelState().isIdle()) {
             MacEvent e(MacEvent::EXPECTED_FRAME_DROPPED);
             dispatch(e);
@@ -743,7 +742,7 @@ void MacAbstractionLayer::handleDataFromLower(
 
     if (!promiscuousMode && (filterByAddr || filterByNetwork)) {
         LOG_INFO("DISCARD data from " << cometos::hex << header.src << " to " << header.dst << " nwkId=" << (int) header.dstNwkId);
-        pkt.deleteObject();
+        pkt.delete_object();
 
         // signal that a frame was received but dropped due to filtering
         if (phy->getChannelState().isIdle()) {
@@ -794,18 +793,18 @@ void MacAbstractionLayer::handleDataFromLower(
             }
 
             ASSERT(switchTime.dbl() >= 0);
-            MacPacket* macPkt = new MacPacket();
+            checked_ptr<MacPacket> macPkt = make_checked<MacPacket>();
             macPkt->encapsulateArray(ack->getData(), ack->getLength());
 
             // possibly need meta data for empirical physical layer
             // TODO quite dirty hack --- better solution?
             macPkt->meta.set(new NodeId(getId()));
-            ack.deleteObject();
+            ack.delete_object();
 
-            attachSignal(macPkt, simTime() + aTurnaroundTime, txPower);
+            attachSignal(macPkt.get(), simTime() + aTurnaroundTime, txPower);
 
             LOG_INFO("send ack of size" << " omnetppLen=" << macPkt->getByteLength());
-            sendDelayed(macPkt, aTurnaroundTime, lowerGateOut);
+            sendDelayed(macPkt.decapsulate(), aTurnaroundTime, lowerGateOut);
             MacEvent e(MacEvent::ACKED_FRAME_RECEIVED);
             dispatch(e);
         }
@@ -835,7 +834,7 @@ void MacAbstractionLayer::handleDataFromLower(
 void MacAbstractionLayer::receiveLowerData(cMessage *msg) {
 
 	// Get data from Mac Packet
-	MacPacket *pktMac = check_and_cast<MacPacket*>(msg);
+	checked_ptr<MacPacket> pktMac(check_and_cast<MacPacket*>(msg));
 	AirframePtr pkt = pktMac->decapsulateNewAirframe();
 	PhyToMacControlInfo* cinfo =
 			check_and_cast<PhyToMacControlInfo*>(pktMac->getControlInfo());
@@ -875,22 +874,21 @@ void MacAbstractionLayer::receiveLowerData(cMessage *msg) {
 	    handleDataFromLower(header, pkt, dre, lqi, lqiValid, rssi);
 	} else if (header.type == MAC_TYPE_ACK) {
 	    handleAckFromLower(rssi, header, dre);
-		pkt.deleteObject();
+		pkt.delete_object();
 	} else {
-		pkt.deleteObject();
+		pkt.delete_object();
 		// invalid packet
 		ASSERT(false);
 	}
 
 	// do not delete earlier, as we pass dre, which is a pointer into cinfo, which
 	// is a pointer into pktMac, to the handleData/handleAck methods just above
-    delete pktMac;
-    pktMac = NULL;
+    pktMac.delete_object();
 }
 
 void MacAbstractionLayer::rxEnd(AirframePtr pkt, node_t src, node_t dst, MacRxInfo const & info) {
 	LOG_ERROR("Discrd data");ASSERT(false);
-	pkt.deleteObject();
+	pkt.delete_object();
 	// should be implemented by derived class
 }
 
@@ -948,21 +946,21 @@ void MacAbstractionLayer::timeout(Message *msg) {
 bool MacAbstractionLayer::sendAirframe(AirframePtr frame, node_t dst, uint8_t mode, const ObjectContainer* meta) {
     if (failure == true) {
         LOG_DEBUG("MAC in fail Mode");
-        frame.deleteObject();
+        frame.delete_object();
         return false;
     }
 
     // discard frames send to our own address
     if (dst == palId_id()) {
         LOG_WARN("discarded frame to this node's address")
-        frame.deleteObject();
+        frame.delete_object();
         return false;
     }
 
     mac_networkId_t dstNwk = nwkId;;
 
 	if (txPkt) {
-		frame.deleteObject();
+		frame.delete_object();
 		LOG_DEBUG("abort: currently sending");ASSERT(false);
 		return false;
 	}
@@ -1002,7 +1000,7 @@ bool MacAbstractionLayer::sendToNetwork(AirframePtr frame, node_t dst,
 	LOG_DEBUG("sending pckt");
 
 	if (enable == false) {
-		frame.deleteObject();
+		frame.delete_object();
 		return false;
 	}
 
@@ -1100,7 +1098,7 @@ void MacAbstractionLayer::txDone(macTxResult_t result) {
 	// make sure that ackRssi is only set to valid directly after receiving ACK
 	ackRssi = RSSI_INVALID;
 
-	txPkt.deleteObject();
+	txPkt.delete_object();
 
 	if (result == MTR_SUCCESS)
 		sendingSucceed++;

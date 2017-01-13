@@ -74,7 +74,7 @@ void MacInterfTest::finish() {
 void MacInterfTest::rxEnd(cometos::AirframePtr frame, node_t src, node_t dst, cometos::MacRxInfo const & info) {
 	uint8_t r;
 	(*frame) >> r;
-	frame.deleteObject();
+	frame.delete_object();
 	if (getId() != 0 || row != 0) {
 		return;
 	}
