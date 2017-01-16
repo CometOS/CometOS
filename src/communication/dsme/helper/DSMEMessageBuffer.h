@@ -48,8 +48,6 @@ private:
 
     static constexpr uint16_t BUFFERSIZE = MSG_POOL_SIZE;
 
-    static DSMEMessageBuffer instance;
-
 public:
     DSMEMessageBuffer();
     ~DSMEMessageBuffer();
