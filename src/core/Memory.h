@@ -37,13 +37,12 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <stdint.h>
-
 namespace cometos {
 
-template<typename T>
+template <typename T>
 class checked_ptr {
-    template<typename T2, typename ...A> friend checked_ptr<T2> make_checked(A&&... arg);
+    template <typename T2, typename... A>
+    friend checked_ptr<T2> make_checked(A&&... arg);
 
 private:
     struct checked_object_wrapper {
@@ -53,61 +52,61 @@ private:
 
     checked_object_wrapper* wrapped_object;
 
-    checked_ptr(checked_object_wrapper * const object) {
+    checked_ptr(checked_object_wrapper* const object) {
         wrapped_object = object;
     }
 
 public:
-    checked_ptr() :
-            wrapped_object(nullptr) {
+    checked_ptr() : wrapped_object(nullptr) {
     }
 
-    checked_ptr(const checked_ptr& other) :
-            wrapped_object { other.wrapped_object } {
-        if (this->wrapped_object) {
+    checked_ptr(const checked_ptr& other) : wrapped_object{other.wrapped_object} {
+        if(this->wrapped_object) {
             this->wrapped_object->reference_count++;
         }
     }
 
-    checked_ptr(checked_ptr&& other) :
-            wrapped_object { other.wrapped_object } {
+    explicit checked_ptr(checked_ptr&& other) : wrapped_object{other.wrapped_object} {
         other.wrapped_object = nullptr;
     }
 
-    checked_ptr(T*&& raw) :
-            checked_ptr { new checked_object_wrapper { raw, 1 } } {
+    explicit checked_ptr(T*&& raw) : checked_ptr{new checked_object_wrapper{raw, 1}} {
     }
 
     ~checked_ptr() {
         reset();
     }
 
-    checked_ptr& operator=(const checked_ptr &other) {
-        if (this->wrapped_object != other.wrapped_object) {
+    checked_ptr& operator=(const checked_ptr& other) {
+        ASSERT(this->wrapped_object == nullptr);
+
+        if(this->wrapped_object != other.wrapped_object) {
             this->wrapped_object = other.wrapped_object;
-            if (this->wrapped_object) {
+            if(this->wrapped_object) {
                 this->wrapped_object->reference_count++;
             }
         }
         return *this;
     }
 
-    checked_ptr& operator=(checked_ptr &&other) {
+    checked_ptr& operator=(checked_ptr&& other) {
+        ASSERT(this->wrapped_object == nullptr);
+
         this->wrapped_object = other.wrapped_object;
         other.wrapped_object = nullptr;
         return *this;
     }
 
-    bool operator==(const checked_ptr &other) const {
+    bool operator==(const checked_ptr& other) const {
         return this->wrapped_object == other.wrapped_object;
     }
 
-    bool operator!=(const checked_ptr &other) const {
+    bool operator!=(const checked_ptr& other) const {
         return this->wrapped_object != other.wrapped_object;
     }
 
     void reset() {
-        if (this->wrapped_object) {
+        if(this->wrapped_object) {
             this->wrapped_object->reference_count--;
             ASSERT(this->wrapped_object->reference_count > 0);
 
@@ -116,8 +115,11 @@ public:
         return;
     }
 
+    /**
+     * This should only be used during deconstruction at the end of the runtime
+     */
     void force_reset() {
-        if (this->wrapped_object) {
+        if(this->wrapped_object) {
             this->wrapped_object->reference_count--;
 
             if(this->wrapped_object->reference_count == 0) {
@@ -131,26 +133,9 @@ public:
     }
 
     T* get() {
-        if (this->wrapped_object) {
+        if(this->wrapped_object) {
             return this->wrapped_object->raw_instance;
-        }
-        else {
-            return nullptr;
-        }
-    }
-
-    T* decapsulate() {
-        if (this->wrapped_object) {
-            ASSERT(unique());
-
-            T* ret = this->wrapped_object->raw_instance;
-            this->wrapped_object->raw_instance = nullptr;
-            delete this->wrapped_object;
-            this->wrapped_object = nullptr;
-
-            return ret;
-        }
-        else {
+        } else {
             return nullptr;
         }
     }
@@ -185,7 +170,7 @@ public:
     }
 
     explicit operator bool() const noexcept {
-        return wrapped_object != nullptr;
+        return this->wrapped_object != nullptr;
     }
 
     bool unique() const noexcept {
@@ -195,7 +180,7 @@ public:
     void deleteObject() {
         ASSERT(unique());
 
-        if (this->wrapped_object) {
+        if(this->wrapped_object) {
             this->wrapped_object->reference_count--;
 
             ASSERT(this->wrapped_object->raw_instance);
@@ -207,80 +192,10 @@ public:
     }
 };
 
-template<typename T, typename ... A> checked_ptr<T> make_checked(A&&... arg) {
-    return checked_ptr<T> { new T { arg... } };
+template <typename T, typename... A>
+checked_ptr<T> make_checked(A&&... arg) {
+    return checked_ptr<T>{new T{arg...}};
 }
-
-//class AirframePtr {
-//public:
-//    AirframePtr() : ptr(nullptr) {
-//    }
-//
-//    AirframePtr(Airframe* ptr)
-//    : ptr(ptr) {
-//        if(ptr != nullptr) {
-//            ptr->refcount++;
-//        }
-//    }
-//
-//    virtual ~AirframePtr() {
-//        if(ptr != nullptr) {
-//            ptr->refcount--;
-//            ASSERT(ptr->refcount > 0);
-//        }
-//    }
-//
-//    AirframePtr(const AirframePtr& other) {
-//        ptr = other.ptr;
-//        if(ptr != nullptr) {
-//            ptr->refcount++;
-//        }
-//    }
-//
-//    Airframe* decapsulate() {
-//        ptr->refcount--;
-//        ASSERT(ptr->refcount == 0);
-//
-//        Airframe* outptr = ptr;
-//        ptr = nullptr;
-//        return outptr;
-//    }
-//
-//    void reset() {
-//        ASSERT(ptr != nullptr);
-//        ptr->refcount--;
-//        ptr = nullptr;
-//    }
-//
-//    AirframePtr& operator=(Airframe* newptr) {
-//        if(newptr == nullptr) {
-//            ASSERT(false); // decapsulate should have been used
-//        }
-//        else {
-//            ASSERT(ptr == nullptr);
-//            ptr = newptr;
-//            ptr->refcount++;
-//        }
-//        return *this;
-//    }
-//
-//    AirframePtr& operator=(const AirframePtr& other) {
-//        ASSERT(ptr == nullptr);
-//        ptr = other.ptr;
-//        if(ptr != nullptr) {
-//            ptr->refcount++;
-//        }
-//        return *this;
-//    }
-//
-//    void deleteAirframe() {
-//        ASSERT(ptr != nullptr);
-//        delete ptr;
-//        ptr = nullptr;
-//    }
-//
-
 }
 
 #endif
-
