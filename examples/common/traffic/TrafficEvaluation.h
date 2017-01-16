@@ -52,6 +52,8 @@ public:
                    time_ms_t cooldownDuration = 2000,
                    int16_t maxMeasurementPackets = 100);
 
+    virtual ~TrafficEvaluation();
+
 	/**Sets parameters*/
     void initialize();
 

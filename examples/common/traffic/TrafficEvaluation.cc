@@ -81,6 +81,12 @@ TrafficEvaluation::TrafficEvaluation(uint8_t msgSize,
         lastHotReception(0)
 {}
 
+TrafficEvaluation::~TrafficEvaluation() {
+    if(frame != NULL) {
+        delete frame;
+    }
+}
+
 void TrafficEvaluation::initialize() {
 	Endpoint::initialize();
 
@@ -225,10 +231,10 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
 	    LOG_WARN("corrupted frame received");
 	} else {
         int16_t rssi = RSSI_INVALID;
-        if (msg->has<MacRxInfo>()) {
+        /*if (msg->has<MacRxInfo>()) {
             rssi = msg->get<MacRxInfo>()->rssi;
             (void) rssi; // avoid warning if logging is disabled
-        }
+        }*/
 
 	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!" << "!R!" << type << "!" << dec << remoteSequenceNumber << "!0x" << hex << palId_id() << "!" << dec << rssi);
         //LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
