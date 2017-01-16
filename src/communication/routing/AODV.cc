@@ -49,11 +49,26 @@ Define_Module(cometos::AODV);
 namespace cometos {
 
 /**This class is used for storing original request in packet*/
-class RoutingRequestId: public RequestId {
+class AODVRoutingRequestId: public RequestId {
 public:
-    RoutingRequestId(DataRequest *req = NULL) :
+public:
+    AODVRoutingRequestId(DataRequest *req = NULL) :
             req(req) {
     }
+
+    virtual ~AODVRoutingRequestId() {
+        if(req) {
+            delete req;
+        }
+    }
+
+    DataRequest* decapsulateRequest() {
+        DataRequest *tmp = req;
+        req = nullptr;
+        return tmp;
+    }
+
+private:
     DataRequest *req;
 };
 
@@ -152,7 +167,7 @@ void AODV::forwardRequest(DataRequest* msg) {
         sendRequest(
                 new DataRequest(nextHop, msg->getAirframe().getCopy(),
                         createCallback(&AODV::handleResponse),
-                        new RoutingRequestId(msg)), offset);
+                        new AODVRoutingRequestId(msg)), offset);
     }
 
 }
@@ -341,7 +356,7 @@ void AODV::handleIndication(DataIndication* msg) {
 }
 
 void AODV::handleResponse(DataResponse* resp) {
-    DataRequest *req = ((RoutingRequestId*) resp->getRequestId())->req;
+    DataRequest *req = ((AODVRoutingRequestId*) resp->getRequestId())->decapsulateRequest();
 
     // remove packet from queue not needed
     // queue.erase(queue.find(req));

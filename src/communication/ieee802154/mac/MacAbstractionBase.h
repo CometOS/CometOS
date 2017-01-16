@@ -178,7 +178,7 @@ public:
      * @param   dst     the destination address of the packet
      *
      */
-    virtual void rxEnd(Airframe *frame, node_t src, node_t dst, MacRxInfo const & info) = 0;
+    virtual void rxEnd(AirframePtr frame, node_t src, node_t dst, MacRxInfo const & info) = 0;
     /**
      * Called when packet is received, but has to be dropped due
      * to a CRC error.
@@ -212,7 +212,7 @@ public:
      *               at least use the same mode for ACKs for transmission to
      *               be successful
      */
-    virtual bool sendAirframe(Airframe* frame, node_t dst, uint8_t mode = 0, const ObjectContainer* meta=NULL) = 0;
+    virtual bool sendAirframe(AirframePtr frame, node_t dst, uint8_t mode = 0, const ObjectContainer* meta=NULL) = 0;
 
 
     /**

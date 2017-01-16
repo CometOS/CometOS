@@ -109,18 +109,18 @@ public:
     bool currentlySending;
 
 private:
-    cometos::Airframe* frame;
+    cometos::AirframePtr frame;
     IEEE802154eMACHeader macHdr;
     cometos::DataRequest* request;
 
-    void prepare(cometos::Airframe* airframe) {
+    void prepare(cometos::AirframePtr airframe) {
         currentlySending = false;
         firstTry = true;
         receivedViaMCPS = false;
 
         macHdr.reset();
 
-        ASSERT(frame == nullptr);
+        ASSERT(!frame);
         frame = airframe;
 
         if (request != nullptr) {
@@ -131,13 +131,12 @@ private:
 
     DSMEMessage() :
         currentlySending(false),
-        frame(nullptr),
         request(nullptr)  {
     }
 
-    ~DSMEMessage() {
-        if (frame != nullptr) {
-            delete frame;
+    virtual ~DSMEMessage() override {
+        if (frame) {
+            frame.deleteObject();
         }
 
         if (request != nullptr) {
@@ -152,12 +151,17 @@ private:
     friend class DSMEPlatformBase;
     friend class DSMEMessageBuffer;
 
-    cometos::Airframe* getSendableCopy();
+    cometos::AirframePtr getSendableCopy();
 
-    cometos::Airframe* decapsulateFrame() {
-        cometos::Airframe* f = frame;
-        frame = nullptr;
-        return f;
+    cometos::AirframePtr decapsulateFrame() {
+        if(!frame) {
+            return frame;
+        }
+        else {
+            cometos::AirframePtr f = frame;
+            frame.reset();
+            return f;
+        }
     }
 };
 

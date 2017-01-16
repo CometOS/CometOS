@@ -138,13 +138,15 @@ bool DSMEPlatform::sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg,
 void DSMEPlatform::receiveLowerData(cMessage *msg) {
     // Get data from Mac Packet
     MacPacket *pktMac = check_and_cast<MacPacket*>(msg);
-    Airframe *pkt = pktMac->decapsulateAirframe();
+    AirframePtr pkt = pktMac->decapsulateNewAirframe();
 
     // Remove the FCS (only dummy bytes since the actual bit error calculation is not based on the FCS itself)
     uint16_t fcs;
     (*pkt) >> fcs;
 
     DSMEMessage* dsmemsg = getLoadedMessage(pkt);
+    pkt.reset();
+
     dsmemsg->getHeader().decapsulateFrom(dsmemsg);
 
     dsmemsg->startOfFrameDelimiterSymbolCounter = getSymbolCounter() - dsmemsg->getTotalSymbols()
@@ -177,12 +179,11 @@ void DSMEPlatform::handleMessage(cMessage* msg) {
 void DSMEPlatform::txDone(macTxResult_t result) {
     LOG_DEBUG("Sig txDone for pckt with ID");
 
-    ASSERT(txPkt != NULL);
+    ASSERT(txPkt);
 
     MacTxInfo info(0, 0);
 
-    delete txPkt;
-    txPkt = NULL;
+    txPkt.deleteObject();
 
     if (result == MTR_SUCCESS)
         sendingSucceed++;
@@ -204,7 +205,7 @@ void DSMEPlatform::receiveLowerControl(cMessage *msg) {
     } else if (msg->getKind() == BaseDecider::PACKET_DROPPED) {
         //ASSERT(phy->getRadioState() == Radio::RX);
         MacPacket *pktMac = check_and_cast<MacPacket*>(msg);
-        Airframe *pkt = pktMac->decapsulateAirframe();
+        AirframePtr pkt = pktMac->decapsulateNewAirframe();
 
         /* TODO
          MacHeader header;
@@ -227,7 +228,7 @@ void DSMEPlatform::receiveLowerControl(cMessage *msg) {
          }
          }
          */
-        delete pkt;
+        pkt.deleteObject();
 
         // we additionally dispatch a frame dropped event to handle a situation
         // in which we waited with TX for RX of a frame which then failed --
@@ -291,7 +292,7 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
     LOG_INFO("sendCopyNow " << (uint64_t)msg);
 
     this->txEndCallback = txEndCallback;
-    Airframe* frame = msg->getSendableCopy();
+    AirframePtr frame = msg->getSendableCopy();
 
     // Add the FCS (only dummy bytes since the actual bit error calculation is not based on the FCS itself)
     uint16_t fcs = 0;
@@ -299,13 +300,13 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
 
     currTxPower = txPower;
 
-    if (txPkt != NULL) {
-        delete frame;
+    if (txPkt) {
+        frame.deleteObject();
         return false;
     }
 
     if (enable == false) {
-        delete frame;
+        frame.deleteObject();
         return false;
     }
 

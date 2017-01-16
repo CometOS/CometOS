@@ -101,7 +101,7 @@ void CsmaMac::finish() {
 #endif
 }
 
-void CsmaMac::rxEnd(cometos::Airframe *frame, node_t src, node_t dst,
+void CsmaMac::rxEnd(cometos::AirframePtr frame, node_t src, node_t dst,
 		MacRxInfo const & info) {
 	LOG_DEBUG("info.tsValid=" << info.tsInfo.isValid << "|info.ts=" << info.tsInfo.ts);
 }

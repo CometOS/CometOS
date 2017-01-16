@@ -94,8 +94,10 @@ void DSMEPlatformBase::start() {
 }
 
 void DSMEPlatformBase::handleDataMessageFromMCPS(DSMEMessage* msg) {
-    Airframe* macPkt = msg->decapsulateFrame();
-    cometos::DataIndication* ind = new cometos::DataIndication(macPkt, msg->getHeader().getSrcAddr().getShortAddress(), msg->getHeader().getDestAddr().getShortAddress());
+    AirframePtr macPkt = msg->decapsulateFrame();
+    Airframe* airframeForUp = macPkt.decapsulate();
+
+    cometos::DataIndication* ind = new cometos::DataIndication(airframeForUp, msg->getHeader().getSrcAddr().getShortAddress(), msg->getHeader().getDestAddr().getShortAddress());
     releaseMessage(msg);
     this->gateIndOut.send(ind);
 }
@@ -179,7 +181,7 @@ void DSMEPlatformBase::txEnd(macTxResult_t result, MacTxInfo const & info) {
     }
 }
 
-void DSMEPlatformBase::rxEnd(Airframe *frame, node_t src, node_t dst, MacRxInfo const & info) {
+void DSMEPlatformBase::rxEnd(AirframePtr frame, node_t src, node_t dst, MacRxInfo const & info) {
     // sending the indication is handled by receiveLowerData
 }
 
@@ -351,7 +353,7 @@ DSMEMessage* DSMEPlatformBase::getEmptyMessage()
     return msg;
 }
 
-DSMEMessage* DSMEPlatformBase::getLoadedMessage(Airframe* frame)
+DSMEMessage* DSMEPlatformBase::getLoadedMessage(AirframePtr frame)
 {
     dsme_atomicBegin();
     messagesInUse++;
@@ -369,6 +371,9 @@ void DSMEPlatformBase::releaseMessage(DSMEMessage* msg) {
     dsme_atomicBegin();
     DSME_ASSERT(msg != nullptr);
     DSME_ASSERT(messagesInUse > 0);
+
+    DSME_ASSERT(!msg->frame || msg->frame.unique());
+
     messagesInUse--;
     dsme_atomicEnd();
 

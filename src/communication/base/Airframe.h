@@ -45,6 +45,7 @@
 #include "templates.h"
 #include "OutputStream.h"
 #include "logging.h"
+#include "Memory.h"
 /*TYPES----------------------------------------------------------------------*/
 
 
@@ -201,6 +202,8 @@ public:
 private:
 	AirframeData data;
 };
+
+typedef checked_ptr<Airframe> AirframePtr;
 
 } /* namespace cometos */
 

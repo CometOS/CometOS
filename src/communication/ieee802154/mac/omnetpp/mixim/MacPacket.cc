@@ -34,14 +34,7 @@
 
 namespace cometos {
 
-MacPacket::MacPacket(Airframe *frame) :
-	cPacket() {
-
-	if (frame != NULL) {
-		//TODO is this still used? semantic of getData changed!
-		encapsulateArray(frame->getData(), frame->getLength());
-	}
-
+MacPacket::MacPacket() {
 }
 
 MacPacket::~MacPacket() {
@@ -54,8 +47,8 @@ void MacPacket::encapsulateArray(const uint8_t* data, pktSize_t size) {
 	memcpy(this->data, data, size);
 }
 
-Airframe *MacPacket::decapsulateAirframe() {
-	Airframe *p = new Airframe;
+AirframePtr MacPacket::decapsulateNewAirframe() {
+	AirframePtr p = make_checked<Airframe>();
 	for (uint8_t i = 0; i < size; i++) {
 		(*p) << data[i];
 	}

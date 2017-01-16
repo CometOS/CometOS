@@ -71,10 +71,10 @@ void MacInterfTest::finish() {
 	}
 }
 
-void MacInterfTest::rxEnd(cometos::Airframe *frame, node_t src, node_t dst, cometos::MacRxInfo const & info) {
+void MacInterfTest::rxEnd(cometos::AirframePtr frame, node_t src, node_t dst, cometos::MacRxInfo const & info) {
 	uint8_t r;
 	(*frame) >> r;
-	delete frame;
+	frame.deleteObject();
 	if (getId() != 0 || row != 0) {
 		return;
 	}
@@ -118,7 +118,7 @@ void MacInterfTest::traffic(cometos::Message* msg) {
 	}
 
 	if ((i == getId() && row == 0) || (j == getId() && row == 1)) {
-		cometos::Airframe *frame = new cometos::Airframe();
+	    cometos::AirframePtr frame = cometos::make_checked<cometos::Airframe>();
 		frame->setLength(payload);
 		(*frame) << row;
 		// send packet immediately (no backoff, no CSMA)

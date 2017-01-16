@@ -79,7 +79,7 @@ public:
     /* cometos::MacAbstractionLayer */
     virtual void initialize() override;
 
-    virtual void rxEnd(cometos::Airframe *frame, node_t src, node_t dst, cometos::MacRxInfo const & info) override;
+    virtual void rxEnd(cometos::AirframePtr frame, node_t src, node_t dst, cometos::MacRxInfo const & info) override;
 
     virtual void txEnd(cometos::macTxResult_t result, cometos::MacTxInfo const & info) override;
 
@@ -124,7 +124,7 @@ protected:
 
     bool send(cometos::Airframe* frame);
 
-    DSMEMessage* getLoadedMessage(cometos::Airframe* frame);
+    DSMEMessage* getLoadedMessage(cometos::AirframePtr frame);
 
     PHY_PIB phy_pib;
     MAC_PIB mac_pib;

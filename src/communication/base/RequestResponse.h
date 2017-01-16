@@ -42,6 +42,9 @@
 namespace cometos {
 
 class RequestId {
+public:
+    virtual ~RequestId() {
+    }
 };
 
 class Response: public Message {
@@ -101,6 +104,7 @@ public:
 	}
 
 	void setResponseDelegate(const TypedDelegate<R> &delegate) {
+	    ASSERT(!this->delegate.isReady());
 	    this->delegate=delegate;
 	}
 

@@ -109,7 +109,6 @@ const char* getName();
 #else
 
 #define LOG_FATAL(msg)
-#define LOG_ERROR(msg)
 #define LOG_WARN(msg)
 #define LOG_INFO(msg)
 #define LOG_INFO_PURE(msg)
@@ -118,6 +117,10 @@ const char* getName();
 #define LOG_DEBUG_PURE(msg)
 #define LOG_DEBUG_RAW(msg)
 #define LOG_DEBUG_PREFIX
+#define LOG_ERROR(msg)
+#define LOG_ERROR_PURE(msg)
+#define LOG_ERROR_RAW(msg)
+#define LOG_ERROR_PREFIX
 
 #endif
 

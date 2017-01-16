@@ -101,6 +101,8 @@ MacAbstractionLayer::~MacAbstractionLayer() {
 
     delete lqiProvider;
     lqiProvider = nullptr;
+
+    this->txPkt.force_reset();
 }
 
 void MacAbstractionLayer::finish() {
@@ -137,7 +139,7 @@ void MacAbstractionLayer::setLqiProvider(LqiProvider * provider) {
 }
 
 bool MacAbstractionLayer::listen() {
-	if (txPkt != NULL) {
+	if (txPkt) {
 		//|| phy->getRadioState() == Radio::TX) {
 		LOG_ERROR("sending...listen failed");// for debugging
 		return false;
@@ -150,7 +152,7 @@ bool MacAbstractionLayer::listen() {
 }
 
 bool MacAbstractionLayer::sleep() {
-	if (txPkt != NULL || phy->getRadioState() == Radio::TX
+	if (txPkt || phy->getRadioState() == Radio::TX
 			|| phy->getRadioState() == Radio::SWITCHING) {
 		LOG_ERROR("Sleep failed");
 		//	ASSERT(false);
@@ -200,7 +202,7 @@ void MacAbstractionLayer::initialize() {
 	// avoid calculating dBm2mW every time
 	ccaThreshold = FWMath::dBm2mW(ccaThreshold);
 
-	txPkt = NULL;
+	ASSERT(!txPkt);
 	timer = new Message;
 
 	// initialize with default LqiProvider
@@ -258,7 +260,7 @@ fsmReturnStatus MacAbstractionLayer::sendRequest() {
         return FSM_HANDLED;
     }
 
-    ASSERT(txPkt != NULL);
+    ASSERT(txPkt);
 
     scheduleBackoff();
     return transition(&MacAbstractionLayer::stateBackoff);
@@ -276,7 +278,7 @@ fsmReturnStatus MacAbstractionLayer::stateIdle(MacEvent& e) {
 		scheduleTimer(sifs, MacEvent::TIMEOUT_SIFS, "SIFS");
         return transition(&MacAbstractionLayer::stateWaitSIFS);
 	} else if (MacEvent::RADIO_SWITCHING_OVER == e.signal) {
-		if (phy->getRadioState() == Radio::RX && txPkt != NULL) {
+		if (phy->getRadioState() == Radio::RX && txPkt) {
 	        return sendRequest();
 		}
         return FSM_IGNORED;
@@ -350,7 +352,7 @@ fsmReturnStatus MacAbstractionLayer::stateCCA(MacEvent& e) {
 	if (e.signal == MacEvent::TIMEOUT_CCA) {
 
 		ASSERT(phy->getRadioState() == Radio::RX);
-		ASSERT(txPkt != NULL);
+		ASSERT(txPkt);
 
 		ChannelState cs = phy->getChannelState();
 
@@ -404,7 +406,8 @@ fsmReturnStatus MacAbstractionLayer::stateCCA(MacEvent& e) {
 
 			txPkt->removeAll(); // remove all meta data
 
-			MacPacket *macPkt = new MacPacket(txPkt);
+			MacPacket *macPkt = new MacPacket();
+			macPkt->encapsulateArray(txPkt->getData(), txPkt->getLength());
 
 			// possibly need meta data for empirical physical layer
 			// TODO quite dirty hack --- better solution?
@@ -460,7 +463,7 @@ fsmReturnStatus MacAbstractionLayer::stateTransmitFrame(MacEvent& e) {
 	LOG_DEBUG("trnsmt " << (int) e.signal);
 
 	if (e.signal == MacEvent::FRAME_TRANSMITTED) {
-		ASSERT(txPkt != NULL);
+		ASSERT(txPkt);
 		if (txMode & TX_MODE_AUTO_ACK) {
 			scheduleTimer(macAckWaitDuration, MacEvent::TIMEOUT_ACK, "ACK_W");
             return transition(&MacAbstractionLayer::stateWaitAck);
@@ -523,7 +526,7 @@ fsmReturnStatus MacAbstractionLayer::stateWaitSIFS(MacEvent& e) {
 	LOG_DEBUG("sifs " << (int) e.signal);
 
 	if (e.signal == MacEvent::TIMEOUT_SIFS) {
-		if (txPkt != NULL) {
+		if (txPkt) {
 		    return sendRequest();
 		} else {
 		    return transition(&MacAbstractionLayer::stateIdle);
@@ -640,7 +643,7 @@ void MacAbstractionLayer::receiveLowerControl(cMessage *msg) {
 	} else if (msg->getKind() == BaseDecider::PACKET_DROPPED) {
 		//ASSERT(phy->getRadioState() == Radio::RX);
         MacPacket *pktMac = check_and_cast<MacPacket*>(msg);
-        Airframe *pkt = pktMac->decapsulateAirframe();
+        AirframePtr pkt = pktMac->decapsulateNewAirframe();
 
         MacHeader header;
         (*pkt) >> header;
@@ -661,7 +664,7 @@ void MacAbstractionLayer::receiveLowerControl(cMessage *msg) {
                 handleRxDrop("ack", header.src, header.dst, dre, ackFrames);
             }
         }
-        delete pkt;
+        pkt.deleteObject();
 
 		// we additionally dispatch a frame dropped event to handle a situation
 		// in which we waited with TX for RX of a frame which then failed --
@@ -699,7 +702,7 @@ void MacAbstractionLayer::handleAckFromLower(mac_dbm_t rssi,
     LOG_DEBUG("RECEIVED ack for pckt from " << STREAM_HEX(header.src) << " to "
                     << STREAM_HEX(header.dst));
     // check whether ack is received
-    if (txPkt != NULL && header.dstNwkId == nwkId && header.src == getId()
+    if (txPkt && header.dstNwkId == nwkId && header.src == getId()
             && header.seq == txSeq) {
         LOG_DEBUG("ACK is for me");
         logRxFrame("ack", header.src, header.dst, dre, ackFrames);
@@ -710,7 +713,7 @@ void MacAbstractionLayer::handleAckFromLower(mac_dbm_t rssi,
 
 void MacAbstractionLayer::handleDataFromLower(
               const MacHeader & header,
-              Airframe *pkt,
+              AirframePtr pkt,
               const DeciderResultEmpiric802154 * dre,
               lqi_t lqi,
               bool lqiValid,
@@ -720,13 +723,13 @@ void MacAbstractionLayer::handleDataFromLower(
     // an active transmission (e.g. in backoff state) with
     // suppressRxWhileTxPending=true is forbidden
     if (getState() == &MacAbstractionLayer::stateWaitAck
-            || (txPkt != NULL && suppressRxWhileTxPending)) {
+            || (txPkt && suppressRxWhileTxPending)) {
         LOG_DEBUG("DISCARD data from " << cometos::hex
                 << header.src << " to "
                 << header.dst << " nwkId="
                 << (int) header.dstNwkId
                 << " supprRxWhileTx=" <<suppressRxWhileTxPending)
-        delete pkt;
+        pkt.deleteObject();
         if (phy->getChannelState().isIdle()) {
             MacEvent e(MacEvent::EXPECTED_FRAME_DROPPED);
             dispatch(e);
@@ -740,7 +743,7 @@ void MacAbstractionLayer::handleDataFromLower(
 
     if (!promiscuousMode && (filterByAddr || filterByNetwork)) {
         LOG_INFO("DISCARD data from " << cometos::hex << header.src << " to " << header.dst << " nwkId=" << (int) header.dstNwkId);
-        delete pkt;
+        pkt.deleteObject();
 
         // signal that a frame was received but dropped due to filtering
         if (phy->getChannelState().isIdle()) {
@@ -776,7 +779,7 @@ void MacAbstractionLayer::handleDataFromLower(
             LOG_INFO("Sending of ACK aborted due to busy TX");
         } else {
             cancel(timer);
-            Airframe *ack = new Airframe;
+            AirframePtr ack = make_checked<Airframe>();
 #ifdef RSSI_IN_DATA_LINK_ACK
             (*ack) << rssi;
 #endif
@@ -791,12 +794,13 @@ void MacAbstractionLayer::handleDataFromLower(
             }
 
             ASSERT(switchTime.dbl() >= 0);
-            MacPacket* macPkt = new MacPacket(ack);
+            MacPacket* macPkt = new MacPacket();
+            macPkt->encapsulateArray(ack->getData(), ack->getLength());
 
             // possibly need meta data for empirical physical layer
             // TODO quite dirty hack --- better solution?
             macPkt->meta.set(new NodeId(getId()));
-            delete ack; // this is not stored in MacPacket!
+            ack.deleteObject();
 
             attachSignal(macPkt, simTime() + aTurnaroundTime, txPower);
 
@@ -819,7 +823,9 @@ void MacAbstractionLayer::handleDataFromLower(
     rxEnd(pkt, header.src, header.dst, phyInfo);
 
     // send up indication
-    DataIndication * ind = new DataIndication(pkt, header.src, header.dst);
+    Airframe* indPkt = pkt.decapsulate();
+
+    DataIndication * ind = new DataIndication(indPkt, header.src, header.dst);
     ind->set((MacRxInfo*) phyInfo.getCopy());
     if (ind->dst == palId_id() || ind->dst == MAC_BROADCAST) {
         gateIndOut.send(ind);
@@ -832,7 +838,7 @@ void MacAbstractionLayer::receiveLowerData(cMessage *msg) {
 
 	// Get data from Mac Packet
 	MacPacket *pktMac = check_and_cast<MacPacket*>(msg);
-	Airframe *pkt = pktMac->decapsulateAirframe();
+	AirframePtr pkt = pktMac->decapsulateNewAirframe();
 	PhyToMacControlInfo* cinfo =
 			check_and_cast<PhyToMacControlInfo*>(pktMac->getControlInfo());
 
@@ -871,9 +877,9 @@ void MacAbstractionLayer::receiveLowerData(cMessage *msg) {
 	    handleDataFromLower(header, pkt, dre, lqi, lqiValid, rssi);
 	} else if (header.type == MAC_TYPE_ACK) {
 	    handleAckFromLower(rssi, header, dre);
-		delete pkt;
+		pkt.deleteObject();
 	} else {
-		delete pkt;
+		pkt.deleteObject();
 		// invalid packet
 		ASSERT(false);
 	}
@@ -884,9 +890,9 @@ void MacAbstractionLayer::receiveLowerData(cMessage *msg) {
     pktMac = NULL;
 }
 
-void MacAbstractionLayer::rxEnd(Airframe *pkt, node_t src, node_t dst, MacRxInfo const & info) {
+void MacAbstractionLayer::rxEnd(AirframePtr pkt, node_t src, node_t dst, MacRxInfo const & info) {
 	LOG_ERROR("Discrd data");ASSERT(false);
-	delete pkt;
+	pkt.deleteObject();
 	// should be implemented by derived class
 }
 
@@ -941,24 +947,24 @@ void MacAbstractionLayer::timeout(Message *msg) {
 	}
 }
 
-bool MacAbstractionLayer::sendAirframe(Airframe* frame, node_t dst, uint8_t mode, const ObjectContainer* meta) {
+bool MacAbstractionLayer::sendAirframe(AirframePtr frame, node_t dst, uint8_t mode, const ObjectContainer* meta) {
     if (failure == true) {
         LOG_DEBUG("MAC in fail Mode");
-        delete frame;
+        frame.deleteObject();
         return false;
     }
 
     // discard frames send to our own address
     if (dst == palId_id()) {
         LOG_WARN("discarded frame to this node's address")
-        delete frame;
+        frame.deleteObject();
         return false;
     }
 
     mac_networkId_t dstNwk = nwkId;;
 
-	if (txPkt != NULL) {
-		delete frame;
+	if (txPkt) {
+		frame.deleteObject();
 		LOG_DEBUG("abort: currently sending");ASSERT(false);
 		return false;
 	}
@@ -992,13 +998,13 @@ bool MacAbstractionLayer::sendAirframe(Airframe* frame, node_t dst, uint8_t mode
 	return sendToNetwork(frame, dst, dstNwk, mode);
 }
 
-bool MacAbstractionLayer::sendToNetwork(Airframe* frame, node_t dst,
+bool MacAbstractionLayer::sendToNetwork(AirframePtr frame, node_t dst,
 		mac_networkId_t dstNwk, uint8_t mode) {
 
 	LOG_DEBUG("sending pckt");
 
 	if (enable == false) {
-		delete frame;
+		frame.deleteObject();
 		return false;
 	}
 
@@ -1081,7 +1087,7 @@ void MacAbstractionLayer::scheduleTxDone(macTxResult_t result) {
 void MacAbstractionLayer::txDone(macTxResult_t result) {
 	LOG_DEBUG("Sig txDone for pckt with ID");
 
-	ASSERT( txPkt != NULL);
+	ASSERT(txPkt);
 
 	MacHeader header;
 	(*txPkt) >> header;
@@ -1096,8 +1102,7 @@ void MacAbstractionLayer::txDone(macTxResult_t result) {
 	// make sure that ackRssi is only set to valid directly after receiving ACK
 	ackRssi = RSSI_INVALID;
 
-	delete txPkt;
-	txPkt = NULL;
+	txPkt.deleteObject();
 
 	if (result == MTR_SUCCESS)
 		sendingSucceed++;

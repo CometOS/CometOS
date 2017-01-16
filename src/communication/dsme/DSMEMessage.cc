@@ -69,10 +69,12 @@ void DSMEMessage::copyTo(DSMEMessageElement* me) {
     ASSERT(this->frame->getData()+me->getSerializationLength() == s.getData());
 }
 
-cometos::Airframe* DSMEMessage::getSendableCopy() {
-    DSME_ASSERT(frame != nullptr);
+cometos::AirframePtr DSMEMessage::getSendableCopy() {
+    DSME_ASSERT(frame);
     DSMEMessage msg;
-    msg.prepare(frame->getDeepCopy());
+
+    cometos::AirframePtr copy(frame->getDeepCopy());
+    msg.prepare(copy);
     macHdr.prependTo(&msg);
     //cometos::Airframe* f = msg.frame;
     //msg.frame = nullptr;

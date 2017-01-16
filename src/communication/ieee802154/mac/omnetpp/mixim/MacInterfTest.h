@@ -57,7 +57,7 @@ public:
 
 	virtual void finish() override;
 
-	virtual void rxEnd(cometos::Airframe *frame, node_t src, node_t dst, cometos::MacRxInfo const & info) override;
+	virtual void rxEnd(cometos::AirframePtr frame, node_t src, node_t dst, cometos::MacRxInfo const & info) override;
 
 	virtual void txEnd(cometos::macTxResult_t success, cometos::MacTxInfo const& info) override;
 

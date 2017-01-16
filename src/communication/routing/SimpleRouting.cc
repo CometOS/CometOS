@@ -49,11 +49,26 @@ Define_Module(cometos::SimpleRouting);
 namespace cometos {
 
 /**This class is used for storing original request in packet*/
-class RoutingRequestId: public RequestId {
+class SimpleRoutingRequestId: public RequestId {
 public:
-    RoutingRequestId(DataRequest *req = NULL) :
+    SimpleRoutingRequestId(DataRequest *req = NULL) :
             req(req) {
     }
+
+    virtual ~SimpleRoutingRequestId() {
+        if(req) {
+            //ASSERT(false); TODO test again!
+            delete req;
+        }
+    }
+
+    DataRequest* decapsulateRequest() {
+        DataRequest *tmp = req;
+        req = nullptr;
+        return tmp;
+    }
+
+private:
     DataRequest *req;
 };
 
@@ -101,7 +116,7 @@ void SimpleRouting::handleRequest(DataRequest* msg) {
         sendRequest(
                 new DataRequest(nextHop, msg->getAirframe().getCopy(),
                         createCallback(&SimpleRouting::handleResponse),
-                        new RoutingRequestId(msg)));
+                        new SimpleRoutingRequestId(msg)));
     }
 
 }
@@ -211,6 +226,7 @@ void SimpleRouting::handleIndication(DataIndication* msg) {
     // no route reply, if nextHop can not addressed directly
     if ((req->dst == BROADCAST)  && (nwk.hops & 0x40)) {
         delete msg;
+        delete req;
         return;
     }
 
@@ -232,7 +248,7 @@ void SimpleRouting::handleIndication(DataIndication* msg) {
         sendRequest(
                 new DataRequest(req->dst, req->getAirframe().getCopy(),
                         createCallback(&SimpleRouting::handleResponse),
-                        new RoutingRequestId(req)));
+                        new SimpleRoutingRequestId(req)));
     }
 
     if (nwk.dst == BROADCAST ) {
@@ -248,7 +264,8 @@ void SimpleRouting::handleIndication(DataIndication* msg) {
 }
 
 void SimpleRouting::handleResponse(DataResponse* resp) {
-    DataRequest *req = ((RoutingRequestId*) resp->getRequestId())->req;
+    DataRequest *req = ((SimpleRoutingRequestId*) resp->getRequestId())->decapsulateRequest();
+
     if (resp->isSuccess()) {
         req->response(new DataResponse(DataResponseStatus::SUCCESS));
         delete req;

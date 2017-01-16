@@ -53,7 +53,7 @@ public:
 
 	virtual void finish();
 
-	virtual void rxEnd(Airframe *frame, node_t src, node_t dst, MacRxInfo const & info);
+	virtual void rxEnd(AirframePtr frame, node_t src, node_t dst, MacRxInfo const & info);
 
 	virtual void txEnd(macTxResult_t result, MacTxInfo const & info);
 

@@ -92,7 +92,7 @@ void SimpleCsmaMac::rxDropped() {
     LOG_INFO("Pckt dropped");
 }
 
-void SimpleCsmaMac::rxEnd(Airframe *frame, node_t src, node_t dst,
+void SimpleCsmaMac::rxEnd(AirframePtr frame, node_t src, node_t dst,
 		MacRxInfo const & info) {
     // sending the indication is handled by MacAbstractionLayer
 }

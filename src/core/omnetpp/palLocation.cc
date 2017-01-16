@@ -82,7 +82,7 @@ class PalLocationImpl : public PalLocation {
             root = root->getParentModule();
         }
 
-        omnetpp::cModule* host;
+        omnetpp::cModule* host = nullptr;
         for(omnetpp::cModule::SubmoduleIterator it(root); !it.end(); ++it) {
             if((*it)->hasPar("id") && ((node_t)(*it)->par("id")) == node) {
                host = *it;

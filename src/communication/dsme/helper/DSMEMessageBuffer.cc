@@ -40,7 +40,7 @@ DSMEMessageBuffer::DSMEMessageBuffer() :
         front(buffer), back(buffer + BUFFERSIZE - 1) {
 
     for (uint16_t i = 0; i < BUFFERSIZE; i++) {
-        Airframe* frame = new Airframe();
+        AirframePtr frame = make_checked<Airframe>();
         airframeStack.push(frame);
     }
 
@@ -52,9 +52,10 @@ DSMEMessageBuffer::DSMEMessageBuffer() :
 
 DSMEMessageBuffer::~DSMEMessageBuffer() {
     while(airframeStack.getSize() != 0) {
-        Airframe* p = airframeStack.top();
+        AirframePtr p = airframeStack.top();
+        airframeStack.top().reset();
         airframeStack.pop();
-        delete p;
+        p.deleteObject();
     }
 }
 
@@ -62,6 +63,7 @@ DSMEMessage* DSMEMessageBuffer::aquire() {
     DSMEMessageBufferElement *element = nullptr;
 
     if (front == nullptr) {
+        ASSERT(false);
         return nullptr;
     }
 
@@ -71,6 +73,7 @@ DSMEMessage* DSMEMessageBuffer::aquire() {
         front = front->next;
 
         element->message.prepare(airframeStack.top());
+        airframeStack.top().reset();
         airframeStack.pop();
     }
     palExec_atomicEnd();
@@ -78,10 +81,11 @@ DSMEMessage* DSMEMessageBuffer::aquire() {
     return &(element->message);
 }
 
-DSMEMessage* DSMEMessageBuffer::aquire(cometos::Airframe* frame) {
+DSMEMessage* DSMEMessageBuffer::aquire(cometos::AirframePtr frame) {
     DSMEMessageBufferElement *element = nullptr;
 
     if (front == nullptr) {
+        ASSERT(false);
         return nullptr;
     }
 
@@ -102,21 +106,23 @@ void DSMEMessageBuffer::release(DSMEMessage* message) {
         return;
     }
 
-    Airframe* frame = message->decapsulateFrame();
+    ASSERT(!message->frame || message->frame.unique());
+    AirframePtr frame = message->decapsulateFrame();
 
     palExec_atomicBegin();
     {
         if(!airframeStack.isFull()) {
-            if(frame == nullptr) {
-                frame = new Airframe(); // the Airframe was decapsulated before
+            if(!frame) {
+                frame = make_checked<Airframe>(); // = new Airframe(); // the Airframe was decapsulated before
             }
             else {
                 frame->clear();
+                frame->removeAll();
             }
             airframeStack.push(frame);
         }
-        else if(frame != nullptr) {
-            delete frame; // the stack is full anyway
+        else if(frame) {
+            frame.deleteObject(); // the stack is full anyway
         }
     }
     palExec_atomicEnd();

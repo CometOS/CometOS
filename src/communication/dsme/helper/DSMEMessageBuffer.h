@@ -56,7 +56,7 @@ public:
 
     DSMEMessage* aquire();
 
-    DSMEMessage* aquire(cometos::Airframe*);
+    DSMEMessage* aquire(cometos::AirframePtr);
 
     void release(DSMEMessage*);
 
@@ -66,7 +66,7 @@ private:
 
     DSMEMessageBufferElement buffer[BUFFERSIZE];
 
-    cometos::Stack<cometos::Airframe*, BUFFERSIZE> airframeStack;
+    cometos::Stack<cometos::AirframePtr, BUFFERSIZE> airframeStack;
 };
 
 }

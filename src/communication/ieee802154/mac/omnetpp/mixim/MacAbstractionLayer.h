@@ -119,7 +119,7 @@ public:
 	/**
 	 * @inheritDoc
 	 */
-	virtual void rxEnd(Airframe * frame, node_t src, node_t dst, MacRxInfo const & info);
+	virtual void rxEnd(AirframePtr frame, node_t src, node_t dst, MacRxInfo const & info);
 
 	/**
 	 * @inheritDoc
@@ -137,7 +137,7 @@ public:
 	/**
 	 * @inheritDoc
 	 */
-	virtual bool sendAirframe(Airframe* frame, node_t dst, uint8_t mode = 0, const ObjectContainer* meta=NULL);
+	virtual bool sendAirframe(AirframePtr frame, node_t dst, uint8_t mode = 0, const ObjectContainer* meta=NULL);
 
 
 	/**
@@ -256,7 +256,7 @@ private:
 
 	void handleDataFromLower(
 	              const MacHeader & header,
-	              Airframe *pkt,
+	              AirframePtr pkt,
 	              const DeciderResultEmpiric802154 * dre,
 	              lqi_t lqi,
                   bool lqiValid,
@@ -290,7 +290,7 @@ private:
      *               at least use the same mode for ACKs for transmission to
      *               be successful
      */
-    virtual bool sendToNetwork(Airframe* frame, node_t dst, mac_networkId_t dstNwk, uint8_t mode = 0);
+    virtual bool sendToNetwork(AirframePtr frame, node_t dst, mac_networkId_t dstNwk, uint8_t mode = 0);
 
 	typedef FSM<MacAbstractionLayer, MacEvent> fsm_t;
 
@@ -409,7 +409,7 @@ protected:
     // MAC VARIABLES
     uint8_t txMode; // current tx mode
     uint8_t txSeq; // current sequence number of send packet
-    Airframe* txPkt;
+    AirframePtr txPkt;
     int currMinBe; // current backoff exponent
 
     // store state for failing MAC layer

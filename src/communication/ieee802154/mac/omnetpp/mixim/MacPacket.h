@@ -49,11 +49,11 @@ public:
 
 	virtual ~MacPacket();
 
-	Airframe *decapsulateAirframe();
+	AirframePtr decapsulateNewAirframe();
 
 	void encapsulateArray(const uint8_t* data, pktSize_t size);
 
-	MacPacket(Airframe* frame = NULL);
+	MacPacket();
 
 	MacPacket& operator=(const MacPacket& other);
 
