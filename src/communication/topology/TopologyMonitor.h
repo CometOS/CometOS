@@ -181,7 +181,7 @@ public:
 	void timerFired(Message * msg) {
 	    schedule(&beaconTimer, &TopologyMonitor::timerFired, cfg.beaconInterval);
 	    numSent++;
-	    cometos::Airframe * frame = new Airframe();
+	    cometos::AirframePtr frame = make_checked<Airframe>();
 	    ASSERT(cfg.beaconSize <= AIRFRAME_MAX_SIZE);
 		for (pktSize_t i = 0; i < cfg.beaconSize; i++) {
 			*frame << i;

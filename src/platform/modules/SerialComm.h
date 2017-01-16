@@ -211,7 +211,7 @@ private:
     /**Stores number of bytes to received as well as current state
      */
     uint8_t retries;
-    Airframe *rxBuffer = NULL;
+    AirframePtr rxBuffer = NULL;
 
 
     /** FIXME TODO instead of using a queue of requests, use a queue of

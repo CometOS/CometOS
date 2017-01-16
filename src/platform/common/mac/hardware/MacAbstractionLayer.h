@@ -80,7 +80,7 @@ public:
 	/**
 	 * @inheritDoc
 	 */
-	virtual void rxEnd(Airframe *frame, node_t src, node_t dst, MacRxInfo const & rxInfo);
+	virtual void rxEnd(AirframePtr frame, node_t src, node_t dst, MacRxInfo const & rxInfo);
 	/**
 	 * Called when packet is received, but has to be dropped due
 	 * to a CRC error.
@@ -99,7 +99,7 @@ public:
 	/**
 	 * @inheritDoc
 	 */
-	virtual bool sendAirframe(Airframe* frame, node_t dst, uint8_t mode = 0, const ObjectContainer* meta=NULL);
+	virtual bool sendAirframe(AirframePtr frame, node_t dst, uint8_t mode = 0, const ObjectContainer* meta=NULL);
 
 	virtual bool setNwkId(mac_networkId_t nwkId);
 
@@ -185,12 +185,12 @@ private:
 
 	mac_result_t changeDriverConfig(const MacConfig & cfg);
 
-	Airframe * rxMsg;
+	AirframePtr rxMsg;
 	MacRxInfo ppi;
 	node_t rxSrc;
 	node_t rxDst;
 
-	Airframe * txMsg;
+	AirframePtr txMsg;
 	MacTxInfo mti;
 	macTxResult_t txResult;
 	const node_t* const fixedAddress;

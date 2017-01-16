@@ -143,7 +143,7 @@ private:
 
 	double evalBER(AirFrame* frame, bool & intermittentTxState);
 
-	LinkStats getLinkStatsForFrame(AirFrame *frame);
+	LinkStats getLinkStatsForFrame(AirFrame* frame);
 
 	void sendControl(omnetpp::cPacket *frame, int kind, bool hasInterference, bool failTxAlready, bool failTxDuringRx);
 

@@ -170,7 +170,7 @@ void MacAbstractionLayer::initialize() {
 	ASSERT(result == MAC_SUCCESS);
 	result = mac_setCCAMode(standardConfig.ccaMode);
 	ASSERT(result == MAC_SUCCESS);
-	rxMsg = new Airframe();
+	rxMsg = make_checked<Airframe>();
 	result = mac_setReceiveBuffer(rxMsg->getData());
 	result = mac_on();
 	ASSERT(result == MAC_SUCCESS);
@@ -272,7 +272,7 @@ bool MacAbstractionLayer::listen() {
 	}
 }
 
-bool MacAbstractionLayer::sendAirframe(Airframe* frame, node_t dst, uint8_t mode, const ObjectContainer* meta) {
+bool MacAbstractionLayer::sendAirframe(AirframePtr frame, node_t dst, uint8_t mode, const ObjectContainer* meta) {
 	ASSERT(txMsg == NULL);
 	if (dst == mac_getNodeId()) {
         delete frame;
@@ -371,7 +371,7 @@ node_t MacAbstractionLayer::getShortAddr() {
 	return mac_getNodeId();
 }
 
-void MacAbstractionLayer::rxEnd(Airframe *frame, node_t src, node_t dst, MacRxInfo const & info) {
+void MacAbstractionLayer::rxEnd(AirframePtr frame, node_t src, node_t dst, MacRxInfo const & info) {
 	ASSERT(false);
 }
 
@@ -415,7 +415,7 @@ void MacAbstractionLayer::processTxDone(Message *msg) {
 }
 
 void MacAbstractionLayer::processRxDone(Message * msg) {
-	Airframe * justReceived = rxMsg;
+	AirframePtr justReceived = rxMsg;
 
 	// pass current message to actual mac layer for logging, stats etc.
 	rxEnd(justReceived, rxSrc, rxDst, ppi);
@@ -430,7 +430,7 @@ void MacAbstractionLayer::processRxDone(Message * msg) {
     }
 
 	// create new receive buffer and pass to mac layer
-	rxMsg = new Airframe();
+	rxMsg = make_checked<Airframe>();
 	mac_setReceiveBuffer(rxMsg->getData());
 }
 

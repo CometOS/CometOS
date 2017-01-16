@@ -199,7 +199,7 @@ void LWT::neighborDataUpdateTimer(Message *timer) {
         return 0;
     }
 #endif
-    Airframe *msg = new Airframe();
+    AirframePtr msg = make_checked<Airframe>();
     mRandomBackoff = intrand(LWT_RANDOM_BACKOFF);
     mTimerMsg = new Message;
     schedule(mTimerMsg, &LWT::neighborDataUpdateTimer, LWT_TIME_INTERVAL + mRandomBackoff);
@@ -253,7 +253,7 @@ bool LWT::performStep() {
         if(didExecute) {
             //// broadcasting new state
             sendMsg = true;
-            Airframe *msg = new Airframe();
+            AirframePtr msg = make_checked<Airframe>();
             mAlgo->addHeader(*msg);
             sendRequest(new DataRequest(BROADCAST, msg, createCallback(&LWT::resp)));
         }

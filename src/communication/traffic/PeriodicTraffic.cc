@@ -71,7 +71,7 @@ void PeriodicTraffic::start(timeOffset_t offset) {
 
 void PeriodicTraffic::traffic(Message *timer) {
 	// create dummy data for transmission
-	Airframe *frame = new Airframe;
+	AirframePtr frame = make_checked<Airframe>();
 	for (uint8_t i = 0; i < payloadSize; i++) {
 		(*frame) << (uint8_t) i;
 	}

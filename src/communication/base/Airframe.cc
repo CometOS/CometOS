@@ -40,13 +40,13 @@
 namespace cometos {
 
 Airframe* Airframe::getCopy() const {
-	Airframe *msg = new Airframe;
+    Airframe* msg = new Airframe();
 	msg->data = this->data; // copy
 	return msg;
 }
 
 Airframe* Airframe::getDeepCopy() const {
-    Airframe *msg = new Airframe;
+    Airframe* msg = new Airframe();
     msg->data = this->data; // copy
 
     ((ObjectContainer*)msg)->operator=(*this);

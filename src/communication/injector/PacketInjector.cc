@@ -63,7 +63,7 @@ void PacketInjector::sendPkt(const uint8_t * data, pktSize_t len, node_t src, no
     if (data != NULL) {
    // if (data != NULL && len >= 0) { len >= 0 is always true
         if (len <= AIRFRAME_MAX_SIZE) {
-            Airframe * pkt = new Airframe();
+            AirframePtr pkt = make_checked<Airframe>();
 //            getCout() << "PI_send: ";
             for (pktSize_t i=0; i < len; i++) {
                 *pkt << data[i];

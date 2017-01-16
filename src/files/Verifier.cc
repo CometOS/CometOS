@@ -175,7 +175,7 @@ void Verifier::getRemoteFileProperties(node_t remote, AirString filename, Callba
     this->remoteCallback = callback;
     palExec_atomicEnd();
 
-    Airframe* frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << filename;
     (*frame) << (uint8_t)CMD::REQUEST;
 
@@ -224,7 +224,7 @@ void Verifier::sendResult(FileProperties properties)
     getArbiter()->release();
 
     if(replyAddr != 0xffff) {
-        Airframe* frame = new Airframe();
+        AirframePtr frame = make_checked<Airframe>();
         (*frame) << properties;
         (*frame) << (uint8_t)CMD::RESPONSE;
 

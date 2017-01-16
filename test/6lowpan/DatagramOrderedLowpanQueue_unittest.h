@@ -331,7 +331,7 @@ TEST_F(DatagramOrderedLowpanQueueTest, emptyInOrderDg) {
     // internal queue of an InOrderDg empty
     queue->add(qf1[0]);
     cometos::DataRequest* req;
-    cometos::Airframe* frame;
+    cometos::AirframePtr frame;
 
     EXPECT_TRUE(queue->hasNext());
 
@@ -373,7 +373,7 @@ TEST_F(DatagramOrderedLowpanQueueTest, emptyInOrderDg) {
 
 TEST_F(DatagramOrderedLowpanQueueTest, mixedOrder) {
     cometos::DataRequest* req;
-    cometos::Airframe* frame;
+    cometos::AirframePtr frame;
 
     queue->add(qf1[0]);
     queue->add(qp);

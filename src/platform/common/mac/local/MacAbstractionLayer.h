@@ -44,7 +44,7 @@ namespace cometos {
 		MacAbstractionLayer(const char * name = NULL,
 	                    const node_t* fixedAddress = NULL) {}
 		void finish() {}
-		bool sendAirframe(cometos::Airframe*, unsigned short, unsigned char, cometos::ObjectContainer const*) {
+		bool sendAirframe(cometos::AirframePtr , unsigned short, unsigned char, cometos::ObjectContainer const*) {
 		    return false;
 		}
 	};

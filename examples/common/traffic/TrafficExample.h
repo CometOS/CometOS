@@ -80,7 +80,7 @@ private:
 	timeOffset_t fI;
 	timeOffset_t rI;
 	StaticSList<node_t, 10> destAddresses;
-	cometos::Airframe * frame;
+	cometos::AirframePtr frame;
 	uint16_t myCrc;
 	uint8_t msgSize;
 

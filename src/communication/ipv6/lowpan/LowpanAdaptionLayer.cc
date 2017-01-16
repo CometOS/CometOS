@@ -486,7 +486,7 @@ uint8_t LowpanAdaptionLayer::checkMesh(cometos::Airframe & frame,
 void LowpanAdaptionLayer::handleMACIndication(LowpanIndication *ind) {
     Ieee802154MacAddress    src = Ieee802154MacAddress(ind->src);
     Ieee802154MacAddress    dst = Ieee802154MacAddress(ind->dst);
-    cometos::Airframe*      frame = ind->decapsulateAirframe();
+    cometos::AirframePtr      frame = ind->decapsulateAirframe();
     cometos::MacRxInfo info;
     uint8_t lowpanDispatch = ind->head;
 
@@ -527,7 +527,7 @@ void LowpanAdaptionLayer::handleMACIndication(LowpanIndication *ind) {
     }
 
     delete ind;
-    delete frame;
+    frame.deleteObject();
 }
 
 

@@ -108,7 +108,7 @@ public:
 
 	void initialize();
 
-	void raise(Airframe* frame, node_t dst);
+	void raise(AirframePtr frame, node_t dst);
 private:
 };
 

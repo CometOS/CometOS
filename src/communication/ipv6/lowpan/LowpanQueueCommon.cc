@@ -48,7 +48,7 @@ cometos::DataRequest* LowpanQueueCommon::getLowpanQueueFrame(
         LowpanFragMetadata& fragMeta,
         const IPv6Datagram* & dg)
 {
-    cometos::Airframe* frame = new cometos::Airframe();
+    cometos::AirframePtr frame = cometos::make_checked<cometos::Airframe>();
 
     qo->createFrame(*frame, maxSize, fragMeta, dg);
     if(frame->getLength() == 0) return NULL; // for LFFRPacket

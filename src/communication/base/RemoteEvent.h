@@ -61,7 +61,7 @@ public:
 	bool unsubscribe( node_t dst);
 
 
-	void raiseEvent(Airframe* frame);
+	void raiseEvent(AirframePtr frame);
 
 	RemoteEventBase *next;
 
@@ -86,7 +86,7 @@ public:
 			return;
 		}
 
-		Airframe* air = new Airframe;
+		AirframePtr air = make_checked<Airframe>();
 		(*air) << value;
 		RemoteEventBase::raiseEvent(air);
 	}

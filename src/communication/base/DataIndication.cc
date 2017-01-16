@@ -39,25 +39,25 @@
 
 namespace cometos {
 
-DataIndication::DataIndication(Airframe * frame, node_t src, node_t dst) :
-		src(src), dst(dst), frame(frame) {
+DataIndication::DataIndication(AirframePtr frame, node_t src, node_t dst) :
+        src(src), dst(dst), frame(frame) {
 }
 
 DataIndication::~DataIndication() {
-	if (frame != NULL) {
-		delete frame;
-	}
+    if (frame) {
+        frame.deleteObject();
+    }
 }
 
 Airframe &DataIndication::getAirframe() {
-	ASSERT(frame != NULL);
-	return *frame;
+    ASSERT(frame);
+    return *frame;
 }
 
-Airframe * DataIndication::decapsulateAirframe() {
-	Airframe *p = frame;
-	frame = NULL;
-	return p;
+AirframePtr DataIndication::decapsulateAirframe() {
+    AirframePtr temp = frame;
+    frame.reset();
+    return temp;
 }
 
 } /* namespace cometos */

@@ -95,9 +95,7 @@ void DSMEPlatformBase::start() {
 
 void DSMEPlatformBase::handleDataMessageFromMCPS(DSMEMessage* msg) {
     AirframePtr macPkt = msg->decapsulateFrame();
-    Airframe* airframeForUp = macPkt.decapsulate();
-
-    cometos::DataIndication* ind = new cometos::DataIndication(airframeForUp, msg->getHeader().getSrcAddr().getShortAddress(), msg->getHeader().getDestAddr().getShortAddress());
+    cometos::DataIndication* ind = new cometos::DataIndication(macPkt, msg->getHeader().getSrcAddr().getShortAddress(), msg->getHeader().getDestAddr().getShortAddress());
     releaseMessage(msg);
     this->gateIndOut.send(ind);
 }

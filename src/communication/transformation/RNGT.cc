@@ -258,7 +258,7 @@ bool RNGT::performStep() {
 
 void RNGT::sendTimedMsg(Message *timer) {
     delete timer;
-    Airframe *msg = new Airframe();
+    AirframePtr msg = make_checked<Airframe>();
     mAlgo->addHeader(*msg);
     sendRequest(new DataRequest(BROADCAST, msg, createCallback(&RNGT::resp)));
 }

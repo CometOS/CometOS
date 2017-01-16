@@ -55,8 +55,8 @@ const char * const TwiComm::MODULE_NAME = "twc";
 void TwiComm::initialize() {
 	ASSERT(instance == NULL); // TODO explicit singleton
 	instance = this;
-	rxBufferTwi = new cometos::Airframe();
-	rxBufferSendUp = new cometos::Airframe();
+	rxBufferTwi = cometos::make_checked<cometos::Airframe>();
+	rxBufferSendUp = cometos::make_checked<cometos::Airframe>();
 
 	if(master) {
 		twiMaster->init();
@@ -91,7 +91,7 @@ void TwiComm::rxFinishedCallback(uint8_t *rxBuf, uint8_t len, cometos_error_t re
         // is there a fresh buffer in rxBufferSendUp?
         if(instance->rxBufferSendUp->getLength() == 0) {
             // swap pointers to prepare TWI buffer for next reception
-            cometos::Airframe* tmp = instance->rxBufferSendUp;
+            cometos::AirframePtr tmp = instance->rxBufferSendUp;
             instance->rxBufferSendUp = instance->rxBufferTwi;
             instance->rxBufferTwi = tmp;
 
@@ -135,7 +135,7 @@ void TwiComm::sendUpTask() {
 
 	LowerEndpoint::sendIndication(ind);
 
-	rxBufferSendUp = new cometos::Airframe();
+	rxBufferSendUp = cometos::make_checked<cometos::Airframe>();
     rxBufferSendUp->setLength(0);
 }
 

@@ -74,7 +74,7 @@ public:
     void sendMessage(Message* msg) {
         schedule(msg, &BroadcastData::sendMessage, 1000);
         palLed_toggle(1);
-        Airframe* frame = new Airframe();
+        AirframePtr frame = make_checked<Airframe>();
         (*frame) << count;
         DataRequest* dr = new DataRequest(0xFFFF, frame);
         dataOut.send(dr);

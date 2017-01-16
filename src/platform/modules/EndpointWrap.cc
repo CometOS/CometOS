@@ -72,7 +72,7 @@ void EndpointWrap::handleIndication(DataIndication* msg) {
 
 void EndpointWrap::sendRequest(ByteVector& frame, int dst) {
 	palExec_atomicBegin();
-	Airframe *air = new Airframe;
+	AirframePtr air = make_checked<Airframe>();
 	for (uint8_t i = 0; i < frame.getSize(); i++) {
 		(*air) << frame[i];
 	}

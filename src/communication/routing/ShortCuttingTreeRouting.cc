@@ -160,7 +160,7 @@ void ShortCuttingTreeRouting::sendBeacon(Message *timer) {
 #endif
 
     LOG_INFO("send beacon");
-    Airframe * air = new Airframe;
+    AirframePtr air = make_checked<Airframe>();
     (*air) << hops << parents;
     DataRequest *req = new DataRequest(BROADCAST, air);
     req->set(new MacControl(broadcastTxPower));

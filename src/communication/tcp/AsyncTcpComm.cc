@@ -58,7 +58,7 @@ void AsyncTcpComm::receivedCallback(const socket_t& handler, uint8_t *buffer,
 #endif
 
 
-	Airframe *frame = new Airframe();
+	AirframePtr frame = make_checked<Airframe>();
 	frame->setLength(length);
 	memcpy(frame->getData(), buffer, length);
 	node_t src;

@@ -328,7 +328,7 @@ Mapping* EmpiricDecider::createConstantMapping(simtime_t start, simtime_t end,
 }
 
 
-LinkStats EmpiricDecider::getLinkStatsForFrame(AirFrame *frame) {
+LinkStats EmpiricDecider::getLinkStatsForFrame(AirFrame* frame) {
     LinkStats stats;
     cometos::MacPacket* mac = check_and_cast<cometos::MacPacket*> (frame->getEncapsulatedPacket());
     if (!mac->meta.has<cometos::NodeId>()) {

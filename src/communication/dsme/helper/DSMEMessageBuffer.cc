@@ -113,7 +113,7 @@ void DSMEMessageBuffer::release(DSMEMessage* message) {
     {
         if(!airframeStack.isFull()) {
             if(!frame) {
-                frame = make_checked<Airframe>(); // = new Airframe(); // the Airframe was decapsulated before
+                frame = make_checked<Airframe>(); // = make_checked<Airframe>(); // the Airframe was decapsulated before
             }
             else {
                 frame->clear();

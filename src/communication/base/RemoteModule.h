@@ -59,8 +59,8 @@ class BaseSerializer {
 public:
     virtual ~BaseSerializer() {};
 
-	virtual void serialize(const void *instance, Airframe* frame)=0;
-	virtual void deserialize(void *instance, Airframe* frame)=0;
+	virtual void serialize(const void *instance, AirframePtr frame)=0;
+	virtual void deserialize(void *instance, AirframePtr frame)=0;
 };
 
 /**Singleton class for Serialization of types
@@ -75,10 +75,10 @@ public:
 
 	virtual ~Serializer() {}
 
-	virtual void serialize(const void *instance, Airframe* frame) {
+	virtual void serialize(const void *instance, AirframePtr frame) {
 		(*frame) << *((const T*) instance);
 	}
-	virtual void deserialize(void *instance, Airframe* frame) {
+	virtual void deserialize(void *instance, AirframePtr frame) {
 		(*frame) >> *((T*) instance);
 
 	}
@@ -185,16 +185,16 @@ public:
 		return NULL;
 	}
 
-	bool remoteWriteVariable(Airframe* frame, const char* name) {
+	bool remoteWriteVariable(AirframePtr frame, const char* name) {
 		RemoteVariable *var = remoteFindVariable(name);
 		if (var == NULL) {
 			return false;
 		}
-		var->serializer->deserialize(var->variable, frame);
+
 		return true;
 	}
 
-	bool remoteReadVariable(Airframe* frame, const char* name) {
+	bool remoteReadVariable(AirframePtr frame, const char* name) {
 		RemoteVariable *var = remoteFindVariable(name);
 		if (var == NULL) {
 			return false;
@@ -214,14 +214,13 @@ public:
 		return NULL;
 	}
 
-	Airframe *remoteMethodInvocation(Airframe* frame, const char* name) {
+	AirframePtr remoteMethodInvocation(AirframePtr frame, const char* name) {
 #ifdef OMNETPP
 		Enter_Method_Silent();
 #endif
 		RemoteMethod *method = remoteFindMethod(name);
 		if (method == NULL) {
-			delete frame;
-			return NULL;
+			frame.deleteObject();
 		}
 
 		return method->invoke(frame);

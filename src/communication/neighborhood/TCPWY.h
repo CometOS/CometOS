@@ -80,7 +80,7 @@ private:
 
 	uint32_t ts;
 
-	cometos::Airframe * frame;
+	cometos::AirframePtr frame;
 
 	uint8_t seqNum;
 

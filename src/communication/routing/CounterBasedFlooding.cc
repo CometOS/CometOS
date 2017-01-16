@@ -79,7 +79,7 @@ void CounterBasedFlooding::handleIndication(DataIndication* msg) {
 
 	// send data to upper layer
 	if (nwk.dst == getId() || nwk.dst == BROADCAST) {
-		Airframe *tmp = msg->getAirframe().getCopy();
+		AirframePtr tmp = msg->getAirframe().getCopy();
 		tmp->set(new RoutingInfo(nwk.hops));
 		sendIndication(new DataIndication(tmp, nwk.src, nwk.dst));
 	}

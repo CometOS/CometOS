@@ -43,14 +43,14 @@
 /**
  * Abstract class. Serves as a basis for empirical deciders.
  * A derived empirical Decider has to implement the
- * getEmpiricAttenuationMapping(AirFrame* frame), providing an attenuation
+ * getEmpiricAttenuationMapping(AirframePtr frame), providing an attenuation
  * mapping for the signal of the given air frame. E.g. to set the received
  * signal power to a certain level, one could simply divide the target mapping
  * by the current signal power mapping and return the result as attenuation
  * mapping.
  *
  * As the attenuation mapping is added to the signal within the
- * processSignal(Airframe* frame) method, this method MUST NOT be
+ * processSignal(AirframePtr frame) method, this method MUST NOT be
  * overridden by a deriving class.
  */
 class EmpiricDeciderBase : public BaseDecider {

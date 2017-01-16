@@ -116,7 +116,7 @@ void TreeRouting::sendBeacon(Message *timer) {
         return;
     }LOG_INFO("send beacon");
 
-    Airframe * air = new Airframe;
+    AirframePtr air = make_checked<Airframe>();
     (*air) << hops;
 
 #ifdef ROUTING_ENABLE_STATS

@@ -199,7 +199,7 @@ void SectorLocationBasedRouting::forward() {
         }
     }
 
-    Airframe *frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << ownPosition << currentSectors << currentRequest->dst;
 
 #ifdef ROUTING_ENABLE_STATS
@@ -401,7 +401,7 @@ void SectorLocationBasedRouting::handleSectorRequest(DataIndication* pkt) {
             i = (i + 1) % MAX_SECTORS) {
         if (i == requestedSector) {
             LOG_INFO("reply to discovery message");
-            Airframe *frame = new Airframe;
+            AirframePtr frame = make_checked<Airframe>();
             (*frame) << ownPosition << established;
 
 #ifdef ROUTING_ENABLE_STATS

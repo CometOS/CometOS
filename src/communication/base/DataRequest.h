@@ -47,24 +47,21 @@ class DataResponse;
 
 class DataRequest: public Request<DataResponse> {
 public:
-	node_t dst;
+    node_t dst;
 
-	DataRequest(
-			node_t dst,
-			Airframe* frame,
-			const TypedDelegate<DataResponse> &delegate = TypedDelegate
-					< DataResponse >(), RequestId *rid = NULL);
+    DataRequest(node_t dst, AirframePtr frame, const TypedDelegate<DataResponse> &delegate =
+            TypedDelegate<DataResponse>(), RequestId *rid = NULL);
 
-	virtual ~DataRequest();
+    virtual ~DataRequest();
 
-	Airframe &getAirframe();
+    Airframe &getAirframe();
 
-	void setAirframe(Airframe* frame);
+    void setAirframe(AirframePtr frame);
 
-	Airframe * decapsulateAirframe();
+    AirframePtr decapsulateAirframe();
 
 private:
-	Airframe* frame;
+    AirframePtr frame;
 
 };
 

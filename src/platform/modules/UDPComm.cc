@@ -58,7 +58,7 @@ UDPComm::UDPComm(int ownPort, const char* remoteAddress, int remotePort)
   remoteAddressStr(remoteAddress),
   remotePort(remotePort)
 {
-	rxFrame = new cometos::Airframe();
+	rxFrame = cometos::make_checked<cometos::Airframe>();
 }
 
 // for dynamic remote
@@ -169,7 +169,7 @@ void UDPComm::pollUDPSocket() {
 
 		sendIndication(ind);
 
-		rxFrame = new cometos::Airframe();
+		rxFrame = cometos::make_checked<cometos::Airframe>();
 
 		if(dynamicRemote) {
 			ASSERT(sizeof(remoteAddr) == addrlen);

@@ -51,7 +51,7 @@ public:
 			name(name), next(next), evName(evName) {
 	}
 
-	virtual Airframe* invoke(Airframe* frame)=0;
+	virtual AirframePtr invoke(AirframePtr frame)=0;
 	const char* name;
 	RemoteMethod* next; // used for building linked list
 	const char* evName;
@@ -70,7 +70,7 @@ public:
 			RemoteMethod(name, evName, next), owner(owner), method(method) {
 	}
 
-	virtual Airframe* invoke(Airframe* frame) {
+	virtual AirframePtr invoke(AirframePtr frame) {
 		ASSERT(frame->getLength()==0);
 		(owner->*method)();
 		(*frame) << (uint8_t)(0);
@@ -93,7 +93,7 @@ public:
 			RemoteMethod(name, evName,  next), owner(owner), method(method) {
 	}
 
-	Airframe* invoke(Airframe* frame) {
+	AirframePtr invoke(AirframePtr frame) {
 		ASSERT(frame->getLength()==0);
 		(*frame) << ((owner->*method)());
 		return frame;
@@ -115,7 +115,7 @@ public:
 			RemoteMethod(name, evName,  next), owner(owner), method(method) {
 	}
 
-	Airframe* invoke(Airframe* frame) {
+	AirframePtr invoke(AirframePtr frame) {
 		P1 val1;
 		(*frame) >> val1;
 		ASSERT(frame->getLength()==0);
@@ -137,7 +137,7 @@ public:
 			RemoteMethod(name, evName,  next), owner(owner), method(method) {
 	}
 
-	Airframe* invoke(Airframe* frame) {
+	AirframePtr invoke(AirframePtr frame) {
 		P1 val1;
 		P2 val2;
 		(*frame) >> val2 >> val1;
@@ -160,7 +160,7 @@ public:
 			RemoteMethod(name, evName,  next), owner(owner), method(method) {
 	}
 
-	Airframe* invoke(Airframe* frame) {
+	AirframePtr invoke(AirframePtr frame) {
 		P1 val1;
 		P2 val2;
 		P3 val3;
@@ -186,7 +186,7 @@ public:
 			RemoteMethod(name, evName,  next), owner(owner), method(method) {
 	}
 
-	Airframe* invoke(Airframe* frame) {
+	AirframePtr invoke(AirframePtr frame) {
 		P1 val1;
 		(*frame) >> val1;
 		ASSERT(frame->getLength()==0);
@@ -211,7 +211,7 @@ public:
 			RemoteMethod(name, evName,  next), owner(owner), method(method) {
 	}
 
-	Airframe* invoke(Airframe* frame) {
+	AirframePtr invoke(AirframePtr frame) {
 		P1 val1;
 		P2 val2;
 		(*frame) >> val2 >> val1;
@@ -236,7 +236,7 @@ public:
 			RemoteMethod(name, evName,  next), owner(owner), method(method) {
 	}
 
-	Airframe* invoke(Airframe* frame) {
+	AirframePtr invoke(AirframePtr frame) {
 		P1 val1;
 		P2 val2;
 		P3 val3;

@@ -96,7 +96,7 @@ void Bounce::handleMACRequest(DataRequest *macrequest) {
 //    }
 
     if (macrequest->dst == 0xFFFF) {
-        cometos::Airframe *frame = macrequest->decapsulateAirframe();
+        cometos::AirframePtr frame = macrequest->decapsulateAirframe();
         cometos::DataIndication * ind =  new cometos::DataIndication(frame, macrequest->dst, getId());
         delete(macrequest);
 

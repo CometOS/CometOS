@@ -144,7 +144,7 @@ void SimpleRouting::sendAutoReply(node_t dst) {
     nwk.src = palId_id(); //getId();
     nwk.dst = dst;
     nwk.hops |= 0x40;
-    Airframe* frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << nwk;
     DataRequest *req = new DataRequest(nextHop, frame);
 

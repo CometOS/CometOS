@@ -67,7 +67,6 @@ Define_Module(TCPWY);
 TCPWY::TCPWY() :
         pGateControlIn(this, &TCPWY::handleControl, "gateControlIn"),
         pGateControlOut(this, "gateControlOut"),
-        frame(NULL),
         seqNum(0),
         toggle(true)
 {
@@ -112,7 +111,7 @@ void TCPWY::neighborDataUpdateTimer(Message *timer) {
     // only sends TCA packet when there is no upper layer
     // or if it has an upper layer but hasn't send within the last time frame
     if(!mHasUpperLayer || (mHasUpperLayer && !mHasSend)) {
-        Airframe *msg = new Airframe();
+        AirframePtr msg = make_checked<Airframe>();
         //Sending out @ every tick
         TCPWYHeader	header(TCPWY_MSG_TYPE_DATA, seqNum);
         setHeaderData(header);
@@ -244,7 +243,7 @@ void TCPWY::handleRequest(DataRequest* msg){
 void TCPWY::sendControl(uint8_t controlType, node_t targetId) {
     //Sending out whenever needed
     if(pGateControlOut.isConnected()) {
-        Airframe *msg = new Airframe();
+        AirframePtr msg = make_checked<Airframe>();
         TCPWYControlHeader header(controlType, targetId);
         (*msg) << header;
         pGateControlOut.send(new DataIndication(msg,palId_id(),palId_id()));

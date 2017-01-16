@@ -65,7 +65,7 @@ void TcpForwarder::handleIndication(cometos::DataIndication* msg) {
 
 void TcpForwarder::receivedCallback(const socket_t& handler, uint8_t *buffer,
 		uint8_t length) {
-	Airframe *frame = new Airframe();
+	AirframePtr frame = make_checked<Airframe>();
 	frame->setLength(length);
 	memcpy(frame->getData(), buffer, length);
 	Endpoint::sendRequest(new DataRequest(MAC_BROADCAST, frame));

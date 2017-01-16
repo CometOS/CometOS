@@ -823,9 +823,7 @@ void MacAbstractionLayer::handleDataFromLower(
     rxEnd(pkt, header.src, header.dst, phyInfo);
 
     // send up indication
-    Airframe* indPkt = pkt.decapsulate();
-
-    DataIndication * ind = new DataIndication(indPkt, header.src, header.dst);
+    DataIndication * ind = new DataIndication(pkt, header.src, header.dst);
     ind->set((MacRxInfo*) phyInfo.getCopy());
     if (ind->dst == palId_id() || ind->dst == MAC_BROADCAST) {
         gateIndOut.send(ind);

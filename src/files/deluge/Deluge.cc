@@ -105,7 +105,7 @@ void Deluge::updateDone(AirString &filename) {
      onInfoFileLoaded(COMETOS_SUCCESS, pInfo);
 
     // Broadcast a wakeup message to prepare the other nodes for the update
-    Airframe* frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << filename;
     (*frame) << static_cast<uint8_t>(Deluge::MessageType::WAKEUP);
 
@@ -268,7 +268,7 @@ fsmReturnStatus Deluge::stateTX(DelugeEvent &event) {
 //---------------------------------------------
 
 void Deluge::handleWakeup() {
-    Airframe *frame = rcvdMsg->decapsulateAirframe();
+    AirframePtr frame = rcvdMsg->decapsulateAirframe();
     (*frame) >> filename;
 
     mInfoFile.getInfo(CALLBACK_MET(&Deluge::onInfoFileLoaded, *this));
@@ -343,7 +343,7 @@ void Deluge::sendSummary() {
     uint8_t gamma = pInfo->getHighestCompletePage();
 
     // Create Airframe
-    Airframe* frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << gamma;
     (*frame) << static_cast<uint16_t>(pInfo->getVersion());
     (*frame) << static_cast<uint8_t>(Deluge::MessageType::SUMMARY);
@@ -361,12 +361,12 @@ fsmReturnStatus Deluge::handleSummary() {
     ASSERT(pInfo);
 
     // Extract summary data
-    Airframe* frame = rcvdMsg->decapsulateAirframe();
+    AirframePtr frame = rcvdMsg->decapsulateAirframe();
     uint16_t versionNumber;
     uint8_t gamma;
     (*frame) >> versionNumber;
     (*frame) >> gamma;
-     delete frame;
+    frame.deleteObject();
 
 #ifdef DELUGE_OUTPUT
     getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received summary (v=" << versionNumber << ",g=" << static_cast<uint16_t>(gamma) << ")" << endl;
@@ -392,7 +392,7 @@ fsmReturnStatus Deluge::handleSummary() {
 
 void Deluge::sendObjectProfile() {
     // Create Airframe
-    Airframe* frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
 
     // Insert age vector
     uint16_t avSize = pInfo->getAgeVectorSize();
@@ -428,7 +428,7 @@ void Deluge::sendObjectProfile() {
 
 void Deluge::handleObjectProfile() {
     // Extract crc code
-    Airframe *frame = rcvdMsg->decapsulateAirframe();
+    AirframePtr frame = rcvdMsg->decapsulateAirframe();
     uint16_t crc;
     (*frame) >> crc;
 
@@ -502,16 +502,16 @@ void Deluge::handleObjectProfile() {
             mActive = true;
         }
     }
-    delete frame;
+    frame.deleteObject();
 }
 
 fsmReturnStatus Deluge::handlePageRequest() {
     uint8_t requestedPage;
     uint32_t requestedPackets;
-    Airframe *frame = rcvdMsg->decapsulateAirframe();
+    AirframePtr frame = rcvdMsg->decapsulateAirframe();
     (*frame) >> requestedPage;
     (*frame) >> requestedPackets;
-    delete frame;
+    frame.deleteObject();
 
     // Check availability of page
     uint8_t gamma = pInfo->getHighestCompletePage();
@@ -593,7 +593,7 @@ void Deluge::sendPageRequest() {
     mPacketsSinceLastTimer = 0;
 
     // Create Airframe
-    Airframe* frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << static_cast<uint32_t>(this->mPacketsMissing);
     (*frame) << static_cast<uint8_t>(this->mPageRX);
     (*frame) << static_cast<uint8_t>(Deluge::MessageType::PAGE_REQUEST);
@@ -623,13 +623,13 @@ void Deluge::handlePacket() {
     uint8_t page;
     uint8_t packet;
     uint16_t crc;
-    Airframe *frame = rcvdMsg->decapsulateAirframe();
+    AirframePtr frame = rcvdMsg->decapsulateAirframe();
     (*frame) >> page;
     (*frame) >> this->mPageCRC;
     (*frame) >> packet;
     (*frame) >> crc;
     (*frame) >> this->mBuffer;
-    delete frame;
+    frame.deleteObject();
 
     if (page != this->mPageRX) {
 #ifdef DELUGE_OUTPUT
@@ -817,7 +817,7 @@ void Deluge::sendPacket(cometos_error_t result) {
     uint16_t crc = Verifier::updateCRC(0, this->mBuffer.getBuffer(), this->mBuffer.getSize(), true);
 
     // Create Airframe
-    Airframe* frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << this->mBuffer;
     (*frame) << static_cast<uint16_t>(crc);
     (*frame) << static_cast<uint8_t>(this->mPacketToSend);
@@ -838,13 +838,13 @@ void Deluge::sendPacket(cometos_error_t result) {
 }
 
 void Deluge::handlePageRequestTX() {
-    Airframe* frame = rcvdMsg->decapsulateAirframe();
-    ASSERT(frame != nullptr);
+    AirframePtr frame = rcvdMsg->decapsulateAirframe();
+    ASSERT(frame);
     uint8_t requestedPage;
     uint32_t requestedPackets;
     (*frame) >> requestedPage;
     (*frame) >> requestedPackets;
-    delete frame;
+    frame.deleteObject();
 
     if(mPageTX == requestedPage) {
         mRequestedPackets |= requestedPackets;

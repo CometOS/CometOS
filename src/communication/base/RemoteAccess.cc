@@ -52,7 +52,7 @@ RemoteAccess::RemoteAccess(const char* service_name) :
 		Endpoint(service_name) {
 }
 
-void RemoteAccess::raise(Airframe* frame, node_t dst) {
+void RemoteAccess::raise(AirframePtr frame, node_t dst) {
 #ifdef OMNETPP
 	Enter_Method_Silent();
 #endif
@@ -98,7 +98,7 @@ void RemoteAccess::handleIndication(DataIndication* msg) {
 	RemoteModule* mod = (RemoteModule*) Module::getModule(module.getStr());
 
 	if (mod == NULL) {
-		Airframe* resp = new Airframe;
+		AirframePtr resp = make_checked<Airframe>();
 		(*resp) << (uint8_t) (RA_ERROR_NO_SUCH_MODULE) << seq; // error flag
 		sendRequest(new DataRequest(dst, resp));
 		delete msg;
@@ -106,7 +106,7 @@ void RemoteAccess::handleIndication(DataIndication* msg) {
 	}
 
 	if (type == RA_REMOTE_VARIABLE) { // remote variable
-		Airframe *resp = new Airframe;
+		AirframePtr resp = make_checked<Airframe>();
 		if (msg->getAirframe().getLength() == 0) {
 			// reading failed
 			if (!mod->remoteReadVariable(resp, var.getStr())) {
@@ -126,13 +126,13 @@ void RemoteAccess::handleIndication(DataIndication* msg) {
 
 	} else if (type == RA_REMOTE_METHOD) { // remote method invocation
 
-		Airframe *resp = mod->remoteMethodInvocation(msg->decapsulateAirframe(),
+		AirframePtr resp = mod->remoteMethodInvocation(msg->decapsulateAirframe(),
 				var.getStr());
 #ifdef OMNETPP
 		Enter_Method_Silent();
 #endif
-		if (resp == NULL) {
-			resp = new Airframe;
+		if (!resp) {
+			resp = make_checked<Airframe>();
 			(*resp) << (uint8_t) (RA_ERROR_NO_SUCH_METHOD); // error flag
 		} else {
 			(*resp) << (uint8_t) (RA_SUCCESS); // succeed flag
@@ -140,7 +140,7 @@ void RemoteAccess::handleIndication(DataIndication* msg) {
 		(*resp) << seq;
 		sendRequest(new DataRequest(dst, resp),offset);
 	} else if (type == RA_REMOTE_EVENT_SUBSCRIBE) { // remote event subscribe
-		Airframe *resp = new Airframe;
+		AirframePtr resp = make_checked<Airframe>();
 		msg->getAirframe() >> counter;
 		if (mod->eventSubscribe(var.getStr(), this, dst, counter)) {
 			(*resp) << (uint8_t) (RA_SUCCESS); // succeed flag
@@ -150,7 +150,7 @@ void RemoteAccess::handleIndication(DataIndication* msg) {
 		(*resp) << seq;
 		sendRequest(new DataRequest(dst, resp),offset);
 	} else if (type == RA_REMOTE_EVENT_UNSUBSCRIBE) { // remote event unsubscribe
-		Airframe *resp = new Airframe;
+		AirframePtr resp = make_checked<Airframe>();
 		if (mod->eventUnsubscribe(var.getStr(), BROADCAST)) {
 			(*resp) << (uint8_t) (RA_SUCCESS); // succeed flag
 		} else {
@@ -163,7 +163,7 @@ void RemoteAccess::handleIndication(DataIndication* msg) {
 	    // remote method call with event callback - check method availability,
 	    // defer event from remoteMethod (and subscribe) and send back
 	    // response -- the called module is responsible for raising the event
-	    Airframe * resp = NULL;
+	    AirframePtr resp;
 	    uint8_t status = RA_SUCCESS;
 	    RemoteMethod * m = mod->remoteFindMethod(var.getStr());
 	    if (m != NULL) {
@@ -180,13 +180,13 @@ void RemoteAccess::handleIndication(DataIndication* msg) {
             #ifdef OMNETPP
                     Enter_Method_Silent();
             #endif
-            if (resp == NULL) {
+            if (!resp) {
                 status = RA_ERROR_NO_SUCH_METHOD;
             }
 	    }
 
 	    if (status != RA_SUCCESS) {
-	        resp = new Airframe();
+	        resp = make_checked<Airframe>();
 	        if (status != RA_ERROR_INVALID_METHOD_TYPE) {
 	            mod->eventUnsubscribe(m->evName, dst);
 	        }
@@ -209,7 +209,7 @@ void RemoteAccess::initialize() {
 }
 
 //void RemoteAccess::timer1(cometos::Message *msg) {
-//	Airframe *air = new Airframe;
+//	AirframePtr air = make_checked<Airframe>();
 //	(*air) << (uint8_t) 4;
 //
 //	send(new DataRequest(dst, air));

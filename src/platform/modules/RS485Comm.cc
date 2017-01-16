@@ -56,11 +56,11 @@ const char * const RS485Comm::MODULE_NAME = "rsc";
 
 void RS485Comm::initialize() {
     if(rxBufferRS485 == NULL) {
-        rxBufferRS485 = new cometos::Airframe();
+        rxBufferRS485 = cometos::make_checked<cometos::Airframe>();
     }
 
     if(rxBufferSendUp == NULL) {
-        rxBufferSendUp = new cometos::Airframe();
+        rxBufferSendUp = cometos::make_checked<cometos::Airframe>();
     }
 
 	if(master) {
@@ -106,7 +106,7 @@ void RS485Comm::rxFinishedCallback(uint8_t *rxBuf, uint8_t len, uint8_t cmdNumbe
 		// is there a fresh buffer in rxBufferSendUp?
 		if(rxBufferSendUp->getLength() == 0) {
 			// swap pointers to prepare RS485 buffer for next reception
-			cometos::Airframe* tmp = rxBufferSendUp;
+			cometos::AirframePtr tmp = rxBufferSendUp;
 			rxBufferSendUp = rxBufferRS485;
 			rxBufferRS485 = tmp;
 
@@ -151,7 +151,7 @@ void RS485Comm::sendUpTask() {
 
 	LowerEndpoint::sendIndication(ind);
 
-	rxBufferSendUp = new cometos::Airframe();
+	rxBufferSendUp = cometos::make_checked<cometos::Airframe>();
 	rxBufferSendUp->setLength(0);
 }
 

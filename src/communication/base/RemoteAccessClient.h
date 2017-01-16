@@ -53,7 +53,7 @@ template<typename... Args>
 class RemoteAccessSerializer {
 public:
     template<int idx>
-    static void serializeArguments(Airframe * frame, std::tuple<typename std::remove_reference<Args>::type ...> & t) {
+    static void serializeArguments(AirframePtr frame, std::tuple<typename std::remove_reference<Args>::type ...> & t) {
         serialize(*frame, std::get<idx>(t));
         if (idx > 0) {
             serializeArguments<idx==0?0:idx-1>(frame, t);
@@ -94,7 +94,7 @@ public:
                                   node_t dest,
                                   Callback<void(DataIndication*, RemoteAccessStatus)> cb,
                                   Args... args) {
-        Airframe * frame = new Airframe();
+        AirframePtr frame = make_checked<Airframe>();
         AirString entityName(method.c_str());
         AirString moduleName(method.c_str());
 
@@ -118,12 +118,12 @@ public:
 
 
 private:
-    void serialize(Airframe * frame) {
+    void serialize(AirframePtr frame) {
         // termination of variadic parameter expansion
     }
 
     template<typename T, typename... Args>
-    void serialize(Airframe * frame, T val, Args... args) {
+    void serialize(AirframePtr frame, T val, Args... args) {
         (*frame) << val;
         serialize(frame, args...);
     }

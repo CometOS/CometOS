@@ -56,7 +56,7 @@ void generateRequest() {
 	cometos::getCout() << "Generate Data" << cometos::endl;
 	cometos::getScheduler().add(task, GEN_DATA_INTERVAL);
 
-	cometos::Airframe* frame = new cometos::Airframe();
+	cometos::AirframePtr frame = cometos::make_checked<cometos::Airframe>();
 	frame->setLength(2);
 	frame->getData()[0] = 4;
 	frame->getData()[1] = 5;

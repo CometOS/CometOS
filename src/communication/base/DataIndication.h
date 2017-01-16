@@ -49,14 +49,14 @@ public:
 	node_t src;
 	node_t dst;
 
-	DataIndication(Airframe * frame, node_t src, node_t dst);
+	DataIndication(AirframePtr frame, node_t src, node_t dst);
 	virtual ~DataIndication();
 
 	Airframe &getAirframe();
-	Airframe * decapsulateAirframe();
+	AirframePtr decapsulateAirframe();
 
 private:
-	Airframe* frame;
+	AirframePtr frame;
 
 
 };

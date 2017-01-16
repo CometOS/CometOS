@@ -70,7 +70,6 @@ TrafficEvaluation::TrafficEvaluation(uint8_t msgSize,
         Endpoint("traf"),
         destinationSet(false),
         meanInterval(meanInterval),
-        frame(NULL),
         myCrc(0xFFFF),
         msgSize(msgSize),
         warmupDuration(warmupDuration),
@@ -82,8 +81,8 @@ TrafficEvaluation::TrafficEvaluation(uint8_t msgSize,
 {}
 
 TrafficEvaluation::~TrafficEvaluation() {
-    if(frame != NULL) {
-        delete frame;
+    if(frame) {
+        frame.deleteObject();
     }
 }
 
@@ -106,7 +105,7 @@ void TrafficEvaluation::initialize() {
 	schedule(new Message, &TrafficEvaluation::traffic, 0);
 	counter = 0;
 	failed = 0;
-	frame = new Airframe();
+	frame = make_checked<Airframe>();
 	for (uint8_t i = 0; i < msgSize - sizeof(myCrc) - sizeof(sequenceNumber) - 1 /*type*/; i++) {
 	    uint8_t data = intrand(256);
 	    myCrc = palFirmware_crc_update(myCrc, data);
@@ -144,7 +143,7 @@ void TrafficEvaluation::traffic(Message *timer) {
         return;
     }
 
-	Airframe *msg = frame->getCopy();
+	AirframePtr msg(frame->getCopy());
 
     char type = MEASUREMENT_TYPE;
     if(palLocalTime_get() < warmupDuration) {

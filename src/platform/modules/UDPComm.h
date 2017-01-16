@@ -74,7 +74,7 @@ private:
     void initializeRemoteAddress();
 
     int ownPort;
-    cometos::Airframe* rxFrame;
+    cometos::AirframePtr rxFrame;
     int fd;
 
     bool dynamicRemote;

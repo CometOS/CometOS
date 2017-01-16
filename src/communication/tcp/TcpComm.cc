@@ -53,7 +53,7 @@ Define_Module( TcpComm);
 
 void TcpComm::receivedCallback(const socket_t& handler, uint8_t *buffer,
 		uint8_t length) {
-	Airframe *frame = new Airframe();
+	AirframePtr frame = make_checked<Airframe>();
 	frame->setLength(length);
 	memcpy(frame->getData(), buffer, length);
 	node_t src;

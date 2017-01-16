@@ -120,7 +120,7 @@ DataRequest* DHRoutingLayer::run(bool permitted, node_t ownId, uint8_t level) {
     node_t node = getNeighbor(index);
 
     if (node != BROADCAST ) {
-        Airframe* air = new Airframe;
+        AirframePtr air = make_checked<Airframe>();
         for (uint8_t it = next->nbs.begin(); it != next->nbs.end();
                 it = next->nbs.next(it)) {
             (*air) << next->nbs[it].id << (uint8_t) next->nbs[it].hops;
@@ -379,7 +379,7 @@ void DHRouting::timeout(Message *timer) {
      uint8_t l = 0;
      node_t dom = getDominator(l);
      if (dom != BROADCAST ) {
-     Airframe * data = new Airframe;
+     AirframePtr data = make_checked<Airframe>();
      (*data) << getId() << (uint8_t) 1 << (uint8_t) MSG_ROUTE_UPDATE
      << getId();
      DataRequest* req2 = new DataRequest(dom, data);

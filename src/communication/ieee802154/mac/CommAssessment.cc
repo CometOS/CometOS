@@ -139,7 +139,7 @@ void CommAssessment::handleIndication(DataIndication* msg) {
 }
 
 void CommAssessment::sendRttPacket() {
-	Airframe *frame = new Airframe;
+	AirframePtr frame = make_checked<Airframe>();
 	sent++;
 	frame->setLength(payl);
 	(*frame) << (uint8_t) CommAssement_RTT << counter;

@@ -95,7 +95,7 @@ void PrintfApp::initialize() {
 }
 
 void PrintfApp::forwardToSink(cometos::AirString *data) {
-    cometos::Airframe *frame = new cometos::Airframe;
+    cometos::AirframePtr frame = cometos::make_checked<cometos::Airframe>();
 	(*frame) << (*data) << sequence;
 	sequence++;
 	Endpoint::sendRequest(new cometos::DataRequest(dst, frame, createCallback(&PrintfApp::handleResponse)));

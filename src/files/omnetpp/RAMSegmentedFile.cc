@@ -120,14 +120,6 @@ void RAMSegmentedFile::write(uint8_t* data, segment_size_t dataLength, num_segme
     file_size_t seek = segment*getMaxSegmentSize();
     segment_size_t segmentSize = getSegmentSize(segment);
 
-    node_t node = palId_id();
-    if(node == 1) {
-        node = palId_id();
-        node++;
-        node--;
-        node = node;
-    }
-
     filesystemLock.lock();
     uint8_t* fdata = file->data();
     uint8_t* fdataseek = fdata+seek;
@@ -154,14 +146,6 @@ void RAMSegmentedFile::read(uint8_t* data, segment_size_t dataLength, num_segmen
 
     file_size_t seek = segment*getMaxSegmentSize();
     segment_size_t segmentSize = getSegmentSize(segment);
-
-    node_t node = palId_id();
-    if(node == 1) {
-        node = palId_id();
-        node++;
-        node--;
-        node = node;
-    }
 
     filesystemLock.lock();
     uint8_t* fdata = file->data();

@@ -115,7 +115,7 @@ int main() {
 	 * If objects are only used in airframes, a
 	 * manual (de)serialization can be done.
 	 */
-	Airframe * frame= new Airframe();
+	AirframePtr frame= make_checked<Airframe>();
 	(*frame)<<before1<<before2<<before3;
 	(*frame)>>after3>>after2>>after1;
 	delete frame;

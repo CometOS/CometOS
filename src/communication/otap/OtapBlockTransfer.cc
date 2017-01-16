@@ -160,7 +160,7 @@ bool OtapBlockTransferBase::sendNext(bool thread_safe) {
 	if (isSending >= getNumPkts() + getRedPkts()) {
 		return false;
 	}
-	Airframe* msg = new Airframe;
+	AirframePtr msg = make_checked<Airframe>();
 	msg->setLength(getPktSize());
 
 	if (isSending < getNumPkts()) {

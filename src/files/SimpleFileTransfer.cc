@@ -99,7 +99,7 @@ void SimpleFileTransfer::localFileOpened(cometos_error_t result)
     }
 
     // send open message to the client(s)
-    Airframe* frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << remoteFilename;
 getCout() << "Send " << remoteFilename.getStr() << endl;
     (*frame) << filenameCRC;
@@ -147,7 +147,7 @@ void SimpleFileTransfer::dataReadFinished(cometos_error_t result) {
     data.setSize(cacheFile.getSegmentSize(currentSegment));
 
     // send payload message to the client(s)
-    Airframe* frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << data;
     (*frame) << currentSegment;
     (*frame) << filenameCRC;
@@ -170,7 +170,7 @@ void SimpleFileTransfer::close(cometos_error_t result)
 
     if(initiator) {
         // send close message to the client(s)
-        Airframe* frame = new Airframe();
+        AirframePtr frame = make_checked<Airframe>();
         (*frame) << (uint8_t)CMD::CLOSE;
 
         DataRequest* req = new DataRequest(receiver, frame);

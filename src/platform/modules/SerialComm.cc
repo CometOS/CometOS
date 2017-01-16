@@ -108,7 +108,7 @@ void SerialComm::rxCallback() {
 
 void SerialComm::initialize() {
 	// initialize UART driver
-	rxBuffer = new Airframe();
+	rxBuffer = make_checked<Airframe>();
 	serial->init(baudrate, &taskRxCallback, NULL, NULL);
 	state = STATE_IDLE;
 	retries = 0;
@@ -241,7 +241,7 @@ void SerialComm::rxHandle() {
 
 	LowerEndpoint::sendIndication(ind);
 
-	rxBuffer = new Airframe;
+	rxBuffer = make_checked<Airframe>();
 }
 
 // MAIN TASKS------------------------------------------------------------------

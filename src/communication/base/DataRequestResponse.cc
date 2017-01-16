@@ -39,33 +39,32 @@
 
 namespace cometos {
 
-DataRequest::DataRequest(node_t dst, Airframe* frame,
+DataRequest::DataRequest(node_t dst, AirframePtr frame,
 		const TypedDelegate<DataResponse> &delegate, RequestId *rid ) :
 		Request<DataResponse>(delegate, rid), dst(dst), frame(frame) {
 }
 
 DataRequest::~DataRequest() {
-	if (frame != NULL) {
-		delete frame;
-		frame = NULL;
+	if (this->frame) {
+	    this->frame.deleteObject();
 	}
 }
 
 
 Airframe & DataRequest::getAirframe() {
-	ASSERT(frame!=NULL);
-	return *frame;
+	ASSERT(this->frame);
+	return *(this->frame);
 }
 
-void DataRequest::setAirframe(Airframe* frame) {
-    ASSERT(this->frame == NULL);
+void DataRequest::setAirframe(AirframePtr frame) {
+    ASSERT(!this->frame);
     this->frame = frame;
 }
 
-Airframe * DataRequest::decapsulateAirframe() {
-	Airframe *p = frame;
-	frame = NULL;
-	return p;
+AirframePtr DataRequest::decapsulateAirframe() {
+	AirframePtr temp = this->frame;
+	this->frame.reset();
+	return temp;
 }
 
 }

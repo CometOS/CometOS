@@ -67,7 +67,6 @@ TrafficExample::TrafficExample(StaticSList<node_t, 10> destAddresses,
         fI(fixedInterval),
         rI(rndInterval),
         destAddresses(destAddresses),
-        frame(NULL),
         myCrc(0xFFFF),
         msgSize(msgSize),
         snoop(snoop),
@@ -87,7 +86,7 @@ void TrafficExample::initialize() {
 	schedule(new Message, &TrafficExample::traffic, intrand(rI) + fI);
 	counter = 0;
 	failed = 0;
-	frame = new Airframe();
+	frame = make_checked<Airframe>();
 	for (uint8_t i = 0; i < msgSize - sizeof(myCrc) - sizeof(sequenceNumber); i++) {
 	    uint8_t data = intrand(256);
 	    myCrc = palFirmware_crc_update(myCrc, data);
@@ -148,7 +147,7 @@ void TrafficExample::traffic(Message *timer) {
         return;
     }
 
-	Airframe *msg = frame->getCopy();
+	AirframePtr msg(frame->getCopy());
 
 	sequenceNumber++;
 	(*msg) << sequenceNumber;

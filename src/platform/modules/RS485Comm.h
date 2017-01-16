@@ -104,8 +104,8 @@ private:
 	BoundedTask<RS485Comm, &RS485Comm::sendUpTask> taskSendUp;
 	BoundedTask<RS485Comm, &RS485Comm::initRx> taskRx;
 
-    cometos::Airframe *rxBufferRS485;
-    cometos::Airframe *rxBufferSendUp;
+    cometos::AirframePtr rxBufferRS485;
+    cometos::AirframePtr rxBufferSendUp;
 
     /** FIXME TODO instead of using a queue of requests, use a queue of
      *  dedicated datastructures which contain meta information like seq, dst, src

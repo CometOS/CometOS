@@ -64,7 +64,7 @@ bool RemoteEventBase::unsubscribe(node_t dst) {
 	return true;
 }
 
-void RemoteEventBase::raiseEvent(Airframe* frame) {
+void RemoteEventBase::raiseEvent(AirframePtr frame) {
 	if (ra == NULL) {
 		return;
 	}

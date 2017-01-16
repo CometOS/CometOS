@@ -78,7 +78,7 @@ private:
 	uint32_t ts;
 
 	timeOffset_t meanInterval;
-	cometos::Airframe * frame;
+	cometos::AirframePtr frame;
 	uint16_t myCrc;
 	uint8_t msgSize;
 

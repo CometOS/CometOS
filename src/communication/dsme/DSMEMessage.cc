@@ -76,7 +76,7 @@ cometos::AirframePtr DSMEMessage::getSendableCopy() {
     cometos::AirframePtr copy(frame->getDeepCopy());
     msg.prepare(copy);
     macHdr.prependTo(&msg);
-    //cometos::Airframe* f = msg.frame;
+    //cometos::AirframePtr f = msg.frame;
     //msg.frame = nullptr;
     return msg.decapsulateFrame();
 }

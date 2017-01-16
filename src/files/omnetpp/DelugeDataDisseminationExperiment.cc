@@ -73,7 +73,7 @@ void DelugeDataDisseminationExperiment::initialize()
 
     for (cModule::SubmoduleIterator i(network); !i.end(); i++)
     {
-        cModule *submod = dynamic_cast<cModule*>(i());
+        cModule *submod = dynamic_cast<cModule*>(*i);
         if(submod->hasPar("id")) {
             int idx = submod->getIndex();
             if(idx != node->getIndex()) {

@@ -66,7 +66,7 @@ int main() {
     myClass.a=3;
     myClass.b=20000;
     myClass.c=255;
-    Airframe *air=new Airframe();
+    AirframePtr air=new Airframe();
     (*air)<<myClass;
 
 

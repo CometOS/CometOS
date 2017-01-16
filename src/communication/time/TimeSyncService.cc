@@ -203,7 +203,7 @@ void TimeSyncService::handleInitialResponse(DataResponse * resp) {
 
     if (success && isSync()) {
         time_ms_t txTs = ts::getTimestamp(resp);
-        Airframe * frame = new Airframe();
+        AirframePtr frame = make_checked<Airframe>();
 
         time_ms_t txTsMaster = NetworkTime::localToNetworkTime(txTs);
         LOG_ERROR("S:ts=" << txTsMaster << "|d=" << (int) syncData.depth);
@@ -321,7 +321,7 @@ void TimeSyncService::transmit() {
     }
     LOG_DEBUG("Transmitting initial " << (int) syncData.depth);
 
-    Airframe * frame = new Airframe();
+    AirframePtr frame = make_checked<Airframe>();
     (*frame) << syncData.depth;
     DataRequest * req = new DataRequest(MAC_BROADCAST, frame, createCallback(&TimeSyncService::handleInitialResponse));
     gateInitialOut.send(req);
@@ -507,7 +507,7 @@ void TimeSyncWirelessBridge::sendNext(TimeSyncTransitData& tstd, OutputGate<Data
 
     if (!discard) {
         OverwriteAddrData* meta = new OverwriteAddrData(msg->src, msg->dst);
-        Airframe* frame = msg->decapsulateAirframe();
+        AirframePtr frame = msg->decapsulateAirframe();
         DataRequest* req = new DataRequest(
                                             msg->dst,
                                             frame,

@@ -122,7 +122,7 @@ protected:
     void handleDataMessageFromMCPS(DSMEMessage* msg);
     void handleConfirmFromMCPS(DSMEMessage* msg, DataStatus::Data_Status dataStatus);
 
-    bool send(cometos::Airframe* frame);
+    bool send(cometos::AirframePtr frame);
 
     DSMEMessage* getLoadedMessage(cometos::AirframePtr frame);
 
