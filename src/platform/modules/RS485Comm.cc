@@ -55,11 +55,11 @@ using namespace cometos;
 const char * const RS485Comm::MODULE_NAME = "rsc";
 
 void RS485Comm::initialize() {
-    if(rxBufferRS485 == NULL) {
+    if(!rxBufferRS485) {
         rxBufferRS485 = cometos::make_checked<cometos::Airframe>();
     }
 
-    if(rxBufferSendUp == NULL) {
+    if(!rxBufferSendUp) {
         rxBufferSendUp = cometos::make_checked<cometos::Airframe>();
     }
 
@@ -132,7 +132,7 @@ void RS485Comm::rxFinishedCallback(uint8_t *rxBuf, uint8_t len, uint8_t cmdNumbe
 
 // Task that is scheduled by rxFinishedCallback
 void RS485Comm::sendUpTask() {
-	ASSERT(rxBufferSendUp!=NULL);
+	ASSERT(rxBufferSendUp);
 
 	//cometos::getCout() << "<<<<<< RX <<<<<<<" << cometos::endl;
 	//cometos::getCout() << "sendUp " << (uint32_t)rxBufferSendUp->getLength() << " Bytes" << cometos::endl;

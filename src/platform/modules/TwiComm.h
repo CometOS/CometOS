@@ -100,8 +100,8 @@ private:
 	BoundedTask<TwiComm, &TwiComm::sendUpTask> taskSendUp;
 	BoundedTask<TwiComm, &TwiComm::initRx> taskRx;
 
-    cometos::AirframePtr rxBufferTwi = NULL;
-    cometos::AirframePtr rxBufferSendUp = NULL;
+    cometos::AirframePtr rxBufferTwi;
+    cometos::AirframePtr rxBufferSendUp;
 
     /** FIXME TODO instead of using a queue of requests, use a queue of
      *  dedicated datastructures which contain meta information like seq, dst, src

@@ -54,7 +54,7 @@ void resetTheNode();
 // For ASSERT_SHORT, the string created by __FILE__ has to be replaced by a
 // unique FILEID by an additional build script
 #define ASSERT(x) \
-    if (false==(x)) { \
+    if (!(x)) { \
         doAssert(__LINE__, __FILE__); \
     }
 
@@ -85,7 +85,7 @@ void doAssert(uint16_t line, const char* filename);
 void doAssert(uint32_t id);
 
 #define ASSERT(x) \
-    if (false==(x)) { \
+    if (!(x)) { \
         doAssert(HASH(STRINGIFY(__LINE__) ":" __FILE__)); \
     }
 
@@ -96,7 +96,7 @@ void doAssert(uint32_t id);
 void doAssert(uint32_t id);
 
 #define ASSERT(x)\
-    if (false==(x)) {\
+    if (!(x)) {\
         doAssert(0);\
     }
 

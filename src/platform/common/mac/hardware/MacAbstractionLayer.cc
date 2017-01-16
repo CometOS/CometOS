@@ -76,8 +76,6 @@ MacAbstractionLayer::MacAbstractionLayer(const char* name,
 		MacAbstractionBase(name),
 		gateIndOut(this, "gateIndOut"),
         gateSnoopIndOut(this, "gateSnoopIndOut"),
-        rxMsg(NULL),
-        txMsg(NULL),
         fixedAddress(fixedAddress),
         changeDriverConfigPending(false)
 {
@@ -241,7 +239,7 @@ cometos_error_t MacAbstractionLayer::setStandardConfig(MacConfig & cfg) {
             ps->setCfgData(this, standardConfig);
         }
 
-        if (txMsg != NULL) {
+        if (txMsg) {
             // we defer changing the driver config, because we do not know in which
             // state the mac driver currently is -- we do this next time before sending
             changeDriverConfigPending = true;
@@ -273,9 +271,9 @@ bool MacAbstractionLayer::listen() {
 }
 
 bool MacAbstractionLayer::sendAirframe(AirframePtr frame, node_t dst, uint8_t mode, const ObjectContainer* meta) {
-	ASSERT(txMsg == NULL);
+	ASSERT(!txMsg);
 	if (dst == mac_getNodeId()) {
-        delete frame;
+	    frame.delete_object();;
         LOG_WARN("frame discarded; destination==nodeId");
         return false;
     }
@@ -349,8 +347,7 @@ bool MacAbstractionLayer::sendAirframe(AirframePtr frame, node_t dst, uint8_t mo
     }
 
 	if (result != MAC_SUCCESS) {
-	    delete(txMsg);
-		txMsg = NULL;
+	    txMsg.delete_object();
 		return false;
 	} else {
 		return true;
@@ -408,8 +405,7 @@ void MacAbstractionLayer::processRxDropped(Message *msg) {
 }
 
 void MacAbstractionLayer::processTxDone(Message *msg) {
-	delete(txMsg);
-	txMsg = NULL;
+    txMsg.delete_object();
 	//printf("macTxDn: res=%d|res=%d|dst=%d|rtr=%d|rRs=%d|aRs=%d\n", result, txResult, mti.destination, mti.numRetries, mti.remoteRssi, mti.ackRssi);
 	txEnd(txResult, mti);
 }

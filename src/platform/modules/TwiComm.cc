@@ -115,7 +115,7 @@ void TwiComm::rxFinishedCallback(uint8_t *rxBuf, uint8_t len, cometos_error_t re
 
 // Task that is scheduled by rxFinishedCallback
 void TwiComm::sendUpTask() {
-	ASSERT(rxBufferSendUp!=NULL);
+	ASSERT(rxBufferSendUp);
 	ASSERT(rxBufferSendUp->getLength()>=sizeof(node_t)*2);
 
 	//cometos::getCout() << "sendUp " << (int)rxBufferSendUp->getLength() << " Bytes" << cometos::endl;

@@ -216,7 +216,7 @@ void SerialComm::txHandle(DataRequest* request) {
 }
 void SerialComm::rxHandle() {
 	// remove CRC and ...
-    ASSERT(rxBuffer!=NULL);
+    ASSERT(rxBuffer);
 	ASSERT(rxBuffer->getLength()>=0);
 
 	// retrieve sequence number
