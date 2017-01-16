@@ -6,9 +6,11 @@ env.add_sources([
 'Routing.cc',
 'SimpleRouting.cc',
 'PredefinedTreeRouting.cc',
-'GPSR.cc',
 'AODV.cc'
 ])
+
+if env.conf.has_key('neighborhood') and env.conf.bool('neighborhood'):
+    env.add_sources(['GPSR.cc'])
 
 if env.get_platform() == 'omnet':
 	env.add_sources([

@@ -8,6 +8,7 @@ env.add_sources([
 'Module.cc',
 'palExec.cc',
 'palLed.cc',
+'palLocation.cc',
 'palLocalTime.cc',
 'palId.cc',
 'logging.cc',

@@ -11,7 +11,7 @@ if env.conf.bool('pal_firmware'):
     'palFirmwareAsync.cc'
     ])
     
-if env.conf.bool('pal_mac') or env.conf.str('mac') in ['dsme','pure_sniffer']:
+if env.conf.bool('pal_mac') or (env.conf.has_key('mac') and env.conf.str('mac') in ['dsme','pure_sniffer']):
     SConscript('mac/SConscript')
 
 SConscript('palLocation/SConscript')

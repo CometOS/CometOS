@@ -80,7 +80,7 @@ void TCPWY::initialize() {
 	    mHasUpperLayer = true;
 	}
     tca.initialize(palId_id());
-    time_t randomBackoff = intrand(TCA_RANDOM_BACKOFF);
+    auto randomBackoff = intrand(TCA_RANDOM_BACKOFF);
 	schedule(new Message, &TCPWY::neighborDataUpdateTimer, TCA_TIME_INTERVAL + randomBackoff);
     schedule(new Message, &TCPWY::timedReport, intrand(TCA_REPORT_INIT_TIME));
 

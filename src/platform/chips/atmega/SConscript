@@ -51,7 +51,6 @@ atmega_pc_width = env.conf.str('atmega_pc_width', valid_values = [2,3])
 env.Append(CPPDEFINES=['ATMEGA_PC_WIDTH='+str(atmega_pc_width)])
 env.conf_to_str_define(['pm_watchdog_reset_flag','pm_watchdog_pc','eeprom_log_assert_address','p_mac_address_0'])
 
-SConscript("arbiter/SConscript")
 
 # Specific mac
 if env.conf.bool('pal_timer1'):

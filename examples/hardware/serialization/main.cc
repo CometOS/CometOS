@@ -118,7 +118,7 @@ int main() {
 	AirframePtr frame= make_checked<Airframe>();
 	(*frame)<<before1<<before2<<before3;
 	(*frame)>>after3>>after2>>after1;
-	delete frame;
+    frame.delete_object();
 
 
 	cometos::getCout() <<"MyClass1 "<< (int)after1.a<<" "<<after1.b << " "<<after1.c.getStr() << "\n";

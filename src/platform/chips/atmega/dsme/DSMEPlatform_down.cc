@@ -127,7 +127,13 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
 
     mac_result_t result = ccaSend_send(&phy_msg);
 
-    return (result == MAC_SUCCESS);
+    if(result != MAC_SUCCESS) {
+        DSMEPlatform::state = STATE_READY;
+        return false;
+    }
+    else {
+        return true;
+    }
 }
 
 bool DSMEPlatform::sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) {
@@ -155,12 +161,20 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
     bool success = msg->getHeader().deserializeFrom(buffer, phy_msg->phyPayloadLen);
 
     if(!success) {
-        DSME_ASSERT(false);
-        releaseMessage(msg);
+        instance->releaseMessage(msg);
+        return phy_msg;
     }
 
+    if(msg->getHeader().getSrcAddrMode() == NO_ADDRESS && msg->getHeader().getFrameType() == IEEE802154eMACHeader::COMMAND) {
+        for(int i = 0; i < phy_msg->phyPayloadLen+2; i++) {
+            cometos::getCout() << "0x" << cometos::hex << phy_msg->data[i] << " ";
+        }
+        cometos::getCout() << cometos::endl;
+	ASSERT(false);
+    }
 
     /* copy data */
+    ASSERT(phy_msg->phyPayloadLen >= msg->getHeader().getSerializationLength());
     msg->frame->setLength(phy_msg->phyPayloadLen - msg->getHeader().getSerializationLength());
     ASSERT(msg->frame->getLength() <= msg->frame->getMaxLength());
     memcpy(msg->frame->getData(), buffer, msg->frame->getLength());
