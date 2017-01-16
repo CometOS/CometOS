@@ -50,9 +50,9 @@
 #if 0
 #include "assert.h"
 
-#define ASSERT(x) if (false == (x)) {std::cout << "ASSERT " << __FILE__ << ":" <<  __LINE__ << std::endl; }
-#define ASSERT2(x,u) if (false == (x)) {std::cout << "ASSERT " << __FILE__ << ":" <<  __LINE__ << std::endl; }
-#define ASSERT_DBG(x,u) if (false == (x)) {std::cout << "ASSERT " << __FILE__<< ":" << __LINE__; << std::endl;}
+#define ASSERT(x) if (!(x)) {std::cout << "ASSERT " << __FILE__ << ":" <<  __LINE__ << std::endl; }
+#define ASSERT2(x,u) if (!(x)) {std::cout << "ASSERT " << __FILE__ << ":" <<  __LINE__ << std::endl; }
+#define ASSERT_DBG(x,u) if (!(x)) {std::cout << "ASSERT " << __FILE__<< ":" << __LINE__; << std::endl;}
 #endif
 
 #include <sstream>
