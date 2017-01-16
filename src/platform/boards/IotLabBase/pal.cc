@@ -168,6 +168,7 @@ void initExternalFlash() {
     PalSpi* spi2 =  PalSpi::getInstance(2);
     spi2->init(true, 18e6, 0, false);
     spi2->setCsPin(&flash_spi_cs, true);
+    spi2->enable();
     spi2->disable();
 
     N25xx* flash = N25xx::getInstance();

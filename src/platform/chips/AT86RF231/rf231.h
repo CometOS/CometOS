@@ -147,6 +147,7 @@ public:
     void reset() {
 
         //reset to default pin values
+        spi->enable();
     	spi->disable();
         rst_pin->clear();
         slptr_pin->clear();
@@ -329,11 +330,19 @@ public:
     	timer->stop();
     	uint8_t txBuffer = 0;
 
-    	if (failedTries > 2)
-    		downloadTimeout();
-
     	if (irq_pin->get() != 0) {
     		failedTries++;
+
+            if (failedTries >= 3) {
+                pc.numTo++;
+                parallelReceptionOn = false;
+                spi->disable();
+
+                if (frameTimeoutCallback) {
+                    frameTimeoutCallback();
+                }
+                return;
+            }
     	}
 
     	while (irq_pin->get() == 0) {
@@ -361,20 +370,6 @@ public:
     	}
 
     	timer->start_async(MICRO_SECONDS_FOR_ONE_BYTE, signalNextByteAvailable);
-    }
-
-    /**
-     * Stops the asynchrounous download of a frame and invokes the
-     * frameTimeoutCallback.
-     */
-    void downloadTimeout() {
-        pc.numTo++;
-    	parallelReceptionOn = false;
-    	spi->disable();
-
-    	if (frameTimeoutCallback) {
-    		frameTimeoutCallback();
-    	}
     }
 
 
