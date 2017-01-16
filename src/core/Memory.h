@@ -41,9 +41,6 @@ namespace cometos {
 
 template <typename T>
 class checked_ptr {
-    template <typename T2, typename... A>
-    friend checked_ptr<T2> make_checked(A&&... arg);
-
 private:
     struct checked_object_wrapper {
         T* raw_instance;
@@ -57,7 +54,7 @@ private:
     }
 
 public:
-    checked_ptr() : wrapped_object(nullptr) {
+    checked_ptr() : wrapped_object{nullptr} {
     }
 
     checked_ptr(const checked_ptr& other) : wrapped_object{other.wrapped_object} {
