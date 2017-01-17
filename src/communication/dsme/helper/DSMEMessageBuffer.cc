@@ -107,10 +107,10 @@ void DSMEMessageBuffer::release(DSMEMessage* message) {
     }
 
     ASSERT(!message->frame || message->frame.unique());
-    AirframePtr frame = message->decapsulateFrame();
 
     palExec_atomicBegin();
     {
+        AirframePtr frame = message->decapsulateFrame();
         if(!airframeStack.isFull()) {
             if(!frame) {
                 frame = make_checked<Airframe>(); // = make_checked<Airframe>(); // the Airframe was decapsulated before

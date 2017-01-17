@@ -343,8 +343,8 @@ DSMEMessage* DSMEPlatformBase::getEmptyMessage()
     dsme_atomicEnd();
 
     DSMEMessage* msg = messageBuffer.aquire();
-    //DSMEMessage* msg = new DSMEMessage(new Airframe());
     ASSERT(msg != nullptr);
+    DSME_ASSERT(msg->frame && msg->frame.unique());
 
     msg->receivedViaMCPS = false;
     signalNewMsg(msg);
@@ -358,7 +358,6 @@ DSMEMessage* DSMEPlatformBase::getLoadedMessage(AirframePtr frame)
     DSME_ASSERT(messagesInUse <= MSG_POOL_SIZE); // TODO
     dsme_atomicEnd();
     DSMEMessage* msg = messageBuffer.aquire(frame);
-    //DSMEMessage* msg = new DSMEMessage(frame);
     ASSERT(msg != nullptr);
     msg->receivedViaMCPS = false;
     signalNewMsg(msg);
