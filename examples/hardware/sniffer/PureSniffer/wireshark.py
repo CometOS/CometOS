@@ -40,11 +40,13 @@ for line in fileinput.input():
                 continue
                 #print line
 
-    m = re.search("PKT(.*)",line)
+    #m = re.search("([0-9.]*)\;.*\;PKT(.*)",line)
+    m = re.search("PKT(.*):(.*)",line)
     if m:
-        line = m.group(1)
+        time = int(m.group(1),16)*(16/(1000.0*1000.0))
+        line = m.group(2)
         
-        print line
+        print time,line
 
         data = []
         for i in range(0,len(line)-1,2):
@@ -57,6 +59,7 @@ for line in fileinput.input():
 
         if data != "":
             d=IEEE802154(data=data)
+            d.time = float(time)
+
             fdesc.write(d)
             fdesc.flush()
-

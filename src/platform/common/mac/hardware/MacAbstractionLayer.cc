@@ -416,16 +416,17 @@ void MacAbstractionLayer::processRxDone(Message * msg) {
 	// pass current message to actual mac layer for logging, stats etc.
 	rxEnd(justReceived, rxSrc, rxDst, ppi);
 	// send up indication
-    DataIndication * ind = new DataIndication(justReceived, rxSrc, rxDst);
-    ind->set((MacRxInfo*) ppi.getCopy());
-    LOG_ERROR("R s=" << rxSrc << " d=" << rxDst);
-    if (ind->dst == mac_getNodeId() || ind->dst == MAC_BROADCAST) {
-        gateIndOut.send(ind);
-    } else {
-        gateSnoopIndOut.send(ind);
-    }
+	DataIndication * ind = new DataIndication(justReceived, rxSrc, rxDst);
+	ind->set((MacRxInfo*) ppi.getCopy());
+	LOG_ERROR("R s=" << rxSrc << " d=" << rxDst);
+	if (ind->dst == mac_getNodeId() || ind->dst == MAC_BROADCAST) {
+		gateIndOut.send(ind);
+	} else {
+		gateSnoopIndOut.send(ind);
+	}
 
 	// create new receive buffer and pass to mac layer
+	rxMsg.reset();
 	rxMsg = make_checked<Airframe>();
 	mac_setReceiveBuffer(rxMsg->getData());
 }
