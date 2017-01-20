@@ -16,6 +16,7 @@ import cometos.src.communication.ipv6.routing.RoutingTable;
 import cometos.src.communication.ipv6.routing.SourceRoutingTable;
 import cometos.src.communication.ipv6.traffic.TrafficGenSim;
 import cometos.src.communication.ipv6.udp.UDPLayer;
+import cometos.src.communication.ipv6.lowpan.ILowpanCongestionControl;
 
 import org.mixim.base.modules.*;
 
@@ -23,6 +24,8 @@ module RPL_Node like IWirelessNode
 {
     parameters:
         int id = default(0);
+        
+        string localCongestionControlType = default("NoCC");
 
         @display("bgb=497,491");
     gates:
@@ -89,7 +92,11 @@ module RPL_Node like IWirelessNode
         lD: LowpanDispatcher {
             @display("p=111,320");
         }
-    connections:
+        
+        locc: <localCongestionControlType> like ILowpanCongestionControl {
+            @display("p=350,267");
+        }
+    connections allowunconnected:
         mac.lowerControlOut --> nic.upperControlIn;
         mac.lowerGateOut --> nic.upperGateIn;
         nic.upperControlOut --> mac.lowerControlIn;
