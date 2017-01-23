@@ -25,6 +25,8 @@ conf.l2types.register(195, IEEE802154)
 
 fdesc = PcapWriter(FIFONAME);
 
+lines_left = 9999999999999
+
 for line in fileinput.input():
     data = ""
     #try:
@@ -39,6 +41,18 @@ for line in fileinput.input():
             else:
                 continue
                 #print line
+
+    if ";A:126" in line:
+        d=IEEE802154(data='A'*120)
+        d.time = time
+        fdesc.write(d)
+        fdesc.flush()
+        lines_left = 15
+
+    lines_left -= 1
+
+    if lines_left == 0:
+        break
 
     #m = re.search("([0-9.]*)\;.*\;PKT(.*)",line)
     m = re.search("PKT(.*):(.*)",line)
