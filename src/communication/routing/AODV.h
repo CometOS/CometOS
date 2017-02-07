@@ -101,6 +101,10 @@ public:
 
 	void handleResponse(DataResponse* resp);
 
+	void handleRreqResponse(DataResponse* resp);
+
+	void handleRrepResponse(DataResponse* resp);
+
 	bool checkHeader(NwkHeader &nwk);
 
 	void finish();

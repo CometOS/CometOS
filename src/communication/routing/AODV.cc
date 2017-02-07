@@ -146,7 +146,7 @@ void AODV::forwardRequest(DataRequest* msg) {
         schedule(msg, &AODV::handleTimeout, ROUTING_TIMEOUT);
         //INITIATE DISCOVERY
         // send route reply
-        DataRequest *req = new DataRequest(BROADCAST, make_checked<Airframe>());
+        DataRequest *req = new DataRequest(BROADCAST, make_checked<Airframe>(), createCallback(&AODV::handleRreqResponse));
         NwkHeader nwk(msg->dst, palId_id(), seq++, 0);
         req->getAirframe() << nwk;
 
@@ -202,11 +202,13 @@ bool AODV::checkHeader(NwkHeader &nwk) {
 
 void AODV::handleRreqIndication(DataIndication* msg) {
 
-    MacRxInfo* phy = msg->get<MacRxInfo>();
-    if (phy->lqi < LQI_FILTER) {
-        LOG_DEBUG("Below LQI Filter: " << (int)phy->lqi);
-        delete msg;
-        return;
+    if(msg->has<MacRxInfo>()) {
+        MacRxInfo* phy = msg->get<MacRxInfo>();
+        if (phy->lqi < LQI_FILTER) {
+            LOG_DEBUG("Below LQI Filter: " << (int)phy->lqi);
+            delete msg;
+            return;
+        }
     }
 
     NwkHeader nwk;
@@ -223,7 +225,7 @@ void AODV::handleRreqIndication(DataIndication* msg) {
         node_t nextHop = getNextHop(nwk.src);
         if (nextHop != BROADCAST ) {
 
-            DataRequest *req = new DataRequest(nextHop, make_checked<Airframe>());
+            DataRequest *req = new DataRequest(nextHop, make_checked<Airframe>(), createCallback(&AODV::handleRrepResponse));
             nwk.dst = nwk.src;
             ASSERT(nwk.dst!=BROADCAST);
             nwk.src = palId_id();
@@ -242,7 +244,7 @@ void AODV::handleRreqIndication(DataIndication* msg) {
         LOG_INFO("forward rreq to 0x"<<hex<<nwk.dst<<" from 0x"<<nwk.src<<dec);
         // forward route request
         DataRequest *req = new DataRequest(BROADCAST,
-                msg->decapsulateAirframe());
+                msg->decapsulateAirframe(), createCallback(&AODV::handleRreqResponse));
         req->getAirframe() << nwk;
 #ifdef ROUTING_ENABLE_STATS
         control++;
@@ -285,7 +287,7 @@ void AODV::handleRrepIndication(DataIndication* msg) {
             LOG_INFO("forward rrep to 0x"<<hex<<nwk.dst<<" via 0x"<<nextHop<<" from 0x"<<nwk.src<<dec);
             // forward route reply
             DataRequest *req = new DataRequest(nextHop,
-                    msg->decapsulateAirframe());
+                    msg->decapsulateAirframe(), createCallback(&AODV::handleRrepResponse));
             req->getAirframe() << nwk;
 #ifdef ROUTING_ENABLE_STATS
             control++;
@@ -353,6 +355,16 @@ void AODV::handleIndication(DataIndication* msg) {
         delete msg;
     }
 
+}
+
+void AODV::handleRrepResponse(DataResponse* resp) {
+    LOG_DEBUG(palId_id() << " finish rrep: " << resp->str());
+    delete resp;
+}
+
+void AODV::handleRreqResponse(DataResponse* resp) {
+    LOG_DEBUG(palId_id() << " finish rreq: " << resp->str());
+    delete resp;
 }
 
 void AODV::handleResponse(DataResponse* resp) {
