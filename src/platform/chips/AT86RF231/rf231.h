@@ -103,6 +103,9 @@ private:
         frameTimeoutCallback = NULL;
     }
 
+    bool pendingPDTDis;
+    bool abort;
+
 public:
 
     /**
@@ -145,6 +148,8 @@ public:
      * Waits until the Transceiver is in READY State.
      */
     void reset() {
+        pendingPDTDis = false;
+        abort = false;
 
         //reset to default pin values
         spi->enable();
@@ -186,7 +191,7 @@ public:
         palExec_atomicBegin();
         spi->enable();
         spi->transmitBlocking(txBuffer, rxBuffer, 2);
-        spi->disable();
+        disableSPI();
         palExec_atomicEnd();
 
         return rxBuffer[1];
@@ -202,7 +207,7 @@ public:
         palExec_atomicBegin();
         spi->enable();
         spi->transmitBlocking(txBuffer, rxBuffer, 2);
-        spi->disable();
+        disableSPI();
         palExec_atomicEnd();
     }
 
@@ -223,22 +228,65 @@ public:
         *length = rxBuffer[1];
 
         if (*length >= 128) {
-        	spi->disable();
+            disableSPI();
         	return COMETOS_ERROR_FAIL;
         }
 
         // read rest of frame
         uint16_t i;
+        uint8_t result = COMETOS_SUCCESS;
         for (i = 0; i < *length; i++){
+            if(abort) {
+                result = COMETOS_ERROR_FAIL;
+                break;
+            }
             ASSERT(i < max_buffer_length);
             spi->transmitBlocking(txBuffer + 2, data_buffer + i, 1);
         }
 
         // byte after payload contains quality information
-        spi->transmitBlocking(txBuffer + 2, rssi, 1);
-        spi->disable();
+        if(!abort) {
+            spi->transmitBlocking(txBuffer + 2, rssi, 1);
+        }
+        else {
+            result = COMETOS_ERROR_FAIL;
+        }
+        disableSPI();
 
-        return COMETOS_SUCCESS;
+        return result;
+    }
+
+private:
+    void enterPDTDis() {
+        abort = false;
+        pendingPDTDis = false;
+        
+        // The methods will call disableSPI recursively, but since pendingPDTDis = false
+        // and we are inside an atomic block, we will not go here again.
+	    uint8_t regVal = readRegister(AT86RF231_REG_RX_SYN);
+	    writeRegister(AT86RF231_REG_RX_SYN, regVal | AT86RF231_RX_SYN_PDT_DIS_MASK);
+    }
+
+public:
+    void disableSPI() {
+        palExec_atomicBegin();
+        spi->disable();
+        if(pendingPDTDis) {
+            enterPDTDis();
+        }
+        palExec_atomicEnd();
+    }
+
+    void forcePDTDis() {
+        palExec_atomicBegin();
+        if(!spi->isAvailable()) {
+            abort = true;
+            pendingPDTDis = true;
+        }
+        else {
+            enterPDTDis();
+        }
+        palExec_atomicEnd();
     }
 
     /**
@@ -264,14 +312,19 @@ public:
 
         //transmit rest
         uint16_t i;
+        uint8_t result = COMETOS_SUCCESS;
         for (i = 0; i < length; i++){
+            if(abort) {
+                result = COMETOS_ERROR_FAIL;
+                break;
+            }
             spi->transmitBlocking(payload + i, rxBuffer, 1);
         }
-        spi->disable();
+        disableSPI();
 
         slptr_pin->clear();
 
-        return COMETOS_SUCCESS;
+        return result;
     }
 
     /**
@@ -305,9 +358,9 @@ public:
         maxBufferLength = max_buffer_length;
         lqiPtr = lqi;
 
-        if (frameLength > 128) {
+        if (frameLength > 128 || abort) {
         	parallelReceptionOn = false;
-        	spi->disable();
+            disableSPI();
         	return COMETOS_ERROR_FAIL;
         }
 
@@ -330,13 +383,13 @@ public:
     	timer->stop();
     	uint8_t txBuffer = 0;
 
-    	if (irq_pin->get() != 0) {
+    	if (irq_pin->get() != 0 || abort) {
     		failedTries++;
 
-            if (failedTries >= 3) {
+            if (failedTries >= 3 || abort) {
                 pc.numTo++;
                 parallelReceptionOn = false;
-                spi->disable();
+                disableSPI();
 
                 if (frameTimeoutCallback) {
                     frameTimeoutCallback();
@@ -355,7 +408,7 @@ public:
 				parallelReceptionOn = false;
 				receptionFinished = true;
 				spi->transmitBlocking(&txBuffer, lqiPtr, 1);
-				spi->disable();
+                disableSPI();
 
 				if (frameDownloadCallback)
 					frameDownloadCallback();
@@ -367,6 +420,16 @@ public:
 	        int j;
 	        for (j = 0; j < WAIT_TICKS_FBEI_VALID; j++)
 	        	__asm("nop");
+
+            if(abort) {
+                parallelReceptionOn = false;
+                disableSPI();
+                if (frameTimeoutCallback) {
+                    frameTimeoutCallback();
+                }
+                return;
+            }
+
     	}
 
     	timer->start_async(MICRO_SECONDS_FOR_ONE_BYTE, signalNextByteAvailable);
@@ -380,7 +443,7 @@ public:
      * @param length The number of bytes to transmit
      * @param result The start address of the buffer in the microcontrollers memory.
      */
-    void readSram(uint8_t address, uint8_t length, uint8_t* result) {
+    uint8_t readSram(uint8_t address, uint8_t length, uint8_t* result) {
 
         //address must be smaller or equal 0x7F
 
@@ -393,10 +456,18 @@ public:
         spi->transmitBlocking(txBuffer, rxBuffer, 2);
 
         uint16_t i;
+        uint8_t resultCode = COMETOS_SUCCESS;
         for (i = 0; i < length; i++){
+            if(abort) {
+                resultCode = COMETOS_ERROR_FAIL;
+                break;
+            }
             spi->transmitBlocking(txBuffer + 2, result + i, 1);
         }
-        spi->disable();
+
+        disableSPI();
+
+        return resultCode;
     }
 
     /**
@@ -407,7 +478,7 @@ public:
      * @param data Pointer to the source buffer in the microcontrollers memory
      * @param length Number of bytes to transmit
      */
-    void writeSram(uint8_t address, uint8_t *data, uint8_t length) {
+    uint8_t writeSram(uint8_t address, uint8_t *data, uint8_t length) {
         txBuffer[0] = AT86RF231_ACCESS_SRAM | AT86RF231_ACCESS_READ;
         txBuffer[1] = address;
 
@@ -415,11 +486,18 @@ public:
         spi->transmitBlocking(txBuffer, rxBuffer, 2);
 
         uint8_t i;
+        uint8_t resultCode = COMETOS_SUCCESS;
         for(i = 0; i < length; i++){
+            if(abort) {
+                resultCode = COMETOS_ERROR_FAIL;
+                break;
+            }
             spi->transmitBlocking(data + i, rxBuffer, 1 );
         }
 
-        spi->disable();
+        disableSPI();
+
+        return resultCode;
     }
 
     /**

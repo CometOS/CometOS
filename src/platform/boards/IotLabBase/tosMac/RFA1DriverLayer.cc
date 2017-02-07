@@ -61,6 +61,8 @@ extern cometos::PhyCounts pc;
 
 static volatile bool radioStateChangeInProgress = false;
 static cometos::Rf231* rf;
+static bool transmissionPending = false;
+static uint8_t lastCCAResult;
 
 
 /**
@@ -417,28 +419,30 @@ uint8_t radioState_getChannel()
 
 //tasklet_async command
 cometos_error_t radioState_setChannel(uint8_t c) {
-	if (MAC_MIN_CHANNEL > c || MAC_MAX_CHANNEL < c) {
-		return MAC_ERROR_FAIL;
-	}
+    if (MAC_MIN_CHANNEL > c || MAC_MAX_CHANNEL < c) {
+        return MAC_ERROR_FAIL;
+    }
 
     pendingChannel = c;
-	tasklet_schedule();
+    tasklet_schedule();
 
-	return MAC_SUCCESS;
-    /*
-	c &= AT86RF231_PHY_CC_CCA_MASK_CHANNEL;
+    return MAC_SUCCESS;
+}
 
-	if( cmd != CMD_NONE )
-		return MAC_ERROR_BUSY;
-	else if( tos_channel == c )
-		return MAC_ERROR_ALREADY;
+cometos_error_t radioState_forceChannel(uint8_t c) {
+    if (MAC_MIN_CHANNEL > c || MAC_MAX_CHANNEL < c) {
+        return MAC_ERROR_FAIL;
+    }
 
-	tos_channel = c;
-	cmd = CMD_CHANNEL;
-	tasklet_schedule();
+    pendingChannel = c;
+    if(activeChannel == pendingChannel) {
+        return MAC_SUCCESS;
+    }
 
-	return MAC_SUCCESS;
-    */
+    rf->forcePDTDis();
+    tasklet_schedule();
+
+    return MAC_SUCCESS;
 }
 
 /*
@@ -485,7 +489,7 @@ inline void changeState() {
 
 		rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
 
-		cometos::getCout() <<  "Commanded to turn RX_ON";
+		//cometos::getCout() <<  "Commanded to turn RX_ON";
 
 #ifdef RFA1_ENABLE_PA
 		SET_BIT(TRX_CTRL_1, PA_EXT_EN);
@@ -585,9 +589,10 @@ cometos_error_t radioState_turnOn() {
 /*----------------- TRANSMIT -----------------*/
 
 
-//tasklet_async command
-mac_result_t radioSend_send(message_t* msg)
-{
+
+mac_result_t radioSend_prepare(message_t* msg) {
+    ASSERT(!transmissionPending);
+
     // we currently assume that this method is only ever called
     // from within a tasklet run, i.e. that it will NOT be interrupted
     // by any radio transceiver interrupts
@@ -636,11 +641,20 @@ mac_result_t radioSend_send(message_t* msg)
 
     txMsg->txInfo.tsData.isValid = false;
 
+    transmissionPending = true;
+    return MAC_SUCCESS;
+}
+
+mac_result_t radioSend_startTransmission() {
+    ASSERT(transmissionPending);
+    ASSERT(activeChannel == pendingChannel);
+
     cometos_error_t res = rf->writeFrameBuffer(txMsg->data, txMsg->phyFrameLen);
 
     if (res != MAC_SUCCESS) {
         rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
         // we must not call sendDone twice in a row as it will kill the CCA-Layer
+        transmissionPending = false;
         cmd = CMD_NONE;
         return MAC_ERROR_FAIL;
     }
@@ -652,11 +666,29 @@ mac_result_t radioSend_send(message_t* msg)
     // wait for the TRX_END interrupt
     radio_state = STATE_BUSY_TX_2_RX_ON;
     cmd = CMD_TRANSMIT;
-	return MAC_SUCCESS;
+
+    transmissionPending = false;
+    return MAC_SUCCESS;
 }
 
-void sendMessage() {
+void radioSend_abortPreparedTransmission() {
+    ASSERT(transmissionPending);
+    rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
+    transmissionPending = false;
+    cmd = CMD_NONE;
+	radioSend_sendDone(txMsg, MAC_ERROR_CANCEL);
+}
 
+//tasklet_async command
+mac_result_t radioSend_send(message_t* msg)
+{
+    mac_result_t result = radioSend_prepare(msg);
+    if(result == MAC_SUCCESS) {
+        return radioSend_startTransmission();
+    }
+    else {
+        return result;
+    }
 }
 
 
@@ -756,7 +788,7 @@ inline void downloadMessage()
             if ( (crc_check_byte & AT86RF231_PHY_RSSI_MASK_RX_CRC_VALID )
                     && (rxMsg->phyPayloadLen >= 3 && rxMsg->phyFrameLen - MAC_HEADER_SIZE <=  MAC_PACKET_BUFFER_SIZE)) {
 
-                //rxMsg->rxInfo.lqi = link_quality;
+                //rxMsg->rxInfo.lqi = link_quality; is written by downloadFrameParallel
                 rxMsg->rxInfo.lqiIsValid = true;
                 sendSignal = true;
                 rxMsg->rxInfo.tsData.isValid = true;
@@ -881,6 +913,7 @@ void serviceRadio() {
 	    pc.numRxStart++;
 		palExec_atomicBegin();
 		if( cmd == CMD_CCA ) {
+            lastCCAResult = MAC_ERROR_FAIL;
 			radioCCA_done(MAC_ERROR_FAIL);
 
 			//clear the receive blocking bit
@@ -960,10 +993,16 @@ void serviceRadio() {
 				else {
 					returnValue = MAC_ERROR_BUSY;
 				}
+                lastCCAResult = returnValue;
 				radioCCA_done(returnValue);
 			}
-		} else {
-			LOG_ERROR("0x" << cometos::hex << cmd << " " << "0x" << radio_state);
+		} else if(lastCCAResult == MAC_ERROR_FAIL) {
+            // there was a RX_START before -> radioCCA_done was already called with MAC_ERROR_FAIL
+        }
+        else {
+			volatile uint8_t status = rf->readRegister(AT86RF231_REG_TRX_STATUS);
+            volatile uint8_t regVal = rf->readRegister(AT86RF231_REG_RX_SYN);
+			LOG_ERROR("0x" << cometos::hex << cmd << " " << "0x" << radio_state << " 0x" << status << " 0x" << regVal << " " << lastCCAResult);
 			RADIO_ASSERT(false);
 			palLed_toggle(0x2);
 		}
@@ -1031,6 +1070,9 @@ void tasklet_radio_run() {
         reg = (~AT86RF231_PHY_CC_CCA_MASK_CHANNEL & reg ) | pendingChannel;
         rf->writeRegister(AT86RF231_REG_PHY_CC_CCA, reg);
         activeChannel = pendingChannel;
+
+        uint8_t regVal = rf->readRegister(AT86RF231_REG_RX_SYN);
+        rf->writeRegister(AT86RF231_REG_RX_SYN, regVal & ~AT86RF231_RX_SYN_PDT_DIS_MASK);
     }
 }
 
