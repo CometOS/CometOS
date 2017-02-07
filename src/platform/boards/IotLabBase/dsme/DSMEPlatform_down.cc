@@ -33,7 +33,7 @@
 #include "DSMEPlatform.h"
 
 #include "RFA1DriverLayer.h"
-#include "DSMECcaLayer.h"
+#include "RFA1DriverLayer.h"
 #include "openDSME/dsmeLayer/DSMELayer.h"
 #include "MacSymbolCounter.h"
 
@@ -62,16 +62,17 @@ void DSMEPlatform::startTimer(uint32_t symbolCounterValue) {
 
 bool DSMEPlatform::setChannelNumber(uint8_t channel) {
     this->channel = channel;
-    cometos_error_t error = radioState_setChannel(this->channel);
+    cometos_error_t error = radioState_forceChannel(this->channel);
     bool success = error != MAC_ERROR_BUSY;
     return success;
 }
 
 bool DSMEPlatform::startCCA() {
-    return (cca_request() == MAC_SUCCESS);
+    return (radioCCA_request() == MAC_SUCCESS);
 }
 
-bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallback) {
+bool DSMEPlatform::prepareSendingCopy(IDSMEMessage* imsg, Delegate<void(bool)> txEndCallback) {
+    DSMEMessage* msg = static_cast<DSMEMessage*>(imsg);
     ASSERT(msg != nullptr);
 
     palExec_atomicBegin();
@@ -107,7 +108,7 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
      */
     phy_msg.phyFrameLen = length + 2;
 
-    mac_result_t result = ccaSend_send(&phy_msg);
+    mac_result_t result = radioSend_prepare(&phy_msg);
 
     if(result != MAC_SUCCESS) {
         DSMEPlatform::state = STATE_READY;
@@ -118,10 +119,31 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
     }
 }
 
-bool DSMEPlatform::sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) {
+bool DSMEPlatform::sendNow() {
+    mac_result_t result = radioSend_startTransmission();
+
+    if(result != MAC_SUCCESS) {
+        DSMEPlatform::state = STATE_READY;
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+void DSMEPlatform::abortPreparedTransmission() {
+    radioSend_abortPreparedTransmission();
+    DSMEPlatform::state = STATE_READY;
+}
+
+bool DSMEPlatform::sendDelayedAck(IDSMEMessage *ackMsg, IDSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) {
     (void) receivedMsg;
     // the time is utilized anyway, so do not delay
-    return sendCopyNow(ackMsg, txEndCallback);
+    bool result = prepareSendingCopy(ackMsg, txEndCallback);
+    if(result) {
+        result = sendNow();
+    }
+    return result;
 }
 
 /**
@@ -131,13 +153,18 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
     uint32_t sfdTimestamp = getSFDTimestamp();
     const uint8_t *buffer = phy_msg->data;
 
-    dsme::DSMEMessage *msg = instance->getEmptyMessage();
+    dsme::DSMEMessage *msg = static_cast<DSMEMessage*>(instance->getEmptyMessage());
     if (msg == nullptr) {
         /* '-> No space for a message could be allocated. */
         return phy_msg;
     }
 
     msg->startOfFrameDelimiterSymbolCounter = sfdTimestamp;
+    MacRxInfo rxInfo;
+    rxInfo.lqi = phy_msg->rxInfo.lqi;
+    rxInfo.lqiIsValid = phy_msg->rxInfo.lqiIsValid;
+    rxInfo.rssi = phy_msg->rxInfo.rssi;
+    msg->setRxInfo(rxInfo);
 
     /* deserialize header */
     bool success = msg->getHeader().deserializeFrom(buffer, phy_msg->phyPayloadLen);
@@ -171,14 +198,14 @@ message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
 /**
  * Interface to tosMac
  */
-void ccaSend_ready(mac_result_t error) {
+void radioSend_ready(mac_result_t error) {
     return;
 }
 
 /**
  * Interface to tosMac
  */
-void ccaResult_ready(mac_result_t error) {
+void radioCCA_done(mac_result_t error) {
     dsme::DSMEPlatform::instance->getDSME().dispatchCCAResult(error == MAC_SUCCESS);
     return;
 }
@@ -187,7 +214,7 @@ void ccaResult_ready(mac_result_t error) {
 /**
  * Interface to tosMac
  */
-void ccaSend_sendDone(message_t * msg, mac_result_t result) {
+void radioSend_sendDone(message_t * msg, mac_result_t result) {
     ASSERT(dsme::DSMEPlatform::state == dsme::DSMEPlatform::STATE_SEND);
 
 // TODO: schedule as task?
