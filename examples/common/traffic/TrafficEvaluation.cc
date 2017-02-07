@@ -230,12 +230,18 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
 	    LOG_WARN("corrupted frame received");
 	} else {
         int16_t rssi = RSSI_INVALID;
-        /*if (msg->has<MacRxInfo>()) {
-            rssi = msg->get<MacRxInfo>()->rssi;
+        int16_t lqi = -1;
+        if (msg->has<MacRxInfo>()) {
+            auto rxInfo = msg->get<MacRxInfo>();
+            rssi = rxInfo->rssi;
+            if(rxInfo->lqiIsValid) {
+                lqi = rxInfo->lqi;
+            }
             (void) rssi; // avoid warning if logging is disabled
-        }*/
+            (void) lqi; // avoid warning if logging is disabled
+        }
 
-	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!" << "!R!" << type << "!" << dec << remoteSequenceNumber << "!0x" << hex << palId_id() << "!" << dec << rssi);
+	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!" << "!R!" << type << "!" << dec << remoteSequenceNumber << "!0x" << hex << palId_id() << "!" << dec << rssi << "!" << dec << lqi);
         //LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
 
 
