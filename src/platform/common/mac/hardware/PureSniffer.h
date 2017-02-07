@@ -12,7 +12,7 @@ class PureSniffer {
 public:
     static PureSniffer& getInstance();
 
-    void init(cometos::Callback<void(uint8_t* data, uint8_t length)> callback);
+    void init(cometos::Callback<void(uint8_t* data, uint8_t length, uint32_t sfdTimestamp)> callback);
     void receive(message_t* msg);
 
 private:
@@ -20,7 +20,7 @@ private:
     PureSniffer(PureSniffer&) = delete;
     PureSniffer& operator=(const PureSniffer&) = delete;
 
-    cometos::Callback<void(uint8_t* data, uint8_t length)> callback;
+    cometos::Callback<void(uint8_t* data, uint8_t length, uint32_t sfdTimestamp)> callback;
 
     mac_ackCfg_t ackCfg;
     mac_backoffCfg_t backoffCfg;

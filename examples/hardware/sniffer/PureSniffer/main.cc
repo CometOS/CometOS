@@ -41,6 +41,8 @@
 //#include "palSerial.h"
 #include "palExec.h"
 #include "palLocalTime.h"
+#include "MacSymbolCounter.h"
+#include "rf231.h"
 using namespace cometos;
 
 #include "PureSniffer.h"
@@ -67,8 +69,9 @@ inline char numToHex(uint8_t num) {
     }
 }
 
-void push(uint8_t* data, uint8_t length) {
+void push(uint8_t* data, uint8_t length, uint32_t sfdTimestamp) {
     palExec_atomicBegin();
+    ASSERT(!empty.empty());
     OutputBuffer* b = empty.front();
     empty.pop();
     palExec_atomicEnd();
@@ -76,6 +79,14 @@ void push(uint8_t* data, uint8_t length) {
     b->output[b->x++] = 'P';
     b->output[b->x++] = 'K';
     b->output[b->x++] = 'T';
+
+    for(int i = 0; i < 8; i++) {
+        b->output[b->x++] = numToHex((sfdTimestamp >> 28) & 0xF);
+        sfdTimestamp <<= 4;
+    }
+
+    b->output[b->x++] = ':';
+
     for(int i = 0; i < length; i++) {
         uint8_t v = data[i];
         b->output[b->x++] = numToHex(v >> 4);
@@ -84,7 +95,7 @@ void push(uint8_t* data, uint8_t length) {
     b->output[b->x++] = '\n';
     
     palExec_atomicBegin();
-    waiting.push(b);
+    ASSERT(waiting.push(b));
     palExec_atomicEnd();
 }
 

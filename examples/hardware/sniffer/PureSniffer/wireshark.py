@@ -60,7 +60,7 @@ for line in fileinput.input():
         time = int(m.group(1),16)*(16/(1000.0*1000.0))
         line = m.group(2)
         
-        print time,line
+        print time,m.group(1),line
 
         data = []
         for i in range(0,len(line)-1,2):
