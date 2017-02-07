@@ -3,7 +3,7 @@
 
 namespace dsme {
 
-typedef Delegate<void(DSMEMessage* msg)> receive_delegate_t;
+typedef Delegate<void(IDSMEMessage* msg)> receive_delegate_t;
 
 class HandleMessageTask : public cometos::Task {
 public:
@@ -11,7 +11,7 @@ public:
             message(nullptr), occupied(false) {
     }
 
-    bool occupy(DSMEMessage* message, receive_delegate_t receiveDelegate) {
+    bool occupy(IDSMEMessage* message, receive_delegate_t receiveDelegate) {
         palExec_atomicBegin();
         if(this->occupied) {
             palExec_atomicEnd();
@@ -31,7 +31,7 @@ public:
     }
 
     virtual void invoke() {
-        DSMEMessage* copy = nullptr;
+        IDSMEMessage* copy = nullptr;
         palExec_atomicBegin();
         {
             copy = message;
@@ -48,7 +48,7 @@ public:
         palExec_atomicEnd();
     }
 private:
-    DSMEMessage* message;
+    IDSMEMessage* message;
     receive_delegate_t receiveDelegate;
     bool occupied;
 };

@@ -93,14 +93,17 @@ void DSMEPlatformBase::start() {
     this->dsmeAdaptionLayer.startAssociation();
 }
 
-void DSMEPlatformBase::handleDataMessageFromMCPS(DSMEMessage* msg) {
+void DSMEPlatformBase::handleDataMessageFromMCPS(IDSMEMessage* imsg) {
+    DSMEMessage* msg = static_cast<DSMEMessage*>(imsg);
     AirframePtr macPkt = msg->decapsulateFrame();
     cometos::DataIndication* ind = new cometos::DataIndication(macPkt, msg->getHeader().getSrcAddr().getShortAddress(), msg->getHeader().getDestAddr().getShortAddress());
+    ind->set(new cometos::MacRxInfo(msg->rxInfo));
     releaseMessage(msg);
     this->gateIndOut.send(ind);
 }
 
-void DSMEPlatformBase::handleConfirmFromMCPS(DSMEMessage* msg, DataStatus::Data_Status dataStatus) {
+void DSMEPlatformBase::handleConfirmFromMCPS(IDSMEMessage* imsg, DataStatus::Data_Status dataStatus) {
+    DSMEMessage* msg = static_cast<DSMEMessage*>(imsg);
     if(msg->request != nullptr) {
         DataResponseStatus status = DataResponseStatus::FAIL_UNKNOWN;
         switch(dataStatus) {
@@ -136,7 +139,7 @@ bool DSMEPlatformBase::isReceptionFromAckLayerPossible() {
     return (handleMessageTask.isOccupied() == false);
 }
 
-void DSMEPlatformBase::handleReceivedMessageFromAckLayer(DSMEMessage* message) {
+void DSMEPlatformBase::handleReceivedMessageFromAckLayer(IDSMEMessage* message) {
     ASSERT(handleMessageTask.isOccupied() == false);
     bool success = handleMessageTask.occupy(message, this->receiveFromAckLayerDelegate);
     ASSERT(success); // assume that isMessageReceptionFromAckLayerPossible was called before in the same atomic block
@@ -167,7 +170,6 @@ void DSMEPlatformBase::handleRequest(DataRequest* req) {
 
     translateMacAddress(dest, dsmemsg->getHeader().getDestAddr());
 
-    dsmemsg->firstTry = true;
     this->dsmeAdaptionLayer.sendMessage(dsmemsg);
 }
 
@@ -224,7 +226,8 @@ void DSMEPlatformBase::printDSMEManagement(uint8_t management, DSMESABSpecificat
     }
 }
 
-void DSMEPlatformBase::printSequenceChartInfo(DSMEMessage* msg) {
+void DSMEPlatformBase::printSequenceChartInfo(IDSMEMessage* imsg) {
+    DSMEMessage* msg = static_cast<DSMEMessage*>(imsg);
 
     IEEE802154eMACHeader &header = msg->getHeader();
 
@@ -335,7 +338,7 @@ void DSMEPlatformBase::printSequenceChartInfo(DSMEMessage* msg) {
 }
 
 // TODO: make sure ALL callers check for nullptr (BeaconManager / GTSManager)
-DSMEMessage* DSMEPlatformBase::getEmptyMessage()
+IDSMEMessage* DSMEPlatformBase::getEmptyMessage()
 {
     dsme_atomicBegin();
     messagesInUse++;
@@ -364,7 +367,9 @@ DSMEMessage* DSMEPlatformBase::getLoadedMessage(AirframePtr frame)
     return msg;
 }
 
-void DSMEPlatformBase::releaseMessage(DSMEMessage* msg) {
+void DSMEPlatformBase::releaseMessage(IDSMEMessage* imsg) {
+    DSMEMessage* msg = static_cast<DSMEMessage*>(imsg);
+
     dsme_atomicBegin();
     DSME_ASSERT(msg != nullptr);
     DSME_ASSERT(messagesInUse > 0);

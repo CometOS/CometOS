@@ -48,6 +48,7 @@
 #include "openDSME/mac_services/dataStructures/DSMEMessageElement.h"
 #include "openDSME/dsmeLayer/messages/IEEE802154eMACHeader.h"
 #include "openDSME/interfaces/IDSMEMessage.h"
+#include "MacAbstractionBase.h"
 
 #include "Airframe.h"
 #include "DataRequest.h"
@@ -104,19 +105,52 @@ public:
         return macHdr;
     }
 
-    bool receivedViaMCPS; // TODO better handling?
-    bool firstTry;
-    bool currentlySending;
+    uint8_t getLQI() override {
+        return rxInfo.lqi;
+    }
+
+    virtual bool getReceivedViaMCPS() override {
+        return receivedViaMCPS;
+    }
+
+    virtual void setReceivedViaMCPS(bool receivedViaMCPS) override {
+        this->receivedViaMCPS = receivedViaMCPS;
+    }
+
+    virtual bool getCurrentlySending() override {
+        return currentlySending;
+    }
+
+    virtual void setCurrentlySending(bool currentlySending) {
+        this->currentlySending = currentlySending;
+    }
+
+    void setRxInfo(cometos::MacRxInfo& rxInfo) {
+        this->rxInfo = rxInfo;
+    }
+
+    void increaseRetryCounter() override {
+        retries++;
+    }
+
+    uint8_t getRetryCounter() override {
+        return retries;
+    }
 
 private:
+    bool receivedViaMCPS;
+    bool currentlySending;
+
     cometos::AirframePtr frame;
     IEEE802154eMACHeader macHdr;
     cometos::DataRequest* request;
+    cometos::MacRxInfo rxInfo;
+    uint8_t retries;
 
     void prepare(cometos::AirframePtr airframe) {
         currentlySending = false;
-        firstTry = true;
         receivedViaMCPS = false;
+        retries = 0;
 
         macHdr.reset();
 

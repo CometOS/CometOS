@@ -91,7 +91,7 @@ public:
 
     bool isReceptionFromAckLayerPossible() override;
 
-    void handleReceivedMessageFromAckLayer(DSMEMessage* message) override;
+    void handleReceivedMessageFromAckLayer(IDSMEMessage* message) override;
 
     void setReceiveDelegate(receive_delegate_t receiveDelegate) override;
 
@@ -105,22 +105,26 @@ public:
         return this->mac_pib.macExtendedAddress;
     }
 
-    DSMEMessage* getEmptyMessage() override;
+    IDSMEMessage* getEmptyMessage() override;
 
-    void releaseMessage(DSMEMessage* msg) override;
+    void releaseMessage(IDSMEMessage* msg) override;
 
     void scheduleStartOfCFP() override;
 
     void start();
 
-    void printSequenceChartInfo(DSMEMessage* msg);
+    void printSequenceChartInfo(IDSMEMessage* msg);
+
+    uint8_t getMinCoordinatorLQI() override {
+        return 140;
+    }
 
 protected:
     virtual void signalNewMsg(DSMEMessage* msg) {}
     virtual void signalReleasedMsg(DSMEMessage* msg) {}
 
-    void handleDataMessageFromMCPS(DSMEMessage* msg);
-    void handleConfirmFromMCPS(DSMEMessage* msg, DataStatus::Data_Status dataStatus);
+    void handleDataMessageFromMCPS(IDSMEMessage* msg);
+    void handleConfirmFromMCPS(IDSMEMessage* msg, DataStatus::Data_Status dataStatus);
 
     bool send(cometos::AirframePtr frame);
 
