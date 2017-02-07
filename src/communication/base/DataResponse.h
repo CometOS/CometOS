@@ -114,6 +114,8 @@ public:
             return "EXPIRED";
         case DataResponseStatus::FAIL_UNKNOWN:
             return "FAIL_UNKNOWN";
+        case DataResponseStatus::NO_ROUTE:
+            return "NO_ROUTE";
         default:
             return "";
         }
