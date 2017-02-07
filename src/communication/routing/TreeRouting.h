@@ -70,6 +70,8 @@ public:
 
 	OutputGate<DataRequest> beaconOut;
 
+	bool isSink;
+
 protected:
 
 
@@ -82,7 +84,6 @@ protected:
 	uint8_t nextHops;
 
 
-	bool isSink;
 
 
 	uint16_t slotsToRun;

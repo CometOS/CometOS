@@ -34,6 +34,7 @@
 #include "MacAbstractionBase.h"
 #include "RoutingInfo.h"
 #include "logging.h"
+#include "palId.h"
 
 /**duration of one slot, after each slot new parent and hop count is
  * used.
@@ -43,7 +44,7 @@
 /**Number of beacons a node sends per slot. A value of 2-4 is
  * recommend to cope with packet loss.
  */
-#define BEACONS_PER_SLOT 3
+#define BEACONS_PER_SLOT 10
 
 /**Minimum lqi value of beacons. Beacons with lower value are filtered out.
  */
@@ -55,8 +56,8 @@ Define_Module(TreeRouting);
 
 TreeRouting::TreeRouting() :
         beaconIn(this, &TreeRouting::handleBeacon, "beaconIn"), beaconOut(this,
-                "beaconOut"), parent(BROADCAST ), hops(0xff), nextParent(
-                BROADCAST ), nextHops(0xff), isSink(false), slotsToRun(0xffff) {
+                "beaconOut"), isSink(false), parent(BROADCAST ), hops(0xff), nextParent(
+                BROADCAST ),  nextHops(0xff), slotsToRun(0xffff) {
 
 }
 void TreeRouting::finish() {
@@ -74,7 +75,7 @@ void TreeRouting::finish() {
 void TreeRouting::handleRequest(DataRequest* msg) {
     if (isSink) {
         msg->response(new DataResponse(DataResponseStatus::SUCCESS));
-        sendIndication(new DataIndication(msg->decapsulateAirframe(), getId(), getId()));
+        sendIndication(new DataIndication(msg->decapsulateAirframe(), palId_id(), palId_id()));
         delete msg;
     } else {
         Routing::handleRequest(msg);
@@ -86,7 +87,10 @@ void TreeRouting::initialize() {
     Routing::initialize();
 
     slotDuration = DEFAULT_SLOT_DURATION;
+
+#ifdef OMNETPP
     CONFIG_NED(slotDuration);CONFIG_NED(isSink);CONFIG_NED(slotsToRun);
+#endif
 
     // timer are set in such a way that in each slot at least one
     // beacon of each node can be received
@@ -114,7 +118,7 @@ void TreeRouting::sendBeacon(Message *timer) {
 
     if (slotsToRun == 0) {
         return;
-    }LOG_INFO("send beacon");
+    }LOG_INFO("send tree beacon");
 
     AirframePtr air = make_checked<Airframe>();
     (*air) << hops;
@@ -146,7 +150,7 @@ void TreeRouting::slotTimeout(Message *timer) {
         hops = 0;
     }
 
-    LOG_INFO("parent="<<parent<<" hops="<<(int)hops);
+    LOG_INFO("id=0x"<<hex<<palId_id()<<" parent=0x"<<parent<<dec<<" hops="<<(int)hops);
 }
 
 void TreeRouting::handleBeacon(DataIndication* pkt) {
@@ -156,10 +160,12 @@ void TreeRouting::handleBeacon(DataIndication* pkt) {
 #endif
 
     // only accept packets of high quality
-    MacRxInfo* phy = pkt->get<MacRxInfo>();
-    if (phy->lqi < LQI_FILTER) {
-        delete pkt;
-        return;
+    if(pkt->has<MacRxInfo>()) {
+        MacRxInfo* phy = pkt->get<MacRxInfo>();
+        if (phy->lqi < LQI_FILTER) {
+            delete pkt;
+            return;
+        }
     }
 
     uint8_t tempHops;
@@ -168,8 +174,11 @@ void TreeRouting::handleBeacon(DataIndication* pkt) {
 
     LOG_INFO("process beacon from "<<pkt->src);
 
-    if ((tempHops + 1) < (nextHops)) {
-        nextHops = tempHops + 1;
+    uint16_t newTempHops = tempHops+1;
+
+    //                            V avoid frequent route changes
+    if (newTempHops < nextHops || (newTempHops == nextHops && pkt->src < nextParent)) {
+        nextHops = newTempHops;
         nextParent = pkt->src;
     }
     delete pkt;
@@ -204,7 +213,7 @@ void TreeRouting::handleRequest(DataRequest* msg, NwkHeader& nwk) {
     }
 
     timeOffset_t offset = 0;
-    if (getId() != nwk.src && sendingOffset > 0 && msg->dst == BROADCAST ) {
+    if (palId_id() != nwk.src && sendingOffset > 0 && msg->dst == BROADCAST ) {
         offset = sendingOffset / 2 + intrand(sendingOffset);
     }
 
