@@ -38,7 +38,7 @@
 #include "NetworkTime.h"
 #include "palId.h"
 
-#define OUTPUT_WEIGELT
+//#define OUTPUT_WEIGELT
 
 
 namespace cometos {

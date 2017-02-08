@@ -56,15 +56,13 @@ namespace cometos {
 class TCPWYHeader {
 public:
 
-    TCPWYHeader(uint8_t msgType = 0, uint8_t seqNum = 0) {
-        this->msgType = msgType;
+    TCPWYHeader(uint8_t seqNum = 0) {
         this->seqNum = seqNum;
         this->ccID = TZ_INVALID_ID;
         this->ccDist = TZ_INVALID_U8;
         this->currentIndex = 0;
     }
 
-    uint8_t msgType;
     uint8_t seqNum;
     node_t ccID;
     node_t ccDist;

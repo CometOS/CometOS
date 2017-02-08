@@ -75,7 +75,6 @@ TCPWY::TCPWY() :
 void TCPWY::initialize() {
 	Layer::initialize();
 	mHasUpperLayer = false;
-	mSendTCAHeader = true;
 	if(gateIndOut.isConnected()) {
 	    mHasUpperLayer = true;
 	}
@@ -104,21 +103,17 @@ void TCPWY::initialize() {
 //}
 
 void TCPWY::neighborDataUpdateTimer(Message *timer) {
-
-    // setting next send msg to have TCA Header with it
-    mSendTCAHeader = true;
-
     // only sends TCA packet when there is no upper layer
     // or if it has an upper layer but hasn't send within the last time frame
     if(!mHasUpperLayer || (mHasUpperLayer && !mHasSend)) {
         AirframePtr msg = make_checked<Airframe>();
         //Sending out @ every tick
-        TCPWYHeader	header(TCPWY_MSG_TYPE_DATA, seqNum);
+        TCPWYHeader	header(seqNum);
         setHeaderData(header);
 
         (*msg) << header;
+        (*msg) << (uint8_t)TCPWY_MSG_TYPE_CTRL;
         sendRequest(new DataRequest(BROADCAST, msg, createCallback(&TCPWY::resp)));
-        mSendTCAHeader = false;
     }
 
     // updating quality values for all neighbors on list and standby-list
@@ -207,7 +202,9 @@ void TCPWY::handleIndication(DataIndication* msg) {
         sendControl(TCPWY_CONTROL_RECEIVED, TZ_INVALID_ID);
     }
     // checks whether msg contains a TCA header
-    if(checkMsgType(msg->getAirframe())) {
+    uint8_t msgType;
+    msg->getAirframe() >> msgType;
+    if(msgType == TCPWY_MSG_TYPE_CTRL) {
         TCPWYHeader header;
         msg->getAirframe() >> header;
         tca.handle(msg->src, header, NetworkTime::get());
@@ -217,7 +214,8 @@ void TCPWY::handleIndication(DataIndication* msg) {
         } else {
             delete msg;
         }
-    } else {
+    }
+    else if(msgType == TCPWY_MSG_TYPE_DATA) {
         // if there is no TCA header yet there is module in a higher layer it just forwards the msg
         // if it is from a neighbor
         if(mHasUpperLayer && isFromNeighbor) {
@@ -226,17 +224,13 @@ void TCPWY::handleIndication(DataIndication* msg) {
             delete msg;
         }
     }
+    else {
+        LOG_ERROR("Wrong TCPWY type " << msgType);
+    }
 }
 
 void TCPWY::handleRequest(DataRequest* msg){
-    mHasSend = true;
-    //Sending out @ every tick
-    if(mSendTCAHeader) {
-        mSendTCAHeader = false;
-        TCPWYHeader header(TCPWY_MSG_TYPE_DATA, seqNum);
-        setHeaderData(header);
-        msg->getAirframe() << header;
-    }
+    msg->getAirframe() << (uint8_t)TCPWY_MSG_TYPE_DATA;
     sendRequest(msg);
 }
 
@@ -257,7 +251,6 @@ void TCPWY::handleControl(DataRequest* msg) {
 
 void TCPWY::setHeaderData(TCPWYHeader &header){
     header.seqNum = seqNum;
-    header.msgType = TCPWY_MSG_TYPE_DATA;
     header.ccID = tca.pClusterId;
     header.ccDist = tca.pClusterDist;
     uint8_t indexHeader = 0;
@@ -276,19 +269,6 @@ void TCPWY::setHeaderData(TCPWYHeader &header){
 #ifdef LOCATION_IN_TCPWYHeader
     header.coordinates = PalLocation::getInstance()->getOwnCoordinates();
 #endif
-}
-
-bool TCPWY::checkMsgType(Airframe& msg) {
-    // checks whether the msg is of type TCPWY
-    bool result = false;
-    uint8_t msgType = 0;
-    msg >> msgType;
-
-    if(msgType == TCPWY_MSG_TYPE_DATA) {
-        result = true;
-    }
-    msg << msgType;
-    return result;
 }
 
 }// namespace cometos

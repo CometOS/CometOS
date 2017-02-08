@@ -46,13 +46,13 @@ Airframe& operator<<(Airframe& frame, TCPWYHeader& value) {
 #ifdef LOCATION_IN_TCPWYHeader
     frame << value.coordinates;
 #endif
-	return frame << value.seqNum << value.ccID << value.ccDist << value.msgType;
+	return frame << value.seqNum << value.ccID << value.ccDist;
 }
 
 /**Deserialization of MacHeader
  */
 Airframe& operator>>(Airframe& frame, TCPWYHeader& value) {
-    frame >> value.msgType >> value.ccDist >> value.ccID >> value.seqNum;
+    frame >> value.ccDist >> value.ccID >> value.seqNum;
 #ifdef LOCATION_IN_TCPWYHeader
     frame >> value.coordinates;
 #endif

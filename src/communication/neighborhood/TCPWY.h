@@ -75,7 +75,6 @@ public:
 
 private:
     void setHeaderData(TCPWYHeader &header);
-    bool checkMsgType(Airframe& msg);
 
 
 	uint32_t ts;
@@ -85,7 +84,6 @@ private:
 	uint8_t seqNum;
 
 	bool mHasUpperLayer; // bool to indicate whether there are layers above TCA
-	bool mSendTCAHeader; // bool to indicate whether next send msg should have a TCA header
 	bool mHasSend; // indicater whether this node has send a msg within the last period
 	bool toggle; // toggle for check deletion and stuff
 
