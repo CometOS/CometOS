@@ -135,7 +135,8 @@ enum
 	//CMD_CHANNEL = 7,    // changing the channel
 	CMD_SIGNAL_DONE = 8,  // signal the end of the state transition
 	CMD_DOWNLOAD = 9,    // download the received message
-	CMD_SENDING = 10  	// Currently sending a packet
+	CMD_DOWNLOAD_RX_END = 10,    // download the received message after reception finished
+	CMD_SENDING = 11  	// Currently sending a packet
 };
 
 enum {
@@ -754,85 +755,81 @@ cometos_error_t radioCCA_request() {
 //TODO: RX_SAFE_MODE with define
 inline void downloadMessage()
 {
+    RADIO_ASSERT(radio_state == STATE_RX_ON && (cmd == CMD_DOWNLOAD || cmd == CMD_DOWNLOAD_RX_END));
 
-	RADIO_ASSERT(radio_state == STATE_RX_ON && cmd == CMD_DOWNLOAD);
+    // we should not be called
+    if (rf->downloadPending()) {
+        return;
+    }
 
-//	cometos_error_t result =  rf->readFrameBuffer(&rxMsg->phyFrameLen, rxMsg->data, &rxMsg->rxInfo.lqi);
-//
-//	if (result == COMETOS_SUCCESS)
-//		downloadMessage_successCallback();
-//	else
-//		downloadMessage_failCallback();
+    if (rf->downloadFinished()) {
+        if(cmd != CMD_DOWNLOAD_RX_END) {
+            return;
+        }
 
-	    // we should not be called
-		if (rf->downloadPending())
-			return;
+        rf->downloadRetrieved();
+        rxMsg->rxInfo.tsData.ts = capturedTime;
+        bool sendSignal = false;
 
-		if (rf->downloadFinished()) {
-		    rf->downloadRetrieved();
-		    rxMsg->rxInfo.tsData.ts = capturedTime;
-            bool sendSignal = false;
+        //get rssi by ED
+        uint8_t rssi = rf->readRegister(AT86RF231_REG_PHY_ED_LEVEL);
+        mac_dbm_t val = -90 + rssi;
+        rxMsg->rxInfo.rssi = val;
 
-            //get rssi by ED
-            uint8_t rssi = rf->readRegister(AT86RF231_REG_PHY_ED_LEVEL);
-            mac_dbm_t val = -90 + rssi;
-            rxMsg->rxInfo.rssi = val;
+        //uint8_t link_quality;
+        uint8_t crc_check_byte = rf->readRegister(AT86RF231_REG_PHY_RSSI);
+        rxMsg->phyPayloadLen = rxMsg->phyFrameLen - 2;
 
-            //uint8_t link_quality;
-            uint8_t crc_check_byte = rf->readRegister(AT86RF231_REG_PHY_RSSI);
-            rxMsg->phyPayloadLen = rxMsg->phyFrameLen - 2;
+        // rxBuffer always has to be available, we drop at higher layers
+        RADIO_ASSERT(rxMsg->data != NULL);
 
-            // rxBuffer always has to be available, we drop at higher layers
-            RADIO_ASSERT(rxMsg->data != NULL);
+        if ( (crc_check_byte & AT86RF231_PHY_RSSI_MASK_RX_CRC_VALID )
+                && (rxMsg->phyPayloadLen >= 3 && rxMsg->phyFrameLen - MAC_HEADER_SIZE <=  MAC_PACKET_BUFFER_SIZE)) {
 
-            if ( (crc_check_byte & AT86RF231_PHY_RSSI_MASK_RX_CRC_VALID )
-                    && (rxMsg->phyPayloadLen >= 3 && rxMsg->phyFrameLen - MAC_HEADER_SIZE <=  MAC_PACKET_BUFFER_SIZE)) {
+            //rxMsg->rxInfo.lqi = link_quality; is written by downloadFrameParallel
+            rxMsg->rxInfo.lqiIsValid = true;
+            sendSignal = true;
+            rxMsg->rxInfo.tsData.isValid = true;
+        } else {
+            pc.numCrcFail++;
+            EVENT_OUTPUT_WRITE(PEO_RADIO_RX_DROPPED);
+        }
 
-                //rxMsg->rxInfo.lqi = link_quality; is written by downloadFrameParallel
-                rxMsg->rxInfo.lqiIsValid = true;
-                sendSignal = true;
-                rxMsg->rxInfo.tsData.isValid = true;
+        // before signalling success, reset cmd and states, otherwise, the ACK is never sent
+        palExec_atomicBegin();
+        radio_state = STATE_RX_ON;
+        cmd = CMD_NONE;
+        palExec_atomicEnd();
 
-            } else {
-                pc.numCrcFail++;
-                EVENT_OUTPUT_WRITE(PEO_RADIO_RX_DROPPED);
-            }
+        // signal only if it has passed the CRC check
+        if( sendSignal ) {
+            pc.numRxSuccess++;
+            rxMsg = radioReceive_receive(rxMsg);
+        }
 
-            // before signalling success, reset cmd and states, otherwise, the ACK is never sent
+        missedIrqPossible = true; // IRQs occuring during the download are not signaled,
+        // so let serviceRadio check if its true.
+        // In the worst case we spend an unnecessary call of serviceRadio.
+        tasklet_schedule();
+    } else {
+
+        pc.numStartDl++;
+        //download message while rf231 is receiving it
+        mac_result_t result = rf->downloadFrameParallel(rxMsg->data, sizeof(rxBuf), &rxMsg->phyFrameLen, &(rxMsg->rxInfo.lqi), downloadMessage_successCallback, downloadMessage_failCallback);
+
+        if (result != MAC_SUCCESS){
             palExec_atomicBegin();
             radio_state = STATE_RX_ON;
             cmd = CMD_NONE;
             palExec_atomicEnd();
-
-            // signal only if it has passed the CRC check
-            if( sendSignal ) {
-                pc.numRxSuccess++;
-                rxMsg = radioReceive_receive(rxMsg);
-            }
-
-	missedIrqPossible = true; // IRQs occuring during the download are not signaled,
-			          // so let serviceRadio check if its true.
-		         	  // In the worst case we spend an unnecessary call of serviceRadio.
-	tasklet_schedule();
-		} else {
-
-            pc.numStartDl++;
-            //download message while rf231 is receiving it
-            mac_result_t result = rf->downloadFrameParallel(rxMsg->data, sizeof(rxBuf), &rxMsg->phyFrameLen, &(rxMsg->rxInfo.lqi), downloadMessage_successCallback, downloadMessage_failCallback);
-
-            if (result != MAC_SUCCESS){
-                palExec_atomicBegin();
-                radio_state = STATE_RX_ON;
-                cmd = CMD_NONE;
-                palExec_atomicEnd();
-                return;
-            }
-		}
+            return;
+        }
+    }
 }
 
 void downloadMessage_successCallback()  {
 	//RADIO_ASSERT(radio_state == STATE_RX_ON && cmd == CMD_DOWNLOAD);
-        if(!(radio_state == STATE_RX_ON && cmd == CMD_DOWNLOAD)) {
+        if(!(radio_state == STATE_RX_ON && (cmd == CMD_DOWNLOAD || cmd == CMD_DOWNLOAD_RX_END))) {
             LOG_ERROR(radio_state << " " << cmd);
             RADIO_ASSERT(false);
         }
@@ -908,7 +905,33 @@ void serviceRadio() {
 		txMsg = nullptr;
 	}
 
+	bool alreadyReceived = false;
 
+	// End of reception of a frame
+	if( ((irq & AT86RF231_IRQ_STATUS_MASK_TRX_END) && cmd != CMD_TRANSMIT)) {
+	    pc.numRxEnd++;
+		if (cmd == CMD_RECEIVE || cmd == CMD_DOWNLOAD) {
+		    // is handled in
+			EVENT_OUTPUT_WRITE(PEO_RADIO_RX_END);
+			RADIO_ASSERT( radio_state == STATE_RX_ON );
+			cmd = CMD_DOWNLOAD_RX_END;
+			downloadMessage();
+		} 
+        else if((irq & AT86RF231_IRQ_STATUS_MASK_RX_START) != 0) {
+            // a frame was already fully received before we
+            // have handled the irqs
+            alreadyReceived = true;
+        }
+        else {
+			// catch a situation where we are not in expectation of a reception
+			// but still have received an RX_END interrupt -- reactivate
+			// reception of frames
+			rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
+		}
+	}
+
+
+	// Start of reception of a frame
 	if( (irq & AT86RF231_IRQ_STATUS_MASK_RX_START) != 0 ) {
 	    pc.numRxStart++;
 		palExec_atomicBegin();
@@ -934,33 +957,21 @@ void serviceRadio() {
 				rxMsg->rxInfo.tsData.isValid = false;
 			}
 
-			cmd = CMD_DOWNLOAD;
+            if(alreadyReceived) {
+			    cmd = CMD_DOWNLOAD_RX_END;
+            }
+            else {
+			    cmd = CMD_DOWNLOAD;
+            }
 		}
 		else {
-			palExec_atomicBegin();
 			if (cmd != CMD_TURNOFF) {
-				//cometos::getCout() << (int) cmd << cometos::endl;
+				cometos::getCout() << "irq " << irq << " state " << radio_state << " cmd " << (uint8_t)cmd << cometos::endl;
+                RADIO_ASSERT(false);
 			}
-			palExec_atomicEnd();
-			RADIO_ASSERT( cmd == CMD_TURNOFF);
+			//RADIO_ASSERT( cmd == CMD_TURNOFF);
 		}
 		palExec_atomicEnd();
-	}
-
-	// End of reception of a frame
-	if( ((irq & AT86RF231_IRQ_STATUS_MASK_TRX_END) && cmd != CMD_TRANSMIT)) {
-	    pc.numRxEnd++;
-		if (cmd == CMD_RECEIVE ) {
-		    // is handled in
-			EVENT_OUTPUT_WRITE(PEO_RADIO_RX_END);
-			RADIO_ASSERT( radio_state == STATE_RX_ON );
-			//cmd = CMD_DOWNLOAD;
-		} else {
-			// catch a situation where we are not in expectation of a reception
-			// but still have received an RX_END interrupt -- reactivate
-			// reception of frames
-			rf->cmd_state(AT86RF231_TRX_STATE_RX_ON);
-		}
 	}
 
 	//This Interrupt is a multifunctional interrupt signaling either the wakeup of the
@@ -1028,6 +1039,10 @@ void handleInterrupt(){
 
 //tasklet_async event
 void tasklet_radio_run() {
+	if(rf->downloadPending()) {
+		// assumes tasklet_schedule will be called after finishing the download
+		return;
+	}
 
 	if (radioIrq != IRQ_NONE || missedIrqPossible) {
 		serviceRadio();
@@ -1047,7 +1062,7 @@ void tasklet_radio_run() {
 	}
 
 	if( cmd != CMD_NONE ) {
-		if (cmd == CMD_DOWNLOAD) {
+		if (cmd == CMD_DOWNLOAD || cmd == CMD_DOWNLOAD_RX_END) {
 			downloadMessage();
 		} else if( CMD_TURNOFF <= cmd && cmd <= CMD_TURNON ) {
 			changeState();

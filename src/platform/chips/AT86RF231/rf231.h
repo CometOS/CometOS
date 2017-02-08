@@ -51,6 +51,7 @@
 #define CLOCK_TICK_TIME_NS 14
 #define WAIT_TICKS_FBEI_VALID 750 / (3 * CLOCK_TICK_TIME_NS) + 1
 #define MICRO_SECONDS_FOR_ONE_BYTE 32
+#define LENGTH_UNKNOWN 0xFF
 
 typedef void (*callback_t)(void);
 
@@ -85,7 +86,7 @@ private:
     volatile bool receptionFinished;
     uint8_t failedTries;
     uint8_t frameLength, frameMissing;
-    uint8_t *dataPtr, *origDataPtr, *lqiPtr;
+    uint8_t *dataPtr, *origDataPtr, *lqiPtr, *lengthPtr;
     uint8_t maxBufferLength;
 
     //Callbacks
@@ -346,11 +347,12 @@ public:
         txBuffer[0] = AT86RF231_ACCESS_FRAMEBUFFER | AT86RF231_ACCESS_READ;
 
         spi->enable();
-        spi->transmitBlocking(txBuffer, rxBuffer, 2);
+        spi->transmitBlocking(txBuffer, rxBuffer, 1);
 
-        *length = rxBuffer[1];
-        frameLength = rxBuffer[1];
-        frameMissing = rxBuffer[1];
+        lengthPtr = length;
+        *lengthPtr = LENGTH_UNKNOWN;
+        frameLength = LENGTH_UNKNOWN;
+        frameMissing = LENGTH_UNKNOWN;
         frameDownloadCallback = success_callback;
         frameTimeoutCallback = timeout_callback;
         dataPtr = data;
@@ -358,9 +360,11 @@ public:
         maxBufferLength = max_buffer_length;
         lqiPtr = lqi;
 
-        if (frameLength > 128 || abort) {
+        if (abort) {
+            palExec_atomicBegin();
         	parallelReceptionOn = false;
             disableSPI();
+            palExec_atomicEnd();
         	return COMETOS_ERROR_FAIL;
         }
 
@@ -388,8 +392,10 @@ public:
 
             if (failedTries >= 3 || abort) {
                 pc.numTo++;
+                palExec_atomicBegin();
                 parallelReceptionOn = false;
                 disableSPI();
+                palExec_atomicEnd();
 
                 if (frameTimeoutCallback) {
                     frameTimeoutCallback();
@@ -400,21 +406,43 @@ public:
 
     	while (irq_pin->get() == 0) {
     		failedTries = 0;
-			ASSERT(dataPtr-origDataPtr < maxBufferLength);
-			spi->transmitBlocking(&txBuffer, dataPtr++, 1);
-			frameMissing--;
 
-			if (frameMissing == 0) {
-				parallelReceptionOn = false;
-				receptionFinished = true;
-				spi->transmitBlocking(&txBuffer, lqiPtr, 1);
-                disableSPI();
+            if(frameMissing == LENGTH_UNKNOWN) {
+			    spi->transmitBlocking(&txBuffer, lengthPtr, 1);
+                frameLength = *lengthPtr;
+                frameMissing = frameLength;
 
-				if (frameDownloadCallback)
-					frameDownloadCallback();
+                if (frameLength > 128 || abort) {
+                    palExec_atomicBegin();
+                    parallelReceptionOn = false;
+                    disableSPI();
+                    palExec_atomicEnd();
+                    if (frameTimeoutCallback) {
+                        frameTimeoutCallback();
+                    }
+                    return;
+                }
+            }
+            else {
+                ASSERT(dataPtr-origDataPtr < maxBufferLength);
+                spi->transmitBlocking(&txBuffer, dataPtr++, 1);
+                frameMissing--;
 
-				return;
-			}
+                if (frameMissing == 0) {
+                    spi->transmitBlocking(&txBuffer, lqiPtr, 1);
+                    palExec_atomicBegin();
+                    parallelReceptionOn = false;
+                    receptionFinished = true;
+                    disableSPI();
+                    palExec_atomicEnd();
+
+                    if (frameDownloadCallback) {
+                        frameDownloadCallback();
+                    }
+
+                    return;
+                }
+            }
 
 	        //Wait 750ns to ensure valid irq pin state.
 	        int j;
@@ -422,8 +450,10 @@ public:
 	        	__asm("nop");
 
             if(abort) {
+                palExec_atomicBegin();
                 parallelReceptionOn = false;
                 disableSPI();
+                palExec_atomicEnd();
                 if (frameTimeoutCallback) {
                     frameTimeoutCallback();
                 }
