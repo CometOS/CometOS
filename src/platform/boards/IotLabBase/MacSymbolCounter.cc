@@ -123,7 +123,14 @@ void MacSymbolCounter::interrupt() {
         }
     }
     
-    if(TIM3->SR & TIM_SR_CC3IF) {
+    if(TIM3->SR & TIM_SR_CC3OF) {
+        // overcapture
+        TIM3->SR = ~TIM_SR_CC3OF;
+        TIM3->SR = ~TIM_SR_CC3IF;
+
+        lastCapture = INVALID_CAPTURE;
+    }
+    else if(TIM3->SR & TIM_SR_CC3IF) {
 		TIM3->SR = ~TIM_SR_CC3IF;
 
         uint16_t captureLSW = TIM3->CCR3;
@@ -138,7 +145,7 @@ void MacSymbolCounter::interrupt() {
         lastCapture = (captureMSW << (uint32_t)16) | captureLSW;
     }
 
-    ASSERT((TIM3->SR & 0xFF00) == 0); // no overcapture
+    ASSERT((TIM3->SR & TIM_SR_CC1OF) == 0); // no overcapture for compare match
 }
 
 uint32_t MacSymbolCounter::getValue() {
@@ -151,7 +158,7 @@ uint32_t MacSymbolCounter::getValue() {
         result += (1 << (uint32_t)16); // increment msw since it is unhandled
     }
 
-    ASSERT((TIM3->SR & 0xFF00) == 0); // no overcapture
+    ASSERT((TIM3->SR & TIM_SR_CC1OF) == 0); // no overcapture for compare match
     ASSERT(lastValue <= result); // TODO remove to allow for overflows of the 32 bit counter
 
     lastValue = result;

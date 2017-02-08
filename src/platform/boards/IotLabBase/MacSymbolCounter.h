@@ -48,6 +48,8 @@ public:
 
     static MacSymbolCounter& getInstance();
 
+    static constexpr uint32_t INVALID_CAPTURE = 0xFFFFFFFF;
+
 private:
     uint16_t msw;
     cometos::Callback<void()> compareMatch;

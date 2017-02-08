@@ -51,11 +51,6 @@ uint32_t DSMEPlatform::getSymbolCounter() {
     return MacSymbolCounter::getInstance().getValue();
 }
 
-uint32_t DSMEPlatform::getSFDTimestamp() {
-    // -2 since the AT86RF231 captures at the end of the PHR (+6us) instead at the end of the SFD as the ATmega256RFR2
-    return MacSymbolCounter::getInstance().getCapture() - 2;
-}
-
 void DSMEPlatform::startTimer(uint32_t symbolCounterValue) {
     MacSymbolCounter::getInstance().setCompareMatch(symbolCounterValue);
 }
@@ -150,7 +145,12 @@ bool DSMEPlatform::sendDelayedAck(IDSMEMessage *ackMsg, IDSMEMessage *receivedMs
  * Interface to tosMac
  */
 message_t* DSMEPlatform::receive_phy(message_t* phy_msg) {
-    uint32_t sfdTimestamp = getSFDTimestamp();
+    uint32_t sfdTimestamp = MacSymbolCounter::getInstance().getCapture();
+    if(sfdTimestamp == MacSymbolCounter::INVALID_CAPTURE) {
+        return phy_msg;
+    }
+    sfdTimestamp -= 2; // -2 since the AT86RF231 captures at the end of the PHR (+6us) instead at the end of the SFD as the ATmega256RFR2
+
     const uint8_t *buffer = phy_msg->data;
 
     dsme::DSMEMessage *msg = static_cast<DSMEMessage*>(instance->getEmptyMessage());
