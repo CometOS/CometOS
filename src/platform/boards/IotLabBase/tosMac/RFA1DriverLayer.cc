@@ -273,7 +273,6 @@ mac_result_t RFA1Driver_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
 	radio_setTxPowerLvl(MAC_DEFAULT_TX_POWER_LVL);
 
 
-	//tos_channel = channel;
 
 	//enable auto crc
 	uint8_t trx_ctrl_1 = rf->readRegister(AT86RF231_REG_TRX_CTRL_1);
@@ -300,10 +299,11 @@ mac_result_t RFA1Driver_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
 		return result;
 	}
 
-	result = mac_setChannel(channel);
-	if (result != MAC_SUCCESS) {
-		return result;
-	}
+	//result = mac_setChannel(channel);
+	//if (result != MAC_SUCCESS) {
+	//	return result;
+	//}
+	pendingChannel = channel;
 
 	result = mac_setMode(mode);
 	if (result != MAC_SUCCESS) {
@@ -336,6 +336,8 @@ mac_result_t RFA1Driver_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
 	rf->writeRegister(AT86RF231_REG_TRX_CTRL_1, ctrlReg);
 
 	rf->setInterruptCallback(&handleInterrupt);
+
+	tasklet_schedule();
 
 	return MAC_SUCCESS;
 }
