@@ -78,7 +78,16 @@ void TCPWY::initialize() {
 	if(gateIndOut.isConnected()) {
 	    mHasUpperLayer = true;
 	}
+#ifdef PAN_COORDINATOR
+    if(PAN_COORDINATOR == palId_id()) { // that is me!
+        tca.initialize(0);
+    }
+    else {
+        tca.initialize(palId_id());
+    }
+#else
     tca.initialize(palId_id());
+#endif
     auto randomBackoff = intrand(TCA_RANDOM_BACKOFF);
 	schedule(new Message, &TCPWY::neighborDataUpdateTimer, TCA_TIME_INTERVAL + randomBackoff);
     schedule(new Message, &TCPWY::timedReport, intrand(TCA_REPORT_INIT_TIME));
@@ -175,7 +184,7 @@ void TCPWY::timedReport(Message *timer) {
                     close = ']';
                 }
             }
-            LOG_INFO_PURE(open << "0x" << hex << (int)tca.neighborView[i].id << ":" << dec << (int)tca.neighborView[i].qualityLT << close);
+            LOG_INFO_PURE(open << "0x" << hex << (int)tca.neighborView[i].id << ":" << dec << (int)tca.neighborView[i].qualityLT << dec << ":" << (int)tca.neighborView[i].ccDist << ":" << (int)tca.neighborView[i].ccID << close);
         }
     }
     LOG_INFO_PURE("}!" << endl);
@@ -209,11 +218,15 @@ void TCPWY::handleIndication(DataIndication* msg) {
         msg->getAirframe() >> header;
         tca.handle(msg->src, header, NetworkTime::get());
         // only forwards messages if node and sender are on each others neighbor lists
+        ASSERT(msg->getAirframe().getLength() == 0); // No piggybacking
+        delete msg;
+        /*
         if(mHasUpperLayer && isFromNeighbor && (msg->getAirframe().getLength() > 0)) {
             sendIndication(msg);
         } else {
             delete msg;
         }
+        */
     }
     else if(msgType == TCPWY_MSG_TYPE_DATA) {
         // if there is no TCA header yet there is module in a higher layer it just forwards the msg
@@ -226,6 +239,7 @@ void TCPWY::handleIndication(DataIndication* msg) {
     }
     else {
         LOG_ERROR("Wrong TCPWY type " << msgType);
+        delete msg;
     }
 }
 

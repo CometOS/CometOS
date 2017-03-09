@@ -11,7 +11,10 @@ env.add_sources([
 ])
 
 if env.conf.has_key('neighborhood') and env.conf.bool('neighborhood'):
-    env.add_sources(['GPSR.cc'])
+    env.add_sources([
+    'GPSR.cc',
+	'TZTCATreeRouting.cc'
+    ])
 
 if env.get_platform() == 'omnet':
 	env.add_sources([
