@@ -168,7 +168,10 @@ void DSMEPlatform::handleMessage(cMessage* msg) {
     }
     else if(strcmp(msg->getName(),"acktimer") == 0) {
         //LOG_INFO("send ACK")
-        sendCopyNow((DSMEMessage*)msg->getParList().get(0), txEndCallback);
+        bool result = prepareSendingCopy((DSMEMessage*)msg->getParList().get(0), txEndCallback);
+        ASSERT(result);
+        result = sendNow();
+        ASSERT(result);
         // the ACK Message itself will be deleted inside the AckLayer
         delete msg;
     }
@@ -258,7 +261,7 @@ void DSMEPlatform::signalReleasedMsg(DSMEMessage* msg) {
 #endif
 }
 
-bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallback) {
+bool DSMEPlatform::prepareSendingCopy(DSMEMessage* msg, Delegate<void(bool)> txEndCallback) {
     printSequenceChartInfo(msg);
 
     if (msg == nullptr) {
@@ -294,7 +297,7 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
     resetTxParams();
 
     bool isReceiving = !phy->getChannelState().isIdle();
-    bool startSendingImmediately = false;
+    startSendingImmediately = false;
 
     if (!txWaitsForBusyRx) {
         startSendingImmediately = true;
@@ -310,13 +313,21 @@ bool DSMEPlatform::sendCopyNow(DSMEMessage* msg, Delegate<void(bool)> txEndCallb
         startSendingImmediately = true;
     }
 
+    return true;
+}
+
+bool DSMEPlatform::sendNow() {
     if (startSendingImmediately) {
+        startSendingImmediately = false;
         LOG_DEBUG("init sending process");
         MacEvent e(MacEvent::SEND_REQUEST);
         dispatch(e);
     }
-
     return true;
+}
+
+void DSMEPlatform::abortPreparedTransmission() {
+    startSendingImmediately = false;
 }
 
 bool DSMEPlatform::setChannelNumber(uint8_t k) {

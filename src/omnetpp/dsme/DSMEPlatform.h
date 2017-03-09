@@ -112,7 +112,11 @@ public:
      * but keep the message (the caller has to ensure that the message is eventually released)
      * This might lead to an additional memory copy in the platform
      */
-    bool sendCopyNow(DSMEMessage *msg, Delegate<void(bool)> txEndCallback) override;
+    bool prepareSendingCopy(DSMEMessage *msg, Delegate<void(bool)> txEndCallback) override;
+
+    bool sendNow() override;
+
+    void abortPreparedTransmission();
 
     bool setChannelNumber(uint8_t k) override;
 
@@ -123,6 +127,7 @@ protected:
     uint16_t msgId;
     std::map<DSMEMessage*, uint16_t> msgMap;
     std::set<uint16_t> msgsActive;
+    bool startSendingImmediately;
 };
 
 }
