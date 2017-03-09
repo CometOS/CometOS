@@ -103,8 +103,6 @@ void DSMEPlatform::initialize() {
     this->mac_pib.macDSMEGTSExpirationTime = 7;
     this->mac_pib.macResponseWaitTime = 16;
 
-    this->mac_pib.recalculateDependentProperties();
-
     this->phy_pib.phyCurrentChannel = MAC_DEFAULT_CHANNEL;
 
     this->dsmeAdaptionLayer.settings.allocationScheme = DSMEAdaptionLayerSettings::ALLOC_CONTIGUOUS_SLOT;
