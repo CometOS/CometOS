@@ -49,6 +49,9 @@ mac_result_t RFA1Driver_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
 
 
 /* ------------ COMMANDS ---------------------------------------------- */
+mac_result_t radioSend_prepare(message_t* msg);
+mac_result_t radioSend_startTransmission();
+void radioSend_abortPreparedTransmission();
 mac_result_t radioSend_send(message_t* msg);
 
 mac_result_t radioCCA_request();

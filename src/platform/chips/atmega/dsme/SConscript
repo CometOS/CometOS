@@ -4,7 +4,6 @@ env.Append(CPPPATH=[Dir('.')])
 
 env.add_sources([
 'DSMEPlatform.cc',
-'DSMEPlatform_down.cc',
-'DSMECcaLayer.cc'
+'DSMEPlatform_down.cc'
 ])
 

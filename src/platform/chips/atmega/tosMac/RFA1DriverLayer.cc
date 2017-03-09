@@ -66,6 +66,7 @@ static const uint8_t MAX_FRAME_LEN = 127; // maximum PHY payload of 802.14.5
 static const uint8_t FCS_FIELD_SIZE = 2;  // size of frame check sequence
 
 static volatile bool radioStateChangeInProgress = false;
+static bool transmissionPending = false;
 
 /**
  * Port of the TinyOS radio driver, including SoftwareAck, RandomBackoff and
@@ -83,10 +84,7 @@ static volatile bool radioStateChangeInProgress = false;
  *       active RX mode
  */
 
-
-//void radioSend_sendDone(const message_t* msg, mac_result_t result, const mac_txInfo_t* info) {
-//    mac_cbSendDone(msg->data, result, info);
-//}
+// --------------- DEFAULT IMPLEMENTATIONS OF INTERFACE FUNCTIONS --------------
 
 void __attribute__((weak)) radioCCA_done(cometos_error_t result) {
 
@@ -112,6 +110,7 @@ void __attribute__((weak)) radioSend_ready() {
 }
 
 
+
 /*----------------- STATE -----------------*/
 
 //  tasklet_norace
@@ -126,10 +125,7 @@ enum
     STATE_RX_ON = 5,
     STATE_BUSY_TX_2_RX_ON = 6,
 };
-static uint8_t radio_state = STATE_TRX_OFF;
 
-//  tasklet_norace
-uint8_t cmd;
 enum
 {
     CMD_NONE = 0,    // the state machine has stopped
@@ -139,9 +135,11 @@ enum
     CMD_TRANSMIT = 4,    // currently transmitting a message
     CMD_RECEIVE = 5,    // currently receiving a message
     CMD_CCA = 6,    // performing clear channel assessment
-    CMD_CHANNEL = 7,    // changing the channel
+	//CMD_CHANNEL = 7,    // changing the channel
     CMD_SIGNAL_DONE = 8,  // signal the end of the state transition
     CMD_DOWNLOAD = 9,    // download the received message
+	CMD_DOWNLOAD_RX_END = 10,    // download the received message after reception finished
+	CMD_SENDING = 11  	// Currently sending a packet
 };
 
 enum {
@@ -157,11 +155,10 @@ enum {
 };
 
 
+//State variables
 
-//enum {
-//    // this disables the RFA1RadioOffP component
-//    RFA1RADIOON = unique("RFA1RadioOn"),
-//};
+volatile static uint8_t radio_state = STATE_TRX_OFF;
+volatile static uint8_t cmd;
 
 //  norace
 static volatile uint8_t radioIrq = IRQ_NONE;
@@ -187,9 +184,7 @@ static uint8_t tos_channel;
  */
 static uint8_t rxBuf[MAC_MAX_PAYLOAD_SIZE + MAC_HEADER_SIZE];
 static message_t rxMsgImpl;
-
 static message_t* rxMsg = &rxMsgImpl;
-
 static message_t* txMsg = NULL;
 
 //  tasklet_norace
@@ -312,6 +307,7 @@ mac_result_t RFA1Driver_init(mac_nodeId_t myAddr, mac_networkId_t nwkId,
 /*----------------- CHANNEL -----------------*/
 
 //tasklet_async command
+/*
  uint8_t radioState_getChannel()
 {
 return tos_channel;
@@ -332,7 +328,9 @@ cometos_error_t radioState_setChannel(uint8_t c) {
 
     return MAC_SUCCESS;
 }
+*/
 
+/*
 inline void changeChannel() {
     RADIO_ASSERT( cmd == CMD_CHANNEL );
     RADIO_ASSERT( radio_state == STATE_SLEEP || radio_state == STATE_TRX_OFF || radio_state == STATE_RX_ON );
@@ -344,6 +342,7 @@ inline void changeChannel() {
     else
         cmd = CMD_SIGNAL_DONE;
 }
+*/
 
 /*----------------- TURN ON/OFF -----------------*/
 
@@ -389,8 +388,11 @@ inline void changeState() {
         #ifdef RFA1_ENABLE_EXT_ANT_SW
         ANT_DIV=3; //default value
         #endif
+
+		//force to state TRX_OFF
         TRX_STATE = CMD_FORCE_TRX_OFF;
 
+		//set irqmask to 0
         IRQ_MASK = 0;
         radioIrq = IRQ_NONE;
 
@@ -458,7 +460,6 @@ cometos_error_t radioState_turnOn() {
 }
 
 //default tasklet_async event void radioState_done() { }
-
 /*----------------- TRANSMIT -----------------*/
 
 enum {
@@ -466,12 +467,24 @@ enum {
 TX_SFD_DELAY = 11,
 };
 
-//tasklet_async command
-mac_result_t radioSend_send(message_t* msg)
-{
-    if( cmd != CMD_NONE || radio_state != STATE_RX_ON || radioIrq ) {
-        return MAC_ERROR_BUSY;
-    }
+
+mac_result_t radioSend_prepare(message_t* msg) {
+    ASSERT(!transmissionPending);
+
+    // we currently assume that this method is only ever called
+    // from within a tasklet run, i.e. that it will NOT be interrupted
+    // by any radio transceiver interrupts
+
+	palExec_atomicBegin();
+
+	if( cmd != CMD_NONE || radio_state != STATE_RX_ON || radioIrq ) {
+		palExec_atomicEnd();
+		return MAC_ERROR_BUSY;
+	}
+
+	txMsg = msg;
+
+	palExec_atomicEnd();
 
     TRX_STATE = CMD_PLL_ON;
 
@@ -516,10 +529,16 @@ mac_result_t radioSend_send(message_t* msg)
     //radioIrq = 0;
     //now we can be sure that we are in a correct state for sending
 
-    txMsg = msg;
     txMsg->txInfo.tsData.isValid = false;
+    transmissionPending = true;
+    return MAC_SUCCESS;
+}
+
+mac_result_t radioSend_startTransmission() {
+    ASSERT(transmissionPending);
+    //ASSERT(activeChannel == pendingChannel);
     // write the PHR length field
-    TRXFBST = msg->phyFrameLen;
+    TRXFBST = txMsg->phyFrameLen;
 
     palExec_atomicBegin();
     {
@@ -535,7 +554,7 @@ mac_result_t radioSend_send(message_t* msg)
 //    memcpy((void*)(&TRXFBST+1), headerBuf, MAC_HEADER_SIZE-2);
 
     // then upload the whole payload
-    memcpy((void*)(&TRXFBST+1), msg->data, msg->phyPayloadLen);
+    memcpy((void*)(&TRXFBST+1), txMsg->data, txMsg->phyPayloadLen);
 
     // go back to RX_ON radio_state when finished
     TRX_STATE=CMD_RX_ON;
@@ -546,7 +565,28 @@ mac_result_t radioSend_send(message_t* msg)
     radio_state = STATE_BUSY_TX_2_RX_ON;
     cmd = CMD_TRANSMIT;
 
+    transmissionPending = false;
     return MAC_SUCCESS;
+}
+
+void radioSend_abortPreparedTransmission() {
+    ASSERT(transmissionPending);
+    TRX_STATE=CMD_RX_ON;
+    transmissionPending = false;
+    cmd = CMD_NONE;
+	radioSend_sendDone(txMsg, MAC_ERROR_CANCEL);
+}
+
+//tasklet_async command
+mac_result_t radioSend_send(message_t* msg)
+{
+    mac_result_t result = radioSend_prepare(msg);
+    if(result == MAC_SUCCESS) {
+        return radioSend_startTransmission();
+    }
+    else {
+        return result;
+    }
 }
 
 //default tasklet_async event void radioSend_sendDone(cometos_error_t error) { }
@@ -665,7 +705,7 @@ void serviceRadio() {
     }
 
     if( (irq & IRQ_PLL_LOCK) != 0 ) {
-        if( cmd == CMD_TURNON || cmd == CMD_CHANNEL ) {
+        if( cmd == CMD_TURNON ) { //|| cmd == CMD_CHANNEL ) {
             RADIO_ASSERT( radio_state == STATE_TRX_OFF_2_RX_ON );
 
             radio_state = STATE_RX_ON;
@@ -831,6 +871,7 @@ ISR(TRX24_RX_END_vect){
 //        TRX_STATE = CMD_PLL_ON;
 //    }
 //    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+#if 0
         if (radioIrq) {
             uint8_t len = TST_RX_LENGTH;
             if (len < MIN_FRAME_LEN || len > MAX_FRAME_LEN) {
@@ -843,6 +884,7 @@ ISR(TRX24_RX_END_vect){
                 RADIO_ASSERT( ! radioIrq );
             }
         }
+#endif
         radioIrq |= IRQ_RX_END;
 //    }
     sei();
@@ -1031,9 +1073,9 @@ void tasklet_radio_run() {
             downloadMessage();
         } else if( CMD_TURNOFF <= cmd && cmd <= CMD_TURNON ) {
             changeState();
-        } else if( cmd == CMD_CHANNEL ) {
+		} /*else if( cmd == CMD_CHANNEL ) {
             changeChannel();
-        }
+		}*/
 
         if( cmd == CMD_SIGNAL_DONE ) {
             cmd = CMD_NONE;
