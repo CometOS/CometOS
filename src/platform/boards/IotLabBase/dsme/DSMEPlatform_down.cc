@@ -33,11 +33,29 @@
 #include "DSMEPlatform.h"
 
 #include "RFA1DriverLayer.h"
-#include "RFA1DriverLayer.h"
 #include "openDSME/dsmeLayer/DSMELayer.h"
 #include "MacSymbolCounter.h"
 
 using namespace cometos;
+
+enum TRX_STATE {
+    STX,SRX,OFF
+};
+
+void transceiverStateChanged(enum TRX_STATE state) {
+    if(state == STX) {
+        palLed_on(1);
+        palLed_off(2);
+    }
+    else if(state == SRX) {
+        palLed_off(1);
+        palLed_on(2);
+    }
+    else {
+        palLed_off(1);
+        palLed_off(2);
+    }
+}
 
 namespace dsme {
 
@@ -115,6 +133,8 @@ bool DSMEPlatform::prepareSendingCopy(IDSMEMessage* imsg, Delegate<void(bool)> t
 }
 
 bool DSMEPlatform::sendNow() {
+    transceiverStateChanged(STX);
+
     mac_result_t result = radioSend_startTransmission();
 
     if(result != MAC_SUCCESS) {
@@ -129,6 +149,7 @@ bool DSMEPlatform::sendNow() {
 void DSMEPlatform::abortPreparedTransmission() {
     radioSend_abortPreparedTransmission();
     DSMEPlatform::state = STATE_READY;
+    transceiverStateChanged(SRX);
 }
 
 bool DSMEPlatform::sendDelayedAck(IDSMEMessage *ackMsg, IDSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) {
@@ -139,6 +160,14 @@ bool DSMEPlatform::sendDelayedAck(IDSMEMessage *ackMsg, IDSMEMessage *receivedMs
         result = sendNow();
     }
     return result;
+}
+
+void DSMEPlatform::turnTransceiverOn() {
+    transceiverStateChanged(SRX);
+}
+
+void DSMEPlatform::turnTransceiverOff() {
+    transceiverStateChanged(OFF);
 }
 
 /**
@@ -216,6 +245,7 @@ void radioCCA_done(mac_result_t error) {
  */
 void radioSend_sendDone(message_t * msg, mac_result_t result) {
     ASSERT(dsme::DSMEPlatform::state == dsme::DSMEPlatform::STATE_SEND);
+    transceiverStateChanged(SRX);
 
 // TODO: schedule as task?
     dsme_atomicBegin();

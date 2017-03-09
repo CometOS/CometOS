@@ -93,6 +93,9 @@ public:
 
     static message_t* receive_phy(message_t* msg);
 
+    virtual void turnTransceiverOn();
+    virtual void turnTransceiverOff();
+
 protected:
     static uint32_t getSFDTimestamp();
 

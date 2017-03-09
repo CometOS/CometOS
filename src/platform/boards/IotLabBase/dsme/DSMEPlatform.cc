@@ -56,7 +56,7 @@ mac_backoffCfg_t DSMEPlatform::backoffCfg { 0, 0, 0, 0 };
 
 DSMEPlatform::DSMEPlatform(const char * name) :
         DSMEPlatformBase(name),
-        channel(MIN_CHANNEL) {
+        channel(MAC_DEFAULT_CHANNEL) {
     instance = this;
 }
 
