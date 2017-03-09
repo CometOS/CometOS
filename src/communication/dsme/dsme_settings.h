@@ -57,7 +57,6 @@ constexpr uint8_t PRE_EVENT_SHIFT = const_redefinitions::macLIFSPeriod;
 constexpr uint8_t MIN_CSMA_SLOTS = 7; // 0 for CAP reduction
 constexpr uint8_t MAX_GTSLOTS = const_redefinitions::aNumSuperframeSlots - MIN_CSMA_SLOTS - 1;
 constexpr uint8_t MAX_CHANNELS = 16;
-constexpr uint8_t MIN_CHANNEL = 11;
 constexpr uint8_t MAX_NEIGHBORS = 25;
 
 constexpr uint8_t MIN_SO = 1;
@@ -72,8 +71,8 @@ constexpr uint8_t MAX_SAB_UNITS = 1;
 
 constexpr uint16_t CAP_QUEUE_SIZE = 8;
 constexpr uint16_t TOTAL_GTS_QUEUE_SIZE = 30-CAP_QUEUE_SIZE;
-constexpr uint16_t UPPER_LAYER_QUEUE_SIZE = 4;
-constexpr uint16_t MSG_POOL_SIZE = CAP_QUEUE_SIZE + TOTAL_GTS_QUEUE_SIZE + 2 * UPPER_LAYER_QUEUE_SIZE + 10;
+constexpr uint16_t UPPER_LAYER_QUEUE_SIZE = 10;
+constexpr uint16_t MSG_POOL_SIZE = CAP_QUEUE_SIZE + TOTAL_GTS_QUEUE_SIZE + UPPER_LAYER_QUEUE_SIZE + 10;
 
 }
 

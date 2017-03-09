@@ -47,6 +47,10 @@
 #include "palId.h"
 #include "logging.h"
 
+#ifndef DSME_CHANNELS
+#define DSME_CHANNELS "11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26"
+#endif
+
 using namespace cometos;
 
 namespace dsme {
@@ -62,11 +66,7 @@ void DSMEPlatformBase::translateMacAddress(node_t& from, IEEE802154MacAddress& t
 DSMEPlatformBase::DSMEPlatformBase(const char* service_name) :
                 cometos::MacAbstractionLayer(service_name),
                 gateReqIn(this, &DSMEPlatformBase::handleRequest, "gateReqIn"),
-#ifdef USE_ONE_CHANNEL_ONLY
-                phy_pib(10,true),
-#else
-                phy_pib(10),
-#endif
+                phy_pib(),
                 mac_pib(phy_pib),
 
                 mcps_sap(dsme),
@@ -85,6 +85,27 @@ DSMEPlatformBase::~DSMEPlatformBase() {
 
 void DSMEPlatformBase::initialize() {
     MacAbstractionLayer::initialize();
+
+    char str[] = DSME_CHANNELS;
+    constexpr uint8_t MAX_CHANNELS = 16;
+    uint8_t channels[MAX_CHANNELS];
+
+    uint8_t num = 0;
+    char* token = strtok(str,",");
+    while(token != nullptr) {
+        ASSERT(num < MAX_CHANNELS);
+        channels[num] = atoi(token);
+        num++;
+        token = strtok(nullptr,",");
+    }
+
+    channelList_t DSSS2450_channels(num);
+    for(uint8_t i = 0; i < num; i++) {
+        DSSS2450_channels[i] = channels[i];
+    }
+
+    phy_pib.setDSSS2450ChannelPage(DSSS2450_channels);
+
     cometos::getScheduler().add(startTask);
 }
 

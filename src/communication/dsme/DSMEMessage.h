@@ -121,7 +121,7 @@ public:
         return currentlySending;
     }
 
-    virtual void setCurrentlySending(bool currentlySending) {
+    virtual void setCurrentlySending(bool currentlySending) override {
         this->currentlySending = currentlySending;
     }
 
