@@ -111,6 +111,8 @@ if __name__ == "__main__":
             shutil.copyfile(name, name+".fid_before")
             fw.processFile(name, name + ".fid")
             shutil.copyfile(name+".fid", name)
+            os.remove(name+".fid_before")
+            os.remove(name+".fid")
     else:
         fw = FileIdWriter("map.test")
         fw.processFile("cc6kPnKB.ii.fid_before", "cc6kPnKB.ii.fid")
