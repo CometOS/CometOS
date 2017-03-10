@@ -3,7 +3,7 @@ package cometos.examples.simulation.mac.dsme;
 import cometos.examples.simulation.base.Node154Flat;
 import cometos.src.communication.neighborhood.TCPWY;
 import cometos.examples.common.traffic.TrafficEvaluation;
-import cometos.src.communication.routing.LocationBasedRouting;
+import cometos.src.communication.routing.GPSR;
 import cometos.src.communication.base.Dispatcher;
 
 module Node extends Node154Flat
@@ -13,7 +13,7 @@ module Node extends Node154Flat
             @display("p=156,36");
         }
         
-        routing: LocationBasedRouting {
+        routing: GPSR {
         }
         
         neighborhood: TCPWY {

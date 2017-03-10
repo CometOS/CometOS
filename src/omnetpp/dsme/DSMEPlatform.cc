@@ -93,8 +93,6 @@ void DSMEPlatform::initialize() {
     this->mac_pib.macDSMEGTSExpirationTime = par("macDSMEGTSExpirationTime");
     this->mac_pib.macResponseWaitTime = 16;
 
-    this->mac_pib.recalculateDependentProperties();
-
     this->mac_pib.macIsPANCoord = par("isPANCoordinator");
     this->mac_pib.macIsCoord = (par("isCoordinator") ||  this->mac_pib.macIsPANCoord);
 
@@ -118,15 +116,15 @@ void DSMEPlatform::finish() {
     recordScalar("numUpperPacketsDroppedFullQueue", dsme.getMessageDispatcher().getNumUpperPacketsDroppedFullQueue());
 }
 
-bool DSMEPlatform::sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) {
+bool DSMEPlatform::sendDelayedAck(IDSMEMessage *ackMsg, IDSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) {
     cMessage* acktimer = new cMessage("acktimer");
     acktimer->getParList().setTakeOwnership(false); // ackMsg is still owned by the AckLayer
-    acktimer->getParList().addAt(0,ackMsg);
+    acktimer->getParList().addAt(0,(DSMEMessage*)ackMsg);
 
     uint32_t endOfReception = receivedMsg->getStartOfFrameDelimiterSymbolCounter()+receivedMsg->getTotalSymbols()
                                     - 2*4 // Preamble
                                     - 2*1; // SFD
-    uint32_t ackTime = endOfReception + aTurnaroundTimeSymbols;
+    uint32_t ackTime = endOfReception + aTurnaroundTime;
     uint32_t now = getSymbolCounter();
     uint32_t diff = ackTime-now;
 
@@ -261,7 +259,7 @@ void DSMEPlatform::signalReleasedMsg(DSMEMessage* msg) {
 #endif
 }
 
-bool DSMEPlatform::prepareSendingCopy(DSMEMessage* msg, Delegate<void(bool)> txEndCallback) {
+bool DSMEPlatform::prepareSendingCopy(IDSMEMessage* msg, Delegate<void(bool)> txEndCallback) {
     printSequenceChartInfo(msg);
 
     if (msg == nullptr) {
@@ -271,7 +269,7 @@ bool DSMEPlatform::prepareSendingCopy(DSMEMessage* msg, Delegate<void(bool)> txE
     LOG_INFO("sendCopyNow " << (uint64_t)msg);
 
     this->txEndCallback = txEndCallback;
-    AirframePtr frame = msg->getSendableCopy();
+    AirframePtr frame = ((DSMEMessage*)msg)->getSendableCopy();
 
     // Add the FCS (only dummy bytes since the actual bit error calculation is not based on the FCS itself)
     uint16_t fcs = 0;

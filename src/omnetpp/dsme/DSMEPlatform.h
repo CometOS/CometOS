@@ -105,20 +105,28 @@ public:
     /**
      * Send an ACK message, delay until aTurnaRoundTime after reception_time has expired
      */
-    bool sendDelayedAck(DSMEMessage *ackMsg, DSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) override;
+    bool sendDelayedAck(IDSMEMessage *ackMsg, IDSMEMessage *receivedMsg, Delegate<void(bool)> txEndCallback) override;
 
     /**
      * Directly send packet without delay and without CSMA
      * but keep the message (the caller has to ensure that the message is eventually released)
      * This might lead to an additional memory copy in the platform
      */
-    bool prepareSendingCopy(DSMEMessage *msg, Delegate<void(bool)> txEndCallback) override;
+    bool prepareSendingCopy(IDSMEMessage *msg, Delegate<void(bool)> txEndCallback) override;
 
     bool sendNow() override;
 
     void abortPreparedTransmission();
 
     bool setChannelNumber(uint8_t k) override;
+
+    virtual void turnTransceiverOn() {
+        // TODO
+    }
+
+    virtual void turnTransceiverOff() {
+        // TODO
+    }
 
 protected:
     virtual void signalNewMsg(DSMEMessage* msg) override;
