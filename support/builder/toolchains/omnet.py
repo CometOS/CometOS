@@ -1,5 +1,6 @@
 from SCons.Script import *
 from messages import *
+import glob
 
 def msgc_emitter(target, source, env):
     # tell scons that for every .msg file, there will be two target files 
@@ -45,7 +46,14 @@ class OmnetToolchain:
 
         # Linker
         self.env.Append(LIBPATH = [self.env.omnet_path+'/lib/gcc', self.env.omnet_path+'/lib', self.env.cometos_path])
-        self.env.Append(LIBS = ['pthread', 'oppmaind', 'opptkenvd', 'oppenvird', 'opplayoutd', 'oppcmdenvd', 'oppenvird', 'oppsimd', 'dl', 'stdc++'])
+
+	libs = ['pthread', 'oppmaind', 'oppenvird', 'opplayoutd', 'oppcmdenvd', 'oppenvird', 'oppsimd', 'dl', 'stdc++']
+	for lddir in self.env['LIBPATH']:
+		for lib in glob.glob(lddir+"/lib*"):
+			if 'opptkenvd' in lib:
+				libs.append('opptkenvd')
+        self.env.Append(LIBS = libs)
+
         self.env.Append(LINKFLAGS = "-u _tkenv_lib -Wl,--no-as-needed -u _cmdenv_lib -Wl,--no-as-needed")
 
         # Library paths
@@ -65,4 +73,5 @@ class OmnetToolchain:
 
         # Define run target
         sim_cmd = 'opp_runall -j1 ./'+str(program[0])+' -n '+self.env.ned_folders()+' -c '+self.env.conf.str('config')+' -r '+self.env.conf.str('run')+' '+self.env.conf.str('ini')+' -u '+self.env.conf.str('env')
+		
         AlwaysBuild(self.env.Alias('go', [simulation], sim_cmd))
