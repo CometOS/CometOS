@@ -64,5 +64,5 @@ class OmnetToolchain:
         simulation = self.env.Alias('build',program)
 
         # Define run target
-        sim_cmd = 'opp_runall -j1 ./'+str(program[0])+' -n '+self.env.ned_folders()+' -c '+self.env.conf.str('config')+' -r 0 '+self.env.conf.str('ini')+' -u '+self.env.conf.str('env')
+        sim_cmd = 'opp_runall -j1 ./'+str(program[0])+' -n '+self.env.ned_folders()+' -c '+self.env.conf.str('config')+' -r '+self.env.conf.str('run')+' '+self.env.conf.str('ini')+' -u '+self.env.conf.str('env')
         AlwaysBuild(self.env.Alias('go', [simulation], sim_cmd))
