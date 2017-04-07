@@ -57,17 +57,19 @@ std::ostream& operator<<(std::ostream& lhs, const cometos::Endl& rhs);
 
 #ifndef GTEST_BUILD
 
+#define LOG_ENDL cometos::endl
+
 inline void cometos_logRaw(uint8_t level, node_t channel, const char* str) {
     std::stringstream ss; ss.precision(9);
     ss << str;
     getLogger().log(getName(), channel, level, ss.str());
 }
 
-#define PREFIX omnetpp::simTime().dbl()<<"|"<<getFullName()<<"|"<<__func__<<"|"
+#define PREFIX omnetpp::simTime().dbl()<<"|0x"<<cometos::hex<<palId_id()<<cometos::dec<<"|"<<getFullName()<<"|"<<__func__<<"|"
 
 #define LOG(level,channel,msg) { \
     std::stringstream ss; ss.precision(9);\
-    ss << PREFIX; \
+    ss << PREFIX << msg << LOG_ENDL; \
     getLogger().log(getName(), channel , level, ss.str()); \
 }
 
@@ -89,7 +91,6 @@ inline void cometos_logRaw(uint8_t level, node_t channel, const char* str) {
 #define LOG_INFO(msg) LOG(3,palId_id(),msg)
 #define LOG_INFO_PURE(msg) LOG_RAW(3,palId_id(), msg)
 #define LOG_INFO_PREFIX  LOG_PREFIX(3, palId_id())
-#define LOG_ENDL cometos::endl
 #define LOG_DEBUG(msg) LOG(4,palId_id(),msg)
 #define LOG_DEBUG_PURE(msg) LOG_RAW(4,palId_id(), msg)
 #define LOG_DEBUG_PREFIX  LOG_PREFIX(4, palId_id())

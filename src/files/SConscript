@@ -14,6 +14,8 @@ env.add_sources([
 if env.conf.bool('cfs'):
 	SConscript('platform/SConscript')
 	SConscript('platform/cfs/SConscript')
+
+if env.conf.bool('deluge'):
 	SConscript('deluge/SConscript')
 
 if env.conf.str('platform') == 'omnet':

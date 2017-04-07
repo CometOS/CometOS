@@ -3,11 +3,8 @@ Import('env')
 env.Append(CPPPATH=[Dir('.')])
 
 env.add_sources([
-'RAMSegmentedFile.cc',
-'SegFileFactoryImpl.cc'
+'DataDisseminationExperiment.cc',
+'DelugeDataDisseminationExperiment.cc'
 ])
-
-#if env.conf.bool('inet'):
-#	SConscript("inet/SConscript")
 
 env.conf_to_bool_define(['deluge_output'])

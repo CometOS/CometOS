@@ -1,0 +1,90 @@
+<?xml version="1.0" ?>
+<root>
+	<node id="0" x="52" y="52">
+		<route to="0" via="0"/>
+		<route to="1" via="1"/>
+		<route to="7" via="1"/>
+		<route to="8" via="1"/>
+		<route to="18" via="1"/>
+		<route to="2" via="2"/>
+		<route to="9" via="2"/>
+		<route to="3" via="3"/>
+		<route to="10" via="3"/>
+		<route to="11" via="3"/>
+		<route to="12" via="3"/>
+		<route to="4" via="4"/>
+		<route to="13" via="4"/>
+		<route to="5" via="5"/>
+		<route to="14" via="5"/>
+		<route to="15" via="5"/>
+		<route to="16" via="5"/>
+		<route to="6" via="6"/>
+		<route to="17" via="6"/>
+	</node>
+	<node id="1" x="77" y="52">
+		<route to="0" via="0"/>
+		<route to="7" via="7"/>
+		<route to="8" via="8"/>
+		<route to="18" via="18"/>
+	</node>
+	<node id="2" x="64.5" y="73.6506">
+		<route to="0" via="0"/>
+		<route to="9" via="9"/>
+	</node>
+	<node id="3" x="39.5" y="73.6506">
+		<route to="0" via="0"/>
+		<route to="10" via="10"/>
+		<route to="11" via="11"/>
+		<route to="12" via="12"/>
+	</node>
+	<node id="4" x="27" y="52">
+		<route to="0" via="0"/>
+		<route to="13" via="13"/>
+	</node>
+	<node id="5" x="39.5" y="30.3494">
+		<route to="0" via="0"/>
+		<route to="14" via="14"/>
+		<route to="15" via="15"/>
+		<route to="16" via="16"/>
+	</node>
+	<node id="6" x="64.5" y="30.3494">
+		<route to="0" via="0"/>
+		<route to="17" via="17"/>
+	</node>
+	<node id="7" x="102" y="52">
+		<route to="0" via="1"/>
+	</node>
+	<node id="8" x="95.3013" y="77">
+		<route to="0" via="1"/>
+	</node>
+	<node id="9" x="77" y="95.3013">
+		<route to="0" via="2"/>
+	</node>
+	<node id="a" x="52" y="102">
+		<route to="0" via="3"/>
+	</node>
+	<node id="b" x="27" y="95.3013">
+		<route to="0" via="3"/>
+	</node>
+	<node id="c" x="8.6987" y="77">
+		<route to="0" via="3"/>
+	</node>
+	<node id="d" x="2" y="52">
+		<route to="0" via="4"/>
+	</node>
+	<node id="e" x="8.6987" y="27">
+		<route to="0" via="5"/>
+	</node>
+	<node id="f" x="27" y="8.6987">
+		<route to="0" via="5"/>
+	</node>
+	<node id="10" x="52" y="2">
+		<route to="0" via="5"/>
+	</node>
+	<node id="11" x="77" y="8.6987">
+		<route to="0" via="6"/>
+	</node>
+	<node id="12" x="95.3013" y="27">
+		<route to="0" via="1"/>
+	</node>
+</root>

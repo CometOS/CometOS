@@ -95,7 +95,12 @@ node_t Module::getId() const{
         MinAddressingBase * addr = check_and_cast<MinAddressingBase *>(tmp);
         return addr->getShortAddr();
     } else {
-        return (int) getParentModule()->par("id");
+        omnetpp::cModule* systemModule = omnetpp::cSimulation::getActiveSimulation()->getSystemModule();
+        omnetpp::cModule* module = getParentModule();
+        while(module->getParentModule() != systemModule) {
+            module = module->getParentModule();
+        }
+        return (int) module->par("id");
     }
 }
 

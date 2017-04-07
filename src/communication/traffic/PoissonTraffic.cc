@@ -79,7 +79,7 @@ void PoissonTraffic::traffic(Message *timer) {
 }
 
 void PoissonTraffic::resp(DataResponse *response) {
-	LOG_INFO("rcv rsp "<<response->success);
+	LOG_INFO("rcv rsp "<<response->isSuccess());
 	delete response;
 }
 

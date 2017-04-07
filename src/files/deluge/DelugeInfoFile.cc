@@ -39,15 +39,11 @@ DelugeInfoFile::DelugeInfoFile() : mFilename(DELUGE_INFO_FILE), pFile(SegFileFac
 }
 
 DelugeInfoFile::~DelugeInfoFile() {
-    if (this->pFile) {
-        delete this->pFile;
-    }
+    delete this->pFile;
 }
 
 void DelugeInfoFile::getInfo(Callback<void(cometos_error_t,DelugeInfo*)> callback) {
-#ifdef DELUGE_OUTPUT
-    getCout() << __PRETTY_FUNCTION__ << ": Reading info file" << endl;
-#endif
+    LOG_INFO("Reading info file");
 
     // Store callback
     this->mDoneCallback = callback;
@@ -61,9 +57,7 @@ void DelugeInfoFile::getInfo(Callback<void(cometos_error_t,DelugeInfo*)> callbac
 }
 
 void DelugeInfoFile::writeInfo(DelugeInfo *pInfo, Callback<void(cometos_error_t,DelugeInfo*)> callback) {
-#ifdef DELUGE_OUTPUT
-    getCout() << __PRETTY_FUNCTION__ << ": Writing info file" << endl;
-#endif
+    LOG_INFO("Writing info file");
 
     this->mDoneCallback = callback;
     this->pInfo = pInfo;
@@ -126,9 +120,7 @@ void DelugeInfoFile::finalize(cometos_error_t result) {
     this->pFile->getArbiter()->release();
 
     // Clear buffer
-#ifdef DELUGE_OUTPUT
-    getCout() << __PRETTY_FUNCTION__ << ": Info file processed for version=" << this->pInfo->getVersion() << endl;
-#endif
+    LOG_INFO("Info file processed for version=" << this->pInfo->getVersion());
 
     // Call callback
     this->mDoneCallback(COMETOS_SUCCESS, this->pInfo);

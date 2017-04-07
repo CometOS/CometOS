@@ -91,6 +91,7 @@ public:
     void updateDone(AirString &filename);
     // Persists the info file
     void persistInfo(DelugeInfo *pNewInfo = nullptr);
+    void sendWakeup();
 
 private:
     typedef FSM<Deluge, DelugeEvent> fsm_t;

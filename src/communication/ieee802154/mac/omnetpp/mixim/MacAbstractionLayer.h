@@ -256,7 +256,7 @@ private:
 
 	void handleDataFromLower(
 	              const MacHeader & header,
-	              AirframePtr pkt,
+	              AirframePtr& pkt,
 	              const DeciderResultEmpiric802154 * dre,
 	              lqi_t lqi,
                   bool lqiValid,

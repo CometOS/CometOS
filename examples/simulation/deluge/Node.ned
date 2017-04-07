@@ -1,4 +1,4 @@
-package cometos.src.files.omnetpp;
+package cometos.examples.simulation.deluge;
 
 import cometos.src.communication.base.Dispatcher;
 import cometos.src.communication.reliability.SimpleReliabilityLayer;

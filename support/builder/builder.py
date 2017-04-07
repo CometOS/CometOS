@@ -160,7 +160,7 @@ class CometOSEnvironment(Environment):
 
 
     def ned_folders(self):
-        subdirs = ['src', 'examples']
+        subdirs = ['.']
         if self.conf.bool('inet'):
             subdirs.append('inet/src')
         if self.conf.bool('mixim'):

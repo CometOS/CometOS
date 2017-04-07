@@ -92,9 +92,7 @@ void DelugeHandler::fileDestinationOpened(cometos_error_t result) {
     this->pPageCRC = new uint16_t[this->mNumberOfPages];
     this->mCurrentSegment = 0;
 
-#ifdef DELUGE_OUTPUT
-    getCout() << __PRETTY_FUNCTION__ << ": Opened '" << this->mFilename.getStr() << "' with size " << pOriginFile->getFileSize() << " and " << this->mNumberOfPages << " pages" << endl;
-#endif
+    LOG_INFO("Opened '" << this->mFilename.getStr() << "' with size " << pOriginFile->getFileSize() << " and " << this->mNumberOfPages << " pages");
 
     this->readSegment();
 }
@@ -177,7 +175,7 @@ void DelugeHandler::infoFileOpened(cometos_error_t result, DelugeInfo *pInfo) {
         }
         pInfo = new DelugeInfo(1, this->mNumberOfPages, this->pOriginFile->getFileSize(), pAge, this->pPageCRC, pComplete);
 
-        getCout() << __PRETTY_FUNCTION__ << ": Created info file from scratch" << endl;
+        LOG_INFO("Created info file from scratch");
     } else {
         // Compare crc and set age vector
         uint8_t *pNewAgeVector = new uint8_t[DelugeInfo::GetAgeVectorSize(this->mNumberOfPages)];
@@ -198,9 +196,7 @@ void DelugeHandler::infoFileOpened(cometos_error_t result, DelugeInfo *pInfo) {
         uint16_t v = pInfo->getVersion();
         delete pInfo;
         pInfo = new DelugeInfo(++v, this->mNumberOfPages, this->pOriginFile->getFileSize(), pNewAgeVector, this->pPageCRC, pComplete);
-#ifdef DELUGE_OUTPUT
-        getCout() << __PRETTY_FUNCTION__ << ": New infofile for version=" << v << " with " << static_cast<uint16_t>(equalPages) << " aged pages" << endl;
-#endif
+        LOG_INFO("New infofile for version=" << v << " with " << static_cast<uint16_t>(equalPages) << " aged pages");
     }
 
     // Persist the info object

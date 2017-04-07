@@ -53,12 +53,16 @@ void CFSFormat::initialize() {
 
 uint8_t CFSFormat::format()
 {
+#ifndef OMNETPP
     palLed_on(2);
     palWdt_pause();
     uint8_t retval = cfs_format();
     palWdt_resume();
     palLed_off(2);
     return retval;
+#else
+    return 0;
+#endif
 }
 
 void CFSFormat::formatAsync()

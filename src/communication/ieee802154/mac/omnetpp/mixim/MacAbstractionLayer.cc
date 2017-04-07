@@ -642,6 +642,7 @@ void MacAbstractionLayer::receiveLowerControl(cMessage *msg) {
 	} else if (msg->getKind() == BaseDecider::PACKET_DROPPED) {
 		//ASSERT(phy->getRadioState() == Radio::RX);
         checked_ptr<MacPacket> pktMac(check_and_cast<MacPacket*>(msg));
+        msg = nullptr; // ownership transferred to pktMac
         AirframePtr pkt = pktMac->decapsulateNewAirframe();
 
         MacHeader header;
@@ -664,6 +665,7 @@ void MacAbstractionLayer::receiveLowerControl(cMessage *msg) {
             }
         }
         pkt.delete_object();
+        pktMac.delete_object();
 
 		// we additionally dispatch a frame dropped event to handle a situation
 		// in which we waited with TX for RX of a frame which then failed --
@@ -712,7 +714,7 @@ void MacAbstractionLayer::handleAckFromLower(mac_dbm_t rssi,
 
 void MacAbstractionLayer::handleDataFromLower(
               const MacHeader & header,
-              AirframePtr pkt,
+              AirframePtr& pkt,
               const DeciderResultEmpiric802154 * dre,
               lqi_t lqi,
               bool lqiValid,

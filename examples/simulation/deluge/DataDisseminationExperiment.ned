@@ -1,4 +1,4 @@
-package cometos.src.files.omnetpp;
+package cometos.examples.simulation.deluge;
 
 simple DataDisseminationExperiment
 {

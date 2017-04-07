@@ -80,11 +80,19 @@ void RandomFileGenerator::genRandWrite(cometos_error_t result)
 
         for(segment_size_t j = 0; j < len; j++) {
             if(genRandBinary) {
+#ifdef OMNETPP
+                genRandBuffer[j] = omnetpp::cSimulation::getActiveSimulation()->getSystemModule()->intrand(256);
+#else
                 genRandBuffer[j] = intrand(256);
+#endif
             }
             else {
                 static char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.:?!        ";
+#ifdef OMNETPP
+                genRandBuffer[j] = charset[omnetpp::cSimulation::getActiveSimulation()->getSystemModule()->intrand(sizeof(charset)-1)];
+#else
                 genRandBuffer[j] = charset[intrand(sizeof(charset)-1)];
+#endif
             }
         }
 

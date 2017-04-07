@@ -5,7 +5,8 @@ env.Append(CPPPATH=[Dir('.')])
 env.add_sources([
 'XMLParseUtil.cc',
 'mac_dummy.cc',
-'palFirmware.cc'
+'palFirmware.cc',
+'Mobility.cc'
 ])
 
 if env.conf.str('mac', valid_values=['original','tos','dsme']) == 'dsme':

@@ -112,7 +112,7 @@ void RAMSegmentedFile::write(uint8_t* data, segment_size_t dataLength, num_segme
 {
 	ASSERT(segment < getNumSegments());
     ASSERT(segment >= 0);
-    ASSERT(dataLength == getSegmentSize(segment));
+    //ASSERT(dataLength == getSegmentSize(segment));
 
     getArbiter()->assertRunning();
     //ASSERT(storage != NULL);
@@ -138,7 +138,7 @@ void RAMSegmentedFile::read(uint8_t* data, segment_size_t dataLength, num_segmen
 {
 	ASSERT(segment < getNumSegments());
     ASSERT(segment >= 0);
-    ASSERT(dataLength == getSegmentSize(segment));
+    //ASSERT(dataLength == getSegmentSize(segment));
 
     getArbiter()->assertRunning();
 

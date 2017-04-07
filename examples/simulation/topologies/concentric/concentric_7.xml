@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<root>
+	<node id="0" x="27" y="23.6506">
+		<route to="0" via="0"/>
+		<route to="1" via="1"/>
+		<route to="2" via="2"/>
+		<route to="3" via="3"/>
+		<route to="4" via="4"/>
+		<route to="5" via="5"/>
+		<route to="6" via="6"/>
+	</node>
+	<node id="1" x="52" y="23.6506">
+		<route to="0" via="0"/>
+	</node>
+	<node id="2" x="39.5" y="45.3012">
+		<route to="0" via="0"/>
+	</node>
+	<node id="3" x="14.5" y="45.3012">
+		<route to="0" via="0"/>
+	</node>
+	<node id="4" x="2" y="23.6506">
+		<route to="0" via="0"/>
+	</node>
+	<node id="5" x="14.5" y="2">
+		<route to="0" via="0"/>
+	</node>
+	<node id="6" x="39.5" y="2">
+		<route to="0" via="0"/>
+	</node>
+</root>

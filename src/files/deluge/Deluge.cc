@@ -35,6 +35,7 @@
 #include "cometosError.h"
 #include "crc16.h"
 #include "palWdt.h"
+#include "palLocalTime.h"
 
 #include "platform/cfs/cfs.h"
 
@@ -42,7 +43,7 @@ using namespace cometos;
 
 Define_Module(Deluge);
 
-Deluge::Deluge() : fsm_t(&Deluge::stateInit), rcvdMsg(nullptr) {
+Deluge::Deluge() : Endpoint("deluge"), fsm_t(&Deluge::stateInit), pInfo(nullptr), rcvdMsg(nullptr) {
 }
 
 Deluge::~Deluge() {
@@ -104,10 +105,16 @@ void Deluge::updateDone(AirString &filename) {
     //newRound();
      onInfoFileLoaded(COMETOS_SUCCESS, pInfo);
 
+    sendWakeup();
+}
+
+void Deluge::sendWakeup() {
     // Broadcast a wakeup message to prepare the other nodes for the update
     AirframePtr frame = make_checked<Airframe>();
     (*frame) << filename;
     (*frame) << static_cast<uint8_t>(Deluge::MessageType::WAKEUP);
+
+    LOG_INFO("sending Wakeup");
 
     // Send broadcast msg
     DataRequest* req = new DataRequest(0xFFFF, frame, this->createCallback(&Deluge::onMessageSent));
@@ -272,6 +279,9 @@ void Deluge::handleWakeup() {
     (*frame) >> filename;
 
     mInfoFile.getInfo(CALLBACK_MET(&Deluge::onInfoFileLoaded, *this));
+    frame.delete_object();
+
+    sendWakeup();
 }
 
 void Deluge::onInfoFileLoaded(cometos_error_t result, DelugeInfo* info) {
@@ -280,9 +290,7 @@ void Deluge::onInfoFileLoaded(cometos_error_t result, DelugeInfo* info) {
     // Store
     this->pInfo = info;
 
-#ifdef DELUGE_OUTPUT
-    getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Deluge initialized" << endl;
-#endif
+    LOG_INFO("Deluge initialized");
 
     DelugeEvent dispatchEvent;
     dispatchEvent.signal = DelugeEvent::RESULT_SIGNAL;
@@ -352,9 +360,7 @@ void Deluge::sendSummary() {
     DataRequest* req = new DataRequest(0xFFFF, frame, this->createCallback(&Deluge::onMessageSent));
     sendRequest(req);
 
-#ifdef DELUGE_OUTPUT
-    getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Propagation of (v=" << pInfo->getVersion() << ", g=" << static_cast<uint16_t>(gamma) << ")" << endl;
-#endif
+    LOG_INFO("Propagation of (v=" << pInfo->getVersion() << ", g=" << static_cast<uint16_t>(gamma) << ")");
 }
 
 fsmReturnStatus Deluge::handleSummary() {
@@ -368,9 +374,7 @@ fsmReturnStatus Deluge::handleSummary() {
     (*frame) >> gamma;
     frame.delete_object();
 
-#ifdef DELUGE_OUTPUT
-    getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received summary (v=" << versionNumber << ",g=" << static_cast<uint16_t>(gamma) << ")" << endl;
-#endif
+    LOG_INFO("Received summary (v=" << versionNumber << ",g=" << static_cast<uint16_t>(gamma) << ")");
 
     // Compare summary with our summary
     uint8_t localGamma = pInfo->getHighestCompletePage();
@@ -421,9 +425,7 @@ void Deluge::sendObjectProfile() {
     DataRequest* req = new DataRequest(0xFFFF, frame, createCallback(&Deluge::onMessageSent));
     sendRequest(req);
 
-#ifdef DELUGE_OUTPUT
-    getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Objectprofile published" << endl;
-#endif
+    LOG_INFO("Objectprofile published");
 }
 
 void Deluge::handleObjectProfile() {
@@ -456,9 +458,7 @@ void Deluge::handleObjectProfile() {
     //	dataFile->close(CALLBACK_MET(&Deluge::reopenFile, *this));
     //} 
 
-#ifdef DELUGE_OUTPUT
-    getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received objectprofile for version=" << static_cast<uint16_t>(versionNumber) << " and numberOfPages=" << static_cast<uint16_t>(numberOfPages) << " and filesize=" << fileSize << endl;
-#endif
+    LOG_INFO("Received objectprofile for version=" << static_cast<uint16_t>(versionNumber) << " and numberOfPages=" << static_cast<uint16_t>(numberOfPages) << " and filesize=" << fileSize);
 
     // Check if the object profile is from a newer version
     if (versionNumber > pInfo->getVersion()) {
@@ -522,9 +522,7 @@ fsmReturnStatus Deluge::handlePageRequest() {
     mPageTX = requestedPage;
     mRequestedPackets |= requestedPackets;
 
-#ifdef DELUGE_OUTPUT
-    getCout() << "[" << palId_id() << "] "  << __PRETTY_FUNCTION__ << ": Received page request for page " << (int)mPageTX << endl;
-#endif
+    LOG_INFO("Received page request for page " << (int)mPageTX);
 
     return transition(&Deluge::stateTX);
 }
@@ -598,9 +596,7 @@ void Deluge::sendPageRequest() {
     (*frame) << static_cast<uint8_t>(this->mPageRX);
     (*frame) << static_cast<uint8_t>(Deluge::MessageType::PAGE_REQUEST);
 
-#ifdef DELUGE_OUTPUT
-        getCout() << "[" << palId_id() << "] "  << __PRETTY_FUNCTION__ << ": Requesting page " << (int)mPageRX << endl;
-#endif
+    LOG_INFO("Requesting page " << (int)mPageRX);
 
     // Send broadcast msg
     ASSERT(this->mCurrentHostIndex < DELUGE_UINT8_OUT_OF_RAGE);
@@ -632,9 +628,7 @@ void Deluge::handlePacket() {
     frame.delete_object();
 
     if (page != this->mPageRX) {
-#ifdef DELUGE_OUTPUT
-        getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received page " << (int)page << " is not expected" << endl;
-#endif
+        LOG_INFO("Received page " << (int)page << " is not expected");
         return;
     }
 
@@ -661,9 +655,7 @@ void Deluge::handlePacket() {
 
     this->dataFile->write(this->mBuffer.getBuffer(), DELUGE_PACKET_SEGMENT_SIZE, this->mPageRX * DELUGE_PACKETS_PER_PAGE + packet, CALLBACK_MET(&Deluge::onPacketWritten, *this));
 
-#ifdef DELUGE_OUTPUT
-    getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received packet=" << static_cast<uint16_t>(packet) << " with size=" << static_cast<uint16_t>(this->mBuffer.getSize()) << endl;
-#endif
+    LOG_INFO("Received packet=" << static_cast<uint16_t>(packet) << " with size=" << static_cast<uint16_t>(this->mBuffer.getSize()));
 }
 
 void Deluge::onPacketWritten(cometos_error_t result) {
@@ -677,9 +669,7 @@ void Deluge::onPacketWritten(cometos_error_t result) {
          mPageCheckPacket = 0;
          mPageCheckCRC = 0;
 
- #ifdef DELUGE_OUTPUT
-         getCout() << "[" << palId_id() << "] "  << __PRETTY_FUNCTION__ << ": Start page check" << endl;
- #endif
+         LOG_INFO("Start page check");
 
 	 uint16_t packetSize = DelugeUtility::PacketSize(this->mPageRX, 0, pInfo->getFileSize());
          this->mBuffer.setSize(packetSize);
@@ -702,9 +692,7 @@ void Deluge::onPageCheck(cometos_error_t result) {
         // Check CRC from our check and the remote CRC        mPacketsMissing = 0;
 
         if (this->mPageCheckCRC != this->mPageCRC) {
-#ifdef DELUGE_OUTPUT
-            getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Received invalid page=" << dec << static_cast<uint16_t>(this->mPageRX) << endl;
-#endif
+            LOG_INFO("Received invalid page=" << dec << static_cast<uint16_t>(this->mPageRX));
             // Remove our instance, then the request process is started again
             DelugeEvent dispatchEvent;
             dispatchEvent.signal = DelugeEvent::RESULT_SIGNAL;
@@ -726,9 +714,7 @@ void Deluge::onPageCheck(cometos_error_t result) {
             finished = true;
         }
 
-#ifdef DELUGE_OUTPUT
-        getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": RX for page " << static_cast<uint16_t>(this->mPageRX) << " done" << endl;
-#endif
+        LOG_INFO("RX for page " << static_cast<uint16_t>(this->mPageRX)+1 << "/" << static_cast<uint16_t>(pInfo->getNumberOfPages()) << " done");
 
         if(finished) {
             if (this->mCallback) {
@@ -763,9 +749,7 @@ void Deluge::resetRX() {
     mPageCheckActive = false;
     mActive = false;
 
-#ifdef DELUGE_OUTPUT
-    getCout() << "[" << palId_id() << "] "  << __PRETTY_FUNCTION__ << "stopped RX" << endl;
-#endif
+    LOG_INFO("stopped RX");
 }
 
 
@@ -832,9 +816,7 @@ void Deluge::sendPacket(cometos_error_t result) {
     // Set timeout
     startTimer(DELUGE_TX_SEND_DELAY);
 
-#ifdef DELUGE_OUTPUT
-    getCout() << "[" << palId_id() << "] " << __PRETTY_FUNCTION__ << ": Transmitted packet " << static_cast<uint16_t>(this->mPacketToSend) << endl;
-#endif
+    LOG_INFO("Transmitted packet " << static_cast<uint16_t>(this->mPacketToSend));
 }
 
 void Deluge::handlePageRequestTX() {

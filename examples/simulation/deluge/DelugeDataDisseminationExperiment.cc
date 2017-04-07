@@ -199,7 +199,7 @@ static bool finished = false;
 
 void DelugeDataDisseminationExperiment::finalize() {
     if(finished) {
-        std::cout << "All nodes finished!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        std::cout << simTime() << "|All nodes finished!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
         delugeHandler.stop();
         //exit(1);
     }

@@ -1,6 +1,7 @@
 package cometos.examples.simulation.base;
 
 import cometos.src.core.omnetpp.SchedulerModule;
+//import cometos.src.core.omnetpp.LocationModule;
 import org.mixim.base.modules.IBaseMobility;
 import org.mixim.base.modules.BaseUtility;
 
@@ -36,8 +37,8 @@ module Node154 like INode
             @display("p=251,313;i=device/cpu");
         }
         
-        location: LocationModule {
-        }
+        //location: LocationModule {
+        //}
         
     connections:
         radioIn --> nic.radioIn;
