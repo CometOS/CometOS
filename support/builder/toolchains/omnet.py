@@ -47,17 +47,18 @@ class OmnetToolchain:
         # Linker
         self.env.Append(LIBPATH = [self.env.omnet_path+'/lib/gcc', self.env.omnet_path+'/lib', self.env.cometos_path])
 
-	libs = ['pthread', 'oppmaind', 'oppenvird', 'opplayoutd', 'oppcmdenvd', 'oppenvird', 'oppsimd', 'dl', 'stdc++']
-	for lddir in self.env['LIBPATH']:
-		for lib in glob.glob(lddir+"/lib*"):
-			if 'opptkenvd' in lib:
-				libs.append('opptkenvd')
+        libs = ['pthread', 'oppmaind', 'oppenvird', 'opplayoutd', 'oppcmdenvd', 'oppenvird', 'oppsimd', 'dl', 'stdc++']
+        for lddir in self.env['LIBPATH']:
+            for lib in glob.glob(lddir+"/lib*"):
+                if 'opptkenvd' in lib:
+                    libs.append('opptkenvd')
         self.env.Append(LIBS = libs)
 
         self.env.Append(LINKFLAGS = "-u _tkenv_lib -Wl,--no-as-needed -u _cmdenv_lib -Wl,--no-as-needed")
 
         # Library paths
-        self.env.Append(ENV = {'LD_LIBRARY_PATH': ':'.join(self.env['LIBPATH'])})
+        libpaths = os.environ['LD_LIBRARY_PATH'].split(':')+self.env['LIBPATH']
+        self.env.Append(ENV = {'LD_LIBRARY_PATH': ':'.join(libpaths)})
 
         # Defines	
         self.env.Append(CPPDEFINES=['HAVE_DLOPEN=0'])
