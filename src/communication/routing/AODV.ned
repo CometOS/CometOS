@@ -19,6 +19,3 @@ simple AODV extends Layer
         output rerrReqOut;
 
 }
-
-
-

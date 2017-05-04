@@ -48,10 +48,10 @@ void SnifferExample::initialize() {
 
 	// use this if no RTTI is available
 	//mac = static_cast<MacAbstractionBase*> (getModule(macName));
-    ASSERT(mac!=NULL);
+    //ASSERT(mac!=NULL);
 
 	// set MAC layer to promiscuous mode
-	mac->setPromiscuousMode(true);
+	//mac->setPromiscuousMode(true);
 }
 
 void SnifferExample::handleRequest(cometos::DataRequest* msg) {

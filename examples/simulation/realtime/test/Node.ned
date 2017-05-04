@@ -3,7 +3,7 @@ package cometos.examples.simulation.realtime.test;
 import cometos.src.communication.ieee802154.mac.Ieee154Phy;
 import cometos.src.communication.ieee802154.mac.NetworkInterfaceSwitch;
 import cometos.src.communication.ieee802154.mac.SimpleCsmaMac;
-import cometos.examples.common.mac.TrafficExample;
+import cometos.examples.common.traffic.TrafficExample;
 import cometos.src.omnetpp.TcpConnector;
 
 import org.mixim.base.modules.*;

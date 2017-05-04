@@ -1,7 +1,7 @@
 package cometos.examples.simulation.mac.base;
 
 import cometos.examples.simulation.base.Node154Flat;
-import cometos.examples.common.mac.TrafficExample;
+import cometos.examples.common.traffic.TrafficExample;
 
 module Node extends Node154Flat
 {
