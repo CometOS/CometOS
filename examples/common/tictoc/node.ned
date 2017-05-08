@@ -35,15 +35,15 @@ module Node extends Node154
     @display("bgb=304,354");
     submodules:
 
-        traffic: node_handler {
+        handler : node_handler {
             @display("p=47,55");
         }
         
         
         
     connections:
-        nic.gateIndOut --> traffic.gateIndIn;
-        traffic.gateReqOut --> nic.gateReqIn;
+        nic.gateIndOut --> handler.gateIndIn;
+        handler.gateReqOut --> nic.gateReqIn;
         
 }
 

@@ -8,10 +8,7 @@ simple node_handler extends Endpoint
         @class(cometos::node_handler);
         
     	bool initiator = default(false);
-        
-        
-        int dst = default(-1);
-        int interval @unit(ms) = default(0ms);
-        int payloadSize = default(50);
-        int start @unit(ms) = default(50ms);
+        int slf_msg_timer @unit(ms) = default(0ms);
+        int start_delay @unit(ms) = default(50ms);
+        int threshold = default(20);
 }
