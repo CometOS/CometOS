@@ -1,4 +1,4 @@
-package cometos.examples.common.tictoc;
+package cometos.examples.common.threshhold_monitoring;
 
 import cometos.src.communication.base.Endpoint;
 

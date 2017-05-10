@@ -1,0 +1,137 @@
+
+
+
+/*
+Principle
+
+
+ount      <=> first byte == UINT32_MAX
+Boradcast <=> first byte != UINT32_MAX    (first byte is distance to coordinator)
+
+second byte standard zero
+second byte (read_uint32_t(msg, 4) != 0) or 236 => "it's me message"   // could be in a broadcast
+
+
+
+*/
+
+   in flood network 
+   start
+   //    uint32_t welcome = 1;
+//    (*frame) << welcome;
+//    uint32_t zero = 0;
+//    (*frame) << zero;
+   
+void node_handler::handleIndication(DataIndication* msg) {
+       if(read_uint32_t(msg,4)==(236)){
+           EV << "Hello... it's me"   << endl;
+       }
+   
+   
+   
+   
+       // just at beginning to build the network topology (the graph)
+       if (((read_uint32_t(msg, 4) != 0) && isSet //
+               && ((read_uint32_t(msg) - 1) > distanceToCoordinator))
+       // ||
+       // ((read_uint32_t(msg,4)-1) == distanceToCoordinator && (read_uint32_t(msg,4)<palId_id())   )
+       ) {
+           subs.pushBack(msg->src);
+           uint32_t size = subs.getSize();
+           EV << "Size of subs of node " << palId_id() << " is now " << size
+                     << endl;
+       }
+   
+       if (par("initiator")) {
+   
+           if ((read_uint32_t(msg) == UINT32_MAX)) { // just events should be count. Ignore broadcasts from coordinator itself
+   
+               counter++;
+   
+               if (counter >= threshold) {      // Print out Result (messages send)
+                   char buf[50];
+                   sprintf(buf, "threshold reached with %d messages send overall",
+                           node_handler::messagesSend);
+                   getDisplayString().setTagArg("t", 0, buf);
+                   bubble(buf);
+                   std::cout << "threshhold reached with: "
+                           << node_handler::messagesSend << " messages over all"
+                           << "\n" << endl;
+                   node_handler::running = false;
+               }
+           }
+       } else {
+   
+           if (!isSet) {
+               EV << "getting broadcast" << endl;
+               isSet = true;
+               initialize_client(msg);
+           } else {
+   
+               // You are already set and it's not a "here I am message"
+               // Now distinguish bewteen broadcast of cordinator and an event of a node
+   
+               if ((read_uint32_t(msg) != UINT32_MAX)) {
+                   // its a broadcast
+                   // this node got the broadcast already earliear
+                   // so do nothing
+               } else {
+                   // its an event, which needs to send on to the coordinator
+                   send_event();
+               } // end of forward
+           } // end of isSet if
+       } // end of initiator if
+           delete msg;
+} // end of handleIndication
+       
+       
+       void node_handler::send_event() {
+    EV << "sending event" << endl;
+    AirframePtr frame = make_checked<Airframe>();
+    uint32_t an_event = UINT32_MAX;
+    (*frame) << an_event;
+    uint32_t zero = 0;
+    (*frame) << zero;
+    sendRequest(new DataRequest(out, frame, createCallback(&node_handler::resp)));
+    sendCounter++;
+    node_handler::messagesSend++;
+    WATCH(sendCounter);
+    WATCH(node_handler::messagesSend);
+}
+       
+       
+       void node_handler::initialize_client(DataIndication* msg){
+
+    // Set Clients knowledge about its place in the network
+    distanceToCoordinator = read_uint32_t(msg);
+    WATCH(distanceToCoordinator);
+    ASSERT(distanceToCoordinator != UINT32_MAX); // the first message every node receives has to be a broadcast
+    out = msg->src;
+
+    // Send broadcast further (important in case of Multihop network)
+    AirframePtr frameBRO = make_checked<Airframe>();
+    uint32_t welcome = distanceToCoordinator + 1;
+    uint32_t iamfin = 0 ; // palId_id();
+    (*frameBRO) << welcome;
+    (*frameBRO) << iamfin;
+    sendRequest(
+            new DataRequest(BROADCAST, frameBRO,
+                    createCallback(&node_handler::resp)));
+    EV << "sending broadcast further" << endl;
+
+//          if(palId_id()==1)sleep(1);
+//          // Send an "here i am", so that the upper node know you
+    AirframePtr frameACK = make_checked<Airframe>();
+    uint32_t iamfinn = (236);
+    (*frameACK) << iamfinn;
+    (*frameACK) << iamfinn;
+    sendRequest(
+    new DataRequest(out, frameACK,
+    createCallback(&node_handler::resp)));
+
+    // this node will start in at least 1000 ms generating events
+    timeOffset_t offset = uniform(1000, 2000); // between one and two seconds
+    schedule(new Message(), &node_handler::generate_events, offset);
+
+}
+       
