@@ -1,4 +1,4 @@
-package cometos.examples.common.threshhold_monitoring;
+package cometos.examples.common.threshold_monitoring;
 
 import cometos.src.communication.base.Endpoint;
 

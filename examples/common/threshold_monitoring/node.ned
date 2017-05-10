@@ -16,7 +16,7 @@
 
 //import cometos.examples.simulation.base.Network;
 //
-package cometos.examples.common.threshhold_monitoring;
+package cometos.examples.common.threshold_monitoring;
 //
 // nötig???????????
 //module tictoc extends Network
