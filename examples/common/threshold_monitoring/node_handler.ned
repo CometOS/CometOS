@@ -11,4 +11,5 @@ simple node_handler extends Endpoint
         int slf_msg_timer @unit(ms) = default(0ms);
         int start_delay @unit(ms) = default(50ms);
         int threshold = default(20);
+        int num_clients;
 }

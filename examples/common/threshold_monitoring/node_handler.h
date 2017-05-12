@@ -30,7 +30,7 @@ public:
 	void initialize_client(DataIndication* msg);
 
 
-	void send_event();
+	void send_event(uint32_t s);
 	void printResult();
 
 	uint32_t read_uint32_t(DataIndication* msg,int offset_in_byte = 0);
@@ -43,7 +43,8 @@ public:
 
 	static bool running;
 	static unsigned int messagesSend;
-
+	uint32_t last_sequencenumber;
+	uint32_t amount_of_clients;
 
 
 	                                   // Importent for |Coordinator|Client|

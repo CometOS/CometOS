@@ -19,6 +19,8 @@ void node_handler::initialize() {
 
     isSet = false;
     sendCounter = 0;
+    last_sequencenumber = 0;
+    amount_of_clients = par("num_clients");
 
     out = BROADCAST; // broadcast ist 2^16 was vorzeichen behaftet minus eins ist
     slf_msg_timer = 2000;
@@ -54,7 +56,7 @@ void node_handler::flood_network(Message *timer) {
 
     //      Comment/LoG  SECTION
     LOG_INFO("wo wird dieser log ausgegeben ?!?!?!?! " << 42 << "\n");
-    EV << "debug test " << 42 << "\n";
+    EV_ERROR<< "debug test " << 42 << "\n";
 
 }
 
@@ -62,7 +64,7 @@ void node_handler::generate_events(Message *timer) {
     if (node_handler::running) {
 
         EV <<"node "<< palId_id()<<" is generating one event"<< endl;
-        send_event();
+        send_event(palId_id()+sendCounter * amount_of_clients);
 
         timeOffset_t offset = uniform(600, 1000); // between 0.1 and one seconds
         schedule(timer, &node_handler::generate_events, offset);
@@ -88,17 +90,27 @@ void node_handler::handleIndication(DataIndication* msg) {
                 initialize_client(msg);
                        }
            break;
-   case 2 : // 2 = "count"
+   case 2 :  // 2 = "count"
+           if(last_sequencenumber != read_uint32_t(msg,4))
+           {
            if (par("initiator")) {
-               counter++;
-               if (counter >= threshold) {
-                   printResult();
-                   node_handler::running = false;
-               }
+                       counter++;
+                       EV << "counter increased to "<<counter<<endl;
+                       EV << "messages send here: "<<node_handler::messagesSend<<endl;
+                       if (counter >= threshold) {
+                       printResult();
+                       node_handler::running = false;
+                       }
            }else
            {
                ASSERT(isSet); // you can just get a count if u are Set
-               send_event();
+               send_event(read_uint32_t(msg,4));
+           }
+           last_sequencenumber=read_uint32_t(msg,4);
+           }
+           else
+           {
+               EV_ERROR << "Same message again: probably lost of an acknowledgement"<<endl;
            }
            break;
    case 3 : // 3 = "here I am message"
@@ -106,7 +118,28 @@ void node_handler::handleIndication(DataIndication* msg) {
            subs.pushBack(msg->src);
            {uint32_t size = subs.getSize();EV << "Size of subs of node " << palId_id() << " is now " << size << endl;} // Debug message
            break;
-   default  :  EV <<"Error unknown message: "<< read_uint32_t(msg) <<endl; break;
+   case 4 : // 4 = "Update" distribute new threshold or somethin (for round based algorithms)
+           ASSERT(isSet); // you can just get an update if u are Set
+
+           {
+           uint32_t size = subs.getSize();
+           for(int i=0;i!=size;i++)
+           {
+           subs[i]; // TO DO
+           }
+           } // end of scope
+           break;
+   case 5 : // 5 = "local threshold reached" inform coordinator
+           ASSERT(isSet);
+
+           if (par("initiator")) {
+           // TO DO
+           //    DO SOME LOGIC
+           }else{
+               // weiteleiten richtung coordinator
+           }
+           break;
+   default  :  EV_ERROR <<"Error unknown message: "<< read_uint32_t(msg) <<endl; break;
    }
     delete msg;
 } // end of handleIndication
@@ -142,11 +175,14 @@ void node_handler::initialize_client(DataIndication* msg){
 }
 
 
-void node_handler::send_event() {
+void node_handler::send_event(uint32_t s) {
     EV << "sending event" << endl;
     AirframePtr frame = make_checked<Airframe>();
     uint32_t status_code = 2; // 2 = "count"
+    uint32_t sequence =  s+amount_of_clients ; // sequencenumber is importent in case an acknowledgement get lost
+    (sequence >= (UINT32_MAX-amount_of_clients)) ? (EV_WARN<<"sequence_number_warap_around"<<endl) : (EV<<"sequence_number_are_ok"<<endl);
     (*frame) << status_code;
+    (*frame) << sequence;
     sendRequest(new DataRequest(out, frame, createCallback(&node_handler::resp)));
     sendCounter++;
     node_handler::messagesSend++;
@@ -160,7 +196,6 @@ void node_handler::printResult(){
     getDisplayString().setTagArg("t", 0, buf);
     bubble(buf);
     std::cout << "threshhold reached with: "<< node_handler::messagesSend << " messages over all"<< "\n" << endl;
-
 }
 
 uint32_t node_handler::read_uint32_t(DataIndication* msg, int offset_in_byte) {
