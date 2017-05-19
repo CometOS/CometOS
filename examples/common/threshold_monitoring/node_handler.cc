@@ -8,6 +8,7 @@ namespace cometos {
 
 void node_handler::finish() {
     recordScalar("sendCounter", sendCounter);
+    delete logic;
 }
 
 bool node_handler::running = true;
@@ -22,10 +23,10 @@ void node_handler::initialize() {
     last_sequencenumber = 0;
     amount_of_clients = par("num_clients");
 
-    out = BROADCAST; // broadcast ist 2^16 was vorzeichen behaftet minus eins ist
-    slf_msg_timer = 2000;
+    logic=new Algo1(threshold,0);
 
-    CONFIG_NED(slf_msg_timer);
+    out = BROADCAST; // broadcast ist 2^16 was vorzeichen behaftet minus eins ist
+
     CONFIG_NED(threshold);
     counter = 0;
 
@@ -118,7 +119,7 @@ void node_handler::handleIndication(DataIndication* msg) {
            subs.pushBack(msg->src);
            {uint32_t size = subs.getSize();EV << "Size of subs of node " << palId_id() << " is now " << size << endl;} // Debug message
            break;
-   case 4 : // 4 = "Update" distribute new threshold or somethin (for round based algorithms)
+   case 4 : // 4 = "new_Round()" distribute new threshold or somethin (for round based algorithms)
            ASSERT(isSet); // you can just get an update if u are Set
 
            {
@@ -129,7 +130,7 @@ void node_handler::handleIndication(DataIndication* msg) {
            }
            } // end of scope
            break;
-   case 5 : // 5 = "local threshold reached" inform coordinator
+   case 5 : // 5 = "local_threshold_reached()" inform coordinator
            ASSERT(isSet);
 
            if (par("initiator")) {

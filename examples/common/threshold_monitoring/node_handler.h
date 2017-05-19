@@ -3,6 +3,7 @@
 #define PERIODICTRAFFIC_H_
 
 #include "Endpoint.h"
+#include "Algo1.h"
 
 
 #include "src/templates/Vector.h"
@@ -47,14 +48,18 @@ public:
 	uint32_t amount_of_clients;
 
 
-	                                   // Importent for |Coordinator|Client|
+	Algo* logic;
+
+	                             // Importent/InUse for |Coordinator|Client|
 	unsigned long int counter;                // uint32 |   X       |      | counts events
 	unsigned long int threshold;              // uint32 |   X       |      | truly a threshold
 	unsigned long int distanceToCoordinator;  // uint32 |   X       |  X   | distance of Coordinator itself is 0 (obviously)
-	timeOffset_t slf_msg_timer;               // uint16 |           |      | time to next action (right now not used)
 	node_t out;                               // uint16 |           |  X   | gives a node the output for events (there is always just one valid output in the direction of coordinator)
 	bool isSet;                               //        |   X       |  X   | true if out isSet           (Coordinator always true) (isSet has to be true for getting subs(see handleIndication))
-	//pktSize_t payloadSize;                  // uint8  |           |      | also apparently not in usage right now
+
+	// fancy types
+	// timeOffset_t slf_msg_timer uint16
+	// pktSize_t    payloadSize   uint8
 
 
 private:
