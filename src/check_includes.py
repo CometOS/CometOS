@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 from subprocess import Popen, PIPE
-import os.path
 import os
+import sys
+
 
 class Violation:
+    errors = {}
+
     def __init__(self, line, path, file_name, include_line, include_value, fixed_include = None):
         self.line = line
         self.path = path
@@ -24,8 +27,11 @@ class Violation:
                 self.fixed_include = os.path.relpath(matches[0], self.path)
                 if self.fixed_include[0] != '.':
                     self.fixed_include = './' + self.fixed_include
-            #else:
-            #    print(matches)
+            else:
+                if not include_file in Violation.errors:
+                    Violation.errors[include_file] = 0
+                Violation.errors[include_file] = Violation.errors[include_file] + 1
+                #print(include_file, matches, file=sys.stderr)
 
     def patch(self):
         if self.fixed_include is not None:
@@ -72,6 +78,9 @@ def main():
 
     for violation in violations:
         violation.patch()
+
+    for key, value in Violation.errors.items():
+        print(key, value, file=sys.stderr)
 
 if __name__ == "__main__":
     main()
