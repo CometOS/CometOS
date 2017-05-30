@@ -23,12 +23,14 @@ void node_handler::initialize() {
     last_sequencenumber = 0;
     amount_of_clients = par("num_clients");
 
-    logic=new Algo1(threshold,0);
-
     out = BROADCAST; // broadcast ist 2^16 was vorzeichen behaftet minus eins ist
 
     CONFIG_NED(threshold);
     counter = 0;
+
+
+
+    logic=new Algo1(threshold,amount_of_clients); // Tau=S0 wird hier übergeben
 
     //remoteDeclare(&node_handler::get, "get");
 
@@ -65,9 +67,26 @@ void node_handler::generate_events(Message *timer) {
     if (node_handler::running) {
 
         EV <<"node "<< palId_id()<<" is generating one event"<< endl;
-        send_event(palId_id()+sendCounter * amount_of_clients);
+ //       send_event(palId_id()+sendCounter * amount_of_clients);
 
-        timeOffset_t offset = uniform(600, 1000); // between 0.1 and one seconds
+        //if(palId_id()==1){
+        if(logic->count()){
+            if(logic->get_local_threshold()<=1)
+            {
+            send_event(palId_id()+sendCounter * amount_of_clients);
+            EV << "sendet single events " << "\n";
+            }
+            else
+            {
+                EV << "sendet threshold_reached of "<< logic->get_local_threshold() << "\n";
+            // Update - Send a "local_threshold_reached()"
+            uint32_t local_threshold_reached=5;
+            send_event(palId_id()+sendCounter * amount_of_clients,local_threshold_reached);
+            }
+        }
+        //} // end of id=1
+
+        timeOffset_t offset = uniform(1000, 2000); // between one and two seconds
         schedule(timer, &node_handler::generate_events, offset);
     } else
         delete timer;
@@ -121,23 +140,98 @@ void node_handler::handleIndication(DataIndication* msg) {
            break;
    case 4 : // 4 = "new_Round()" distribute new threshold or somethin (for round based algorithms)
            ASSERT(isSet); // you can just get an update if u are Set
+           ASSERT(!par("initiator")); // the coordinator never gets a new_Round message !
+           ASSERT(logic->get_local_threshold()!=0); // if threshold reached zero, there is somethin fishy
+           //ASSERT(logic->get_local_threshold()!=1); // if threshold reached one, there are just counts
+
 
            {
-           uint32_t size = subs.getSize();
-           for(int i=0;i!=size;i++)
+
+           if(logic->get_local_threshold()==1)EV<<"Remark: local_threshold = 1"<<endl;
+           else
            {
-           subs[i]; // TO DO
+           EV<<"Slack was in last round: "<<logic->get_Slack()<<endl;
+
+
+           if(logic->new_Round()){
+               // An Update results in a new reached threshold
+               EV << "sendet threshold_reached of "<<logic->get_local_threshold()<<" (due to new round)"<< "\n";
+               EV << "new local count = "<< logic->get_count()<<"\n";
+                           uint32_t local_threshold_reached=5;
+                           uint32_t                   count=2;
+
+                           if(logic->get_local_threshold()<=1)
+                           send_event(palId_id()+sendCounter * amount_of_clients,count);
+                           else
+                           send_event(palId_id()+sendCounter * amount_of_clients,local_threshold_reached);
            }
+
+           }
+           EV << "runde: "<< logic->get_round()<< " | local_count: "<< logic->get_count() <<"\n";
+
+//           uint32_t size = subs.getSize();
+//           uint32_t status_code=4;
+//           AirframePtr frame = make_checked<Airframe>();
+//                     (*frame) << status_code;
+//           for(int i=0;i!=size;i++)
+//           {
+//               sendRequest(new DataRequest(subs[i], frame, createCallback(&node_handler::resp)));
+//           }
+
+
+
            } // end of scope
            break;
    case 5 : // 5 = "local_threshold_reached()" inform coordinator
            ASSERT(isSet);
 
            if (par("initiator")) {
-           // TO DO
-           //    DO SOME LOGIC
+
+
+               counter+=logic->get_local_threshold();
+
+
+
+               EV << "Counter ist nun schon: "<<counter<< "\n";
+               //EV << "Slack: "<<logic->get_Slack()<<" | k = "<<logic->get_k()<< "\n";
+
+               if (counter >= threshold) {
+               printResult();
+               node_handler::running = false;
+               }else{
+
+               logic->new_Round();
+
+               EV << "neuer threshold ist "<<logic->get_local_threshold()<< "\n";
+               EV << "Coordinator veranlässt eine neue runde an alle: "<<logic->get_round()<< "\n";
+
+
+               int size=(int) subs.getSize();
+               uint32_t status_code=4;
+
+
+
+
+
+                          for(int i=0;i!=(size);i++)
+                          //for(int i=(size-1);i!=(-1);i--)
+                          {
+                            AirframePtr frame = make_checked<Airframe>();
+                                      (*frame) << status_code;
+
+                            sendRequest(new DataRequest(subs[i], frame,createCallback(&node_handler::resp)));
+                            sendCounter++;
+                            node_handler::messagesSend++;
+                            EV << "neue runde an "<<subs[i]<<" (messages: "<<node_handler::messagesSend<< ")\n";
+
+                          }
+               }
+
+
+
            }else{
                // weiteleiten richtung coordinator
+               send_event(read_uint32_t(msg,4),5);
            }
            break;
    default  :  EV_ERROR <<"Error unknown message: "<< read_uint32_t(msg) <<endl; break;
@@ -169,6 +263,10 @@ void node_handler::initialize_client(DataIndication* msg){
     sendRequest(new DataRequest(out, frameACK,createCallback(&node_handler::resp)));
     EV << "sending here i am message" << endl;
 
+
+    // Debug Output for Algorithm
+    EV << "(runde: "<< logic->get_round()<< ") | local_count"<< logic->get_count() << " | local_threshold: "<< logic->get_local_threshold()<<" | Slack: "<<logic->get_Slack()<<"\n";
+
     // this node will start in at least 1000 ms generating events
     timeOffset_t offset = uniform(1000, 2000); // between one and two seconds
     schedule(new Message(), &node_handler::generate_events, offset);
@@ -176,17 +274,25 @@ void node_handler::initialize_client(DataIndication* msg){
 }
 
 
-void node_handler::send_event(uint32_t s) {
-    EV << "sending event" << endl;
+void node_handler::send_event(uint32_t s,uint32_t status_code) {
+    EV << "sending event"<<(int)status_code<< endl;
     AirframePtr frame = make_checked<Airframe>();
-    uint32_t status_code = 2; // 2 = "count"
+
+    //uint32_t status_code = 2; // 2 = "count"
+    (*frame) << status_code;
+
+
     uint32_t sequence =  s+amount_of_clients ; // sequencenumber is importent in case an acknowledgement get lost
     (sequence >= (UINT32_MAX-amount_of_clients)) ? (EV_WARN<<"sequence_number_warap_around"<<endl) : (EV<<"sequence_number_are_ok"<<endl);
-    (*frame) << status_code;
     (*frame) << sequence;
+
+
+
+
     sendRequest(new DataRequest(out, frame, createCallback(&node_handler::resp)));
     sendCounter++;
     node_handler::messagesSend++;
+    EV << "Send_Event: Messages " <<node_handler::messagesSend<< endl;
     WATCH(sendCounter);
     WATCH(node_handler::messagesSend);
 }

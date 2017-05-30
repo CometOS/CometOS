@@ -51,7 +51,7 @@ namespace cometos {
 #define MAC_MODULE_NAME "mac"
 
 enum {
-	CSMA_MAC_QUEUE_LENGTH = 5
+	CSMA_MAC_QUEUE_LENGTH = 100
 };
 
 

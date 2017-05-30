@@ -15,7 +15,7 @@ public:
 
 
     void local_threshold_reached();
-    void new_Round();
+    bool new_Round();
 
 };
 

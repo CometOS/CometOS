@@ -31,7 +31,8 @@ public:
 	void initialize_client(DataIndication* msg);
 
 
-	void send_event(uint32_t s);
+	void send_event(uint32_t sequencenumber,uint32_t status_code=2);
+
 	void printResult();
 
 	uint32_t read_uint32_t(DataIndication* msg,int offset_in_byte = 0);

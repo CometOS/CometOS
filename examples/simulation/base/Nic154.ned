@@ -44,7 +44,7 @@ module Nic154 like ILowerEndpoint
                 @display("p=115,81");
 
                 usePropagationDelay = false;
-                useThermalNoise = true;
+                useThermalNoise = false;
 
         }
 

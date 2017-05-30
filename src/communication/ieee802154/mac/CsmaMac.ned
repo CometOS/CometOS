@@ -6,7 +6,7 @@ simple CsmaMac extends MacAbstractionLayer
 {
     parameters:
         @class(cometos::CsmaMac);
-
+    
 
 }
 
