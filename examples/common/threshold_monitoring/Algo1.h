@@ -9,13 +9,14 @@
 class Algo1 : public Algo{
 
 public:
-     Algo1(){};
-     Algo1(unsigned long int local_threshold,unsigned long int k);
+
+     Algo1():Algo(){}
+
     ~Algo1(){};
 
 
     void local_threshold_reached();
-    bool new_Round();
+    bool new_Round(unsigned long int);
 
 };
 

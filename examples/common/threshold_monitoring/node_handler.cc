@@ -2,6 +2,7 @@
 #include "Airframe.h"
 #include "logging.h"
 
+
 Define_Module(cometos::node_handler);
 
 namespace cometos {
@@ -18,8 +19,13 @@ void node_handler::initialize() {
 
     Endpoint::initialize();
 
-    isSet = false;
+    isSet     = false;
+    hasStarted= false;
+    childs_local_threshold_reached_one=false;
+
+
     sendCounter = 0;
+    forwardCounter=0;
     last_sequencenumber = 0;
     amount_of_clients = par("num_clients");
 
@@ -30,7 +36,7 @@ void node_handler::initialize() {
 
 
 
-    logic=new Algo1(threshold,amount_of_clients); // Tau=S0 wird hier übergeben
+    logic=new Algo1();
 
     //remoteDeclare(&node_handler::get, "get");
 
@@ -47,6 +53,33 @@ void node_handler::start(timeOffset_t offset) {
     schedule(new Message(), &node_handler::flood_network, offset);
 }
 
+void node_handler::start_observing(Message *timer) {
+    delete timer;
+
+
+    logic->set_k((int)subs.getSize());
+    logic->set_local_Slack(threshold); // local Slack from Coordinator is overall Slack
+    uint32_t local_threshold = logic->calc_local_threshold();
+
+
+    EV<<"threshold = "<<threshold<<endl;
+    EV<<"k = "<<(int)subs.getSize()<<endl;
+    EV<<"local_threshold ="<<local_threshold<<endl;
+
+
+
+    uint32_t status_code = 6;
+    uint32_t size = subs.getSize();
+    for(unsigned int i=0;i!=size;i++)
+    {
+        AirframePtr frame = make_checked<Airframe>();
+        (*frame) << status_code;
+        (*frame) << local_threshold;
+        sendRequest(new DataRequest(subs[i], frame,createCallback(&node_handler::resp)));
+    }
+
+}
+
 void node_handler::flood_network(Message *timer) {
     delete timer;
 
@@ -61,15 +94,18 @@ void node_handler::flood_network(Message *timer) {
     LOG_INFO("wo wird dieser log ausgegeben ?!?!?!?! " << 42 << "\n");
     EV_ERROR<< "debug test " << 42 << "\n";
 
+
+    timeOffset_t offset = 2000; // 2 Seconds untill start obersving
+    schedule(new Message(), &node_handler::start_observing, offset);
 }
 
 void node_handler::generate_events(Message *timer) {
     if (node_handler::running) {
 
         EV <<"node "<< palId_id()<<" is generating one event"<< endl;
- //       send_event(palId_id()+sendCounter * amount_of_clients);
+        //send_event(palId_id()+sendCounter * amount_of_clients);
 
-        //if(palId_id()==1){
+        //if(palId_id()==6){
         if(logic->count()){
             if(logic->get_local_threshold()<=1)
             {
@@ -81,7 +117,8 @@ void node_handler::generate_events(Message *timer) {
                 EV << "sendet threshold_reached of "<< logic->get_local_threshold() << "\n";
             // Update - Send a "local_threshold_reached()"
             uint32_t local_threshold_reached=5;
-            send_event(palId_id()+sendCounter * amount_of_clients,local_threshold_reached);
+            uint32_t local_threshold_was = logic->get_local_threshold();
+            send_event(palId_id()+sendCounter * amount_of_clients,local_threshold_reached,local_threshold_was);
             }
         }
         //} // end of id=1
@@ -135,50 +172,88 @@ void node_handler::handleIndication(DataIndication* msg) {
            break;
    case 3 : // 3 = "here I am message"
            ASSERT(isSet); // you can just get a sub message if u are Set
+           {
+           bool is=false;
+           uint32_t size = subs.getSize();
+           for(unsigned int i=0;i!=size;i++)
+           { if(subs[i]==msg->src)is=true;}
+
+           if(is==false)
+           {
            subs.pushBack(msg->src);
+
+           EV<<msg->src<<" ist knecht von "<<palId_id()<<endl;
            {uint32_t size = subs.getSize();EV << "Size of subs of node " << palId_id() << " is now " << size << endl;} // Debug message
+           }
+           else
+           {EV<<msg->src<<" ist bereits knecht von "<<palId_id()<<endl;}
+           }
            break;
    case 4 : // 4 = "new_Round()" distribute new threshold or somethin (for round based algorithms)
+
+
+       EV<<"MY slack is "<<read_uint32_t(msg,4)<<endl;
+       EV<<"MY k is "<<logic->get_k()<<endl;
+                     EV<<"MY threshold is "<<logic->get_local_threshold()<<endl;
+
+
            ASSERT(isSet); // you can just get an update if u are Set
            ASSERT(!par("initiator")); // the coordinator never gets a new_Round message !
            ASSERT(logic->get_local_threshold()!=0); // if threshold reached zero, there is somethin fishy
-           //ASSERT(logic->get_local_threshold()!=1); // if threshold reached one, there are just counts
+           //ASSERT(logic->get_local_threshold()!=1); // without  Multihop this ASSERT is TRUE
 
-
+           if(logic->get_local_threshold()!=1){
            {
 
-           if(logic->get_local_threshold()==1)EV<<"Remark: local_threshold = 1"<<endl;
-           else
-           {
-           EV<<"Slack was in last round: "<<logic->get_Slack()<<endl;
 
 
-           if(logic->new_Round()){
+
+
+
+
+           if(logic->new_Round(read_uint32_t(msg,4))){
                // An Update results in a new reached threshold
-               EV << "sendet threshold_reached of "<<logic->get_local_threshold()<<" (due to new round)"<< "\n";
-               EV << "new local count = "<< logic->get_count()<<"\n";
+               EV << "sendet threshold_reached of "<<read_uint32_t(msg,4)<<" (due to new round)"<< "\n";
+
                            uint32_t local_threshold_reached=5;
                            uint32_t                   count=2;
 
-                           if(logic->get_local_threshold()<=1)
+                           if(read_uint32_t(msg,4)<=1)
                            send_event(palId_id()+sendCounter * amount_of_clients,count);
                            else
-                           send_event(palId_id()+sendCounter * amount_of_clients,local_threshold_reached);
+                           send_event(palId_id()+sendCounter * amount_of_clients,local_threshold_reached,read_uint32_t(msg,4));
            }
 
-           }
+
            EV << "runde: "<< logic->get_round()<< " | local_count: "<< logic->get_count() <<"\n";
 
-//           uint32_t size = subs.getSize();
-//           uint32_t status_code=4;
-//           AirframePtr frame = make_checked<Airframe>();
-//                     (*frame) << status_code;
-//           for(int i=0;i!=size;i++)
-//           {
-//               sendRequest(new DataRequest(subs[i], frame, createCallback(&node_handler::resp)));
-//           }
 
 
+           if(logic->get_k()==1)ASSERT(logic->get_local_threshold()==logic->get_Slack());
+
+
+           uint32_t size = subs.getSize();
+           uint32_t status_code=4;
+
+
+               EV<<"my slack is "<<read_uint32_t(msg,4)<<endl;
+               EV<<"my threshold is "<<logic->get_local_threshold()<<endl;
+
+
+
+
+           for(unsigned int i=0;i!=size;i++)
+           {
+               AirframePtr frame = make_checked<Airframe>();
+                         (*frame) << status_code;
+                         (*frame) <<(uint32_t)logic->get_local_threshold();
+               sendRequest(new DataRequest(subs[i], frame, createCallback(&node_handler::resp)));
+               forwardCounter++;
+               node_handler::messagesSend++;
+               EV<<"new Round weitergeleitet (messages: "<<node_handler::messagesSend<<")\n";
+           }
+
+           }
 
            } // end of scope
            break;
@@ -188,8 +263,8 @@ void node_handler::handleIndication(DataIndication* msg) {
            if (par("initiator")) {
 
 
-               counter+=logic->get_local_threshold();
-
+               counter+=read_uint32_t(msg,8);
+               EV << "Counter um folgenden threshold erhöht: "<<read_uint32_t(msg,8)<< "\n";
 
 
                EV << "Counter ist nun schon: "<<counter<< "\n";
@@ -198,11 +273,18 @@ void node_handler::handleIndication(DataIndication* msg) {
                if (counter >= threshold) {
                printResult();
                node_handler::running = false;
-               }else{
+               }else if(childs_local_threshold_reached_one==false){
 
-               logic->new_Round();
 
-               EV << "neuer threshold ist "<<logic->get_local_threshold()<< "\n";
+
+               logic->new_Round_c(read_uint32_t(msg,8));
+
+               uint32_t new_local_threshold=logic->calc_local_threshold();
+
+
+
+               EV << "neuer Slack/threshld ist "<<logic->get_Slack()<< "\n";
+               EV << "neuer localer_threshold ist "<<new_local_threshold<< "\n";
                EV << "Coordinator veranlässt eine neue runde an alle: "<<logic->get_round()<< "\n";
 
 
@@ -211,13 +293,12 @@ void node_handler::handleIndication(DataIndication* msg) {
 
 
 
-
-
                           for(int i=0;i!=(size);i++)
                           //for(int i=(size-1);i!=(-1);i--)
                           {
                             AirframePtr frame = make_checked<Airframe>();
                                       (*frame) << status_code;
+                                      (*frame) << new_local_threshold;
 
                             sendRequest(new DataRequest(subs[i], frame,createCallback(&node_handler::resp)));
                             sendCounter++;
@@ -225,14 +306,63 @@ void node_handler::handleIndication(DataIndication* msg) {
                             EV << "neue runde an "<<subs[i]<<" (messages: "<<node_handler::messagesSend<< ")\n";
 
                           }
+
+                          if(new_local_threshold == 1)childs_local_threshold_reached_one=true;
+
+
                }
 
 
 
            }else{
                // weiteleiten richtung coordinator
-               send_event(read_uint32_t(msg,4),5);
+               send_event(read_uint32_t(msg,4),5,read_uint32_t(msg,8));
            }
+           break;
+   case 6 : // 6 = "start observing" coordinator informs clients that they can start observing events
+            if ((!par("initiator")) && hasStarted==false){
+                hasStarted=true;
+
+                uint32_t size = (int)subs.getSize();
+                unsigned long int k = size ;
+                EV<<"k is"<<k<<endl;
+                k = k + 1;
+                EV<<"and now "<<k<<endl;
+
+                logic->set_k(k); // here the client himself is in k !!!
+                logic->set_local_Slack(read_uint32_t(msg,4));
+                uint32_t local_threshold = logic->calc_local_threshold();
+                logic->set_local_treshold(local_threshold);
+
+               // this node will start in at least 1000 ms generating events
+               timeOffset_t offset = uniform(1000, 2000); // between one and two seconds
+               schedule(new Message(), &node_handler::generate_events, offset);
+
+               // Send broadcast further (important in case of Multihop network)
+
+
+
+               uint32_t status_code = 6;
+               for(unsigned int i=0;i!=size;i++)
+               {
+                   AirframePtr frameBRO = make_checked<Airframe>();
+                   (*frameBRO) << status_code;
+                   (*frameBRO) << local_threshold;
+                   sendRequest(new DataRequest(subs[i], frameBRO,createCallback(&node_handler::resp)));
+                   EV << "sending start observing further to"<<subs[i]<< endl;
+               }
+
+
+//                 BROADCASTS gehen immernoch mal verloren, warum auch immer
+//               AirframePtr frameBRO = make_checked<Airframe>();
+//               (*frameBRO) << status_code;
+//               (*frameBRO) << local_threshold;
+//               sendRequest(new DataRequest(BROADCAST, frameBRO,createCallback(&node_handler::resp)));
+//               // mit dem kann auch der hasStarted kram gelöscht werden
+
+
+           }
+
            break;
    default  :  EV_ERROR <<"Error unknown message: "<< read_uint32_t(msg) <<endl; break;
    }
@@ -265,29 +395,23 @@ void node_handler::initialize_client(DataIndication* msg){
 
 
     // Debug Output for Algorithm
-    EV << "(runde: "<< logic->get_round()<< ") | local_count"<< logic->get_count() << " | local_threshold: "<< logic->get_local_threshold()<<" | Slack: "<<logic->get_Slack()<<"\n";
-
-    // this node will start in at least 1000 ms generating events
-    timeOffset_t offset = uniform(1000, 2000); // between one and two seconds
-    schedule(new Message(), &node_handler::generate_events, offset);
+    EV << "(runde: "<< logic->get_round()<< ") | local_count"<< logic->get_count() <<"\n";
 
 }
 
 
-void node_handler::send_event(uint32_t s,uint32_t status_code) {
+void node_handler::send_event(uint32_t s,uint32_t status_code,uint32_t para) {
     EV << "sending event"<<(int)status_code<< endl;
     AirframePtr frame = make_checked<Airframe>();
 
-    //uint32_t status_code = 2; // 2 = "count"
-    (*frame) << status_code;
-
+    (*frame) << status_code; // default status_code = 2
 
     uint32_t sequence =  s+amount_of_clients ; // sequencenumber is importent in case an acknowledgement get lost
     (sequence >= (UINT32_MAX-amount_of_clients)) ? (EV_WARN<<"sequence_number_warap_around"<<endl) : (EV<<"sequence_number_are_ok"<<endl);
     (*frame) << sequence;
 
 
-
+    if(status_code==5) (*frame) << para;
 
     sendRequest(new DataRequest(out, frame, createCallback(&node_handler::resp)));
     sendCounter++;
@@ -302,6 +426,7 @@ void node_handler::printResult(){
     sprintf(buf, "threshold reached with %d messages send overall",node_handler::messagesSend);
     getDisplayString().setTagArg("t", 0, buf);
     bubble(buf);
+    std::cout << "counter = "<< counter  << endl;
     std::cout << "threshhold reached with: "<< node_handler::messagesSend << " messages over all"<< "\n" << endl;
 }
 

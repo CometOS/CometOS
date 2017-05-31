@@ -16,37 +16,36 @@ public:
 virtual~Algo();
     
 
-            void initialize(unsigned long int k,unsigned long int S);
+
     
     virtual void local_threshold_reached(){};
-    virtual bool new_Round(){};
+    virtual bool new_Round(unsigned long int new_local_threshold){}; // for clients only
+            void new_Round_c(unsigned long int reduction); // for Coordinator only
+
+    unsigned long int calc_local_threshold();
+
+   void set_local_treshold(unsigned long int);
+   void set_local_Slack(unsigned long int);
+   void set_k(unsigned long int);
 
 
             bool count();
 
-         int get_local_threshold(){
-             double t=ceil(local_threshold);
-             return (int)t;}
-         int get_count(){return local_count;}
-         int get_round(){return round;}
-         int get_Slack(){return Slack;}
-         int get_k(){return k;}
-         bool get_threshold_reached_one(){return threshold_reached_one;}
+unsigned long int get_local_threshold(){return local_threshold_int;}
+unsigned long int get_count()          {return local_count        ;}
+unsigned long int get_round()          {return round              ;}
+unsigned long int get_Slack()          {return Slack              ;}
+unsigned long int get_k()              {return k                  ;}
+
     
 protected:
 
-    volatile unsigned long int local_count;                // Nur die
-    volatile double            local_threshold;
-             unsigned long int local_threshold_int;        // beiden am ende
+    volatile unsigned long int local_count;
+             unsigned long int local_threshold_int;
 
-    unsigned long int round;
-    unsigned long int Slack;
-    unsigned long int k; // number of Observer behind this node
-
-    bool threshold_reached_one;
-
-
-
+             unsigned long int round;
+             unsigned long int Slack;
+             unsigned long int k;
 
 };
 

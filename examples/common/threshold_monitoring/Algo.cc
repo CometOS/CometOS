@@ -4,27 +4,38 @@
 
 #include "Algo.h"
 
-Algo::Algo(unsigned long int Slack,unsigned long int k):Slack(Slack),k(k),local_count(0),round(0),threshold_reached_one(false){
-    double d1=static_cast<double>(Slack);
-    double d2=static_cast<double>(k);
-    this->local_threshold = d1/d2;
+Algo::Algo():local_count(0),round(0){
+
 };
 
 Algo::~Algo(){}
 
-void Algo::initialize(unsigned long int k,unsigned long int local_threshold){
-this->k=k;
-this->local_threshold_int=local_threshold;
+
+
+unsigned long int Algo::calc_local_threshold(){
+    double  d1=static_cast<double>(this->Slack);
+    double  d2=static_cast<double>(this->k);
+    return static_cast<unsigned long int>(ceil(d1/d2));
+}
+
+void Algo::set_local_treshold(unsigned long int t){local_threshold_int = t;}
+void Algo::set_local_Slack(unsigned long int S){Slack=S;}
+void Algo::set_k(unsigned long int k){this->k=k;}
+
+
+
+void Algo::new_Round_c(unsigned long int reduction){
+    this->round++;
+    Slack-=reduction;
 }
 
 
 bool Algo::count(){
 
     local_count++;
-    if(local_count>=local_threshold){
-       local_count-=static_cast<unsigned long int>(ceil(local_threshold));
+    if(local_count>=local_threshold_int){
+       local_count-=local_threshold_int;
         return true;
     }
     return false;
 }
-

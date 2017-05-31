@@ -31,13 +31,14 @@ public:
 	void initialize_client(DataIndication* msg);
 
 
-	void send_event(uint32_t sequencenumber,uint32_t status_code=2);
+	void send_event(uint32_t sequencenumber,uint32_t status_code=2,uint32_t para = 0);
 
 	void printResult();
 
 	uint32_t read_uint32_t(DataIndication* msg,int offset_in_byte = 0);
 
 	void start(timeOffset_t offset);
+	void start_observing(Message *timer);
 
 
 	cometos::Vector<node_t,255> subs; // 255 elements is max for this vector
@@ -57,7 +58,8 @@ public:
 	unsigned long int distanceToCoordinator;  // uint32 |   X       |  X   | distance of Coordinator itself is 0 (obviously)
 	node_t out;                               // uint16 |           |  X   | gives a node the output for events (there is always just one valid output in the direction of coordinator)
 	bool isSet;                               //        |   X       |  X   | true if out isSet           (Coordinator always true) (isSet has to be true for getting subs(see handleIndication))
-
+	bool hasStarted;                          //        |           |  X   | client(s) hasStarted observing events
+	bool childs_local_threshold_reached_one;  //        |   X       |  X   | Every Node can have child nodes
 	// fancy types
 	// timeOffset_t slf_msg_timer uint16
 	// pktSize_t    payloadSize   uint8
@@ -65,6 +67,7 @@ public:
 
 private:
 	int sendCounter;
+	int forwardCounter;
 
 };
 
