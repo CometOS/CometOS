@@ -35,6 +35,7 @@ class Violation:
 
     def patch(self):
         if self.fixed_include is not None:
+            # apply with 'git apply --unidiff-zero ...'
             a = os.path.join('a', 'src', self.path, self.file_name)
             b = os.path.join('b', 'src', self.path, self.file_name)
             print('diff', a, b)
