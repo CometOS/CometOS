@@ -4,7 +4,9 @@
 
 #include "Algo.h"
 
-Algo::Algo():local_count(0),round(0){
+namespace cometos {
+
+Algo::Algo():local_count(0),round(0),run_var(0){
 
 };
 
@@ -12,15 +14,13 @@ Algo::~Algo(){}
 
 
 
-unsigned long int Algo::calc_local_threshold(){
-    double  d1=static_cast<double>(this->Slack);
-    double  d2=static_cast<double>(this->k);
-    return static_cast<unsigned long int>(ceil(d1/d2));
-}
+
 
 void Algo::set_local_treshold(unsigned long int t){local_threshold_int = t;}
 void Algo::set_local_Slack(unsigned long int S){Slack=S;}
 void Algo::set_k(unsigned long int k){this->k=k;}
+void Algo::set_local_branch_threshold(unsigned long int local_branch_threshold){this->local_branch_threshold=local_branch_threshold;}
+
 
 
 
@@ -38,4 +38,8 @@ bool Algo::count(){
         return true;
     }
     return false;
+}
+
+
+
 }

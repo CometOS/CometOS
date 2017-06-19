@@ -31,7 +31,9 @@ public:
 	void initialize_client(DataIndication* msg);
 
 
-	void send_event(uint32_t sequencenumber,uint32_t status_code=2,uint32_t para = 0);
+	void send_event(uint32_t s,uint32_t status_code=2,uint32_t para = 0); // sends an event (goes in direction of coorinator)
+	void send_new_threshold(uint32_t threshold,uint32_t status_code); // distributes new threshold (goes from coordinator away)
+	bool does_this_node_finished_these_round();
 
 	void printResult();
 
@@ -53,13 +55,16 @@ public:
 	Algo* logic;
 
 	                             // Importent/InUse for |Coordinator|Client|
-	unsigned long int counter;                // uint32 |   X       |      | counts events
+	unsigned long int counter;                // uint32 |   X       |  X   | counts events (in second approach clients also use it)
 	unsigned long int threshold;              // uint32 |   X       |      | truly a threshold
 	unsigned long int distanceToCoordinator;  // uint32 |   X       |  X   | distance of Coordinator itself is 0 (obviously)
 	node_t out;                               // uint16 |           |  X   | gives a node the output for events (there is always just one valid output in the direction of coordinator)
 	bool isSet;                               //        |   X       |  X   | true if out isSet           (Coordinator always true) (isSet has to be true for getting subs(see handleIndication))
-	bool hasStarted;                          //        |           |  X   | client(s) hasStarted observing events
-	bool childs_local_threshold_reached_one;  //        |   X       |  X   | Every Node can have child nodes
+
+	bool childs_local_threshold_reached_one;  //        |   X       |  X   | Every Node can have child nodes (not more in algo1)
+	unsigned long int last_threshold_send;
+	unsigned long int temp_count;
+
 	// fancy types
 	// timeOffset_t slf_msg_timer uint16
 	// pktSize_t    payloadSize   uint8
