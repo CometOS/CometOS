@@ -16,12 +16,17 @@ unsigned long int Algo2::calc_local_threshold(){
 
 bool Algo2::new_Round(unsigned long int new_local_Slack){
 
+
+
+
     if(this->get_k()==1) // wenn er keine kinder nodes hat, bekommt er seinen threshold
     set_local_treshold(new_local_Slack);
     else
     set_local_treshold(calc_local_threshold());
 
-    this->round++;
+  //  this->round++;
+  // neue runde wird nur gestartet wenn k thresholds erreicht wurden
+
 
     if(this->local_count >= local_threshold_int){
              local_count -= local_threshold_int;

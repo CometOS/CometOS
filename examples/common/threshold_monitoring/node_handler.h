@@ -32,7 +32,7 @@ public:
 
 
 	void send_event(uint32_t s,uint32_t status_code=2,uint32_t para = 0); // sends an event (goes in direction of coorinator)
-	void send_new_threshold(uint32_t threshold,uint32_t status_code); // distributes new threshold (goes from coordinator away)
+	void send_new_threshold(uint32_t threshold,uint32_t status_code,uint32_t restart = 0); // distributes new threshold (goes from coordinator away)
 	bool does_this_node_finished_these_round();
 
 	void printResult();

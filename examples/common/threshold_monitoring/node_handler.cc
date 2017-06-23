@@ -40,7 +40,7 @@ void node_handler::initialize() {
 
 
 
-    logic=new Algo1();
+    logic=new Algo2();
 
     //remoteDeclare(&node_handler::get, "get");
 
@@ -95,9 +95,15 @@ void node_handler::flood_network(Message *timer) {
 void node_handler::generate_events(Message *timer) {
     if (node_handler::running) {
         ASSERT(logic->get_local_threshold()>0);
-        //send_event(palId_id()+sendCounter * amount_of_clients);
 
-        //if(palId_id()==4){
+
+
+        if(palId_id()==2){
+
+          // trivialer algo
+          //  send_event(palId_id()+sendCounter * amount_of_clients);
+
+
         EV <<"node "<< palId_id()<<" is generating one event"<< endl;
         EV <<"threshold is "<< logic->get_local_threshold()<< endl;
         EV <<"b = "<<logic->get_local_branch_threshold()<<endl;
@@ -109,12 +115,12 @@ void node_handler::generate_events(Message *timer) {
 
 
         if(logic->count()){
-            if(logic->get_local_threshold()==1) // nichts
+            if(logic->get_local_threshold()==1)
             {
                 if(logic->get_k()==1) {
                     send_event(palId_id()+sendCounter * amount_of_clients);        EV << "sendet single events " << "\n";
                 }else{
-                    counter++;                                                     EV <<"count is "<<counter<<endl;
+                    counter++;                                                     EV <<"counter is "<<counter<<endl;
                     does_this_node_finished_these_round();   // check if new round and react properly
                 }
             }
@@ -122,8 +128,6 @@ void node_handler::generate_events(Message *timer) {
             {
 
                 if(logic->get_k()==1) { // Node ist kein Koordinator
-
-
 
                 EV << "sendet threshold_reached of "<< logic->get_local_threshold() << "\n";
             if(logic->isAlgo1())  send_event(palId_id()+sendCounter * amount_of_clients,5,logic->get_local_threshold());
@@ -136,10 +140,11 @@ void node_handler::generate_events(Message *timer) {
                     counter+=logic->get_local_threshold();
 
                     if(logic->run_var==logic->get_k() && (!logic->isAlgo1())){
+                        ASSERT(counter<logic->get_local_branch_threshold()); // der ast schwellenwert kann nicht über local threshold ungleich eins erreicht werden
                         EV <<logic->run_var<<" times were this reached "<< logic->get_local_threshold() << "\n";
                         logic->new_Round_c(0);                                                // increment round
                         logic->set_local_treshold(logic->calc_local_threshold());             // set new threshold
-                        send_new_threshold(logic->get_local_threshold(),8);                     // distribute new Slack/threshold
+                        send_new_threshold(logic->get_local_threshold(),8,0);                     // distribute new Slack/threshold
                         EV <<"new threshold is: "<<logic->get_local_threshold()<< "\n";
                         EV <<"count is "<<counter<<endl;
                         logic->run_var=0;
@@ -172,7 +177,7 @@ void node_handler::generate_events(Message *timer) {
 
             }
         }
-        //} // end of id=1
+        } // end of id
 
         timeOffset_t offset = uniform(1000, 2000); // between one and two seconds
 
@@ -222,7 +227,7 @@ void node_handler::handleIndication(DataIndication* msg) {
                        EV<<"Slack = "<<logic->get_Slack()<<" und k = "<<logic->get_k() <<" und count = "<<counter<<" und runde= "<<logic->get_round()<<endl;
 
                        if(counter< threshold && logic->isAlgo1())ASSERT(new_local_threshold!=0); // Slack ist nicht 0 und dadurch auch nicht new_local_threshold
-                       if(counter>=threshold && logic->isAlgo1())ASSERT(new_local_threshold==0); // in der letzten runde ist Slack 0 und dadurch auch new_local_threshold
+                       if(counter==threshold && logic->isAlgo1())ASSERT(new_local_threshold==0); // in der letzten runde ist Slack 0 und dadurch auch new_local_threshold
 
                        EV<<"new_local_threshold is: "<<new_local_threshold<<endl;
                        if(new_local_threshold!=1 && logic->isAlgo1() && counter<threshold)
@@ -230,6 +235,7 @@ void node_handler::handleIndication(DataIndication* msg) {
 
            }else
            {
+            //   send_event(read_uint32_t(msg,4)); // trivialer algo
                if(logic->get_local_branch_threshold()==1)
                send_event(read_uint32_t(msg,4));
                else{
@@ -378,18 +384,9 @@ void node_handler::handleIndication(DataIndication* msg) {
 
 
            if(logic->get_Slack()==0){
-               ASSERT(counter==0);
+               //ASSERT(counter==0); // muss nicht unbedingt sein , wenn er z.b. mehrere nachrichten in dem status bekommt !
                counter+=read_uint32_t(msg,8);
-
-
                ASSERT(((bool)par("initiator"))==false); // der koordinator kann & darf hier nicht rein
-
-//               // weiterleiten, da er zurzeit noch keine antwort bekommen hat
-//               if(read_uint32_t(msg,4)==1)
-//               send_event(palId_id()+sendCounter * amount_of_clients,read_uint32_t(msg,8));
-//               else
-//               send_event(palId_id()+sendCounter * amount_of_clients,5,read_uint32_t(msg,8));
-
            }else{ if(logic->get_Slack()<read_uint32_t(msg,8)){
 
                counter+=logic->get_Slack();  // addiere slack auf counter
@@ -541,9 +538,16 @@ void node_handler::handleIndication(DataIndication* msg) {
                           {  logic->run_var=0;
 
 
-                      logic->new_Round_c(0);
+
                       // berechne neuen local_threshold mit selben slack, nur neuer runden anzahl
+
+                          logic->new_Round_c(0);
+
+                      EV<<"Slack= "<<logic->get_Slack()<<" | round= "<<logic->get_round()<<" | k= "<<logic->get_k()<<endl;
                       uint32_t new_local_threshold=logic->calc_local_threshold();
+
+
+
 
                       logic->set_local_treshold(new_local_threshold);
                        // TO DO
@@ -558,7 +562,7 @@ void node_handler::handleIndication(DataIndication* msg) {
 
 
 
-                                  send_new_threshold(new_local_threshold,8);
+                                  send_new_threshold(new_local_threshold,8,0);
 
                                  if(new_local_threshold == 1)childs_local_threshold_reached_one=true;
                           } // end of logic->run_var==logic->get_k()
@@ -567,7 +571,6 @@ void node_handler::handleIndication(DataIndication* msg) {
            break;
    case 8 : // 4 = "new_Round()" distribute new threshold or somethin (for round based algorithms) for Algo2
      {
-
          //EV<<"MY old Slack is "<<logic->get_Slack()<<endl;
          //EV<<"MY threshold is "<<logic->get_local_threshold()<<endl;
          EV<<"MY new Slack is "<<read_uint32_t(msg,4)<<endl;
@@ -583,19 +586,42 @@ void node_handler::handleIndication(DataIndication* msg) {
 
 
              bool its_new_round=false;
-             if(read_uint32_t(msg,4) > logic->get_local_branch_threshold()){childs_local_threshold_reached_one=false;its_new_round=true;
-             EV<<"its new round"<<endl;
-             } // tritt bei Algo 2 praktisch nicht ein, da slack nicht benutzt wird
+
+
+             if(read_uint32_t(msg,8)==1){ // restart of an algo
+             logic->reset_round(); EV<<"some algo upwards finished"<<endl; // oder sogar immer resetten
+             childs_local_threshold_reached_one=false;its_new_round=true;
+             }
+
+
+             logic->reset_round();
+             logic->run_var=0;
+
+
+             EV<<"MY round is "<<logic->get_round()<<endl;
 
              logic->set_local_branch_threshold(read_uint32_t(msg,4));
              logic->set_local_Slack(read_uint32_t(msg,4));
              EV <<"b = "<<logic->get_local_branch_threshold()<<endl;
 
-             if(logic->get_local_threshold()!=1 || its_new_round){ // Wenn threshold bereits eins ist, dann schick ihn nicht nochmal
+
+
+
+             // schau ob durch neues b vieleicht counter direkt erreicht ist
+             if(does_this_node_finished_these_round()){
+             ASSERT(does_this_node_finished_these_round()==false); // er kann maximal einmal überschritten seien
+             }
+             logic->set_local_Slack(logic->get_local_branch_threshold()-counter);
+             counter=0;
 
 
 
 
+
+
+
+             if(logic->get_local_threshold()!=1 || its_new_round){
+            // Wenn threshold bereits eins ist tue nichts, außer wenn eine neue runde beginnt, weil alle unteren knoten werden dann auch schon local threshold 1 haben
 
              if(logic->new_Round(read_uint32_t(msg,4))){ // hat der local_count den local_threshold erreicht?
                  // An Update results in a new reached threshold
@@ -606,7 +632,6 @@ void node_handler::handleIndication(DataIndication* msg) {
 
                              uint32_t                   count=2;
                              uint32_t local_threshold_reached=7;
-                             if(logic->isAlgo1()){local_threshold_reached=5;}
 
                              if(read_uint32_t(msg,4)==1){
                                                                                        send_event(palId_id()+sendCounter * amount_of_clients,count);
@@ -618,30 +643,11 @@ void node_handler::handleIndication(DataIndication* msg) {
                  else{
 
 
-
-
-                     if(logic->isAlgo1()){
-                         logic->new_Round_c(logic->get_local_threshold());
-                         counter+=logic->get_local_threshold();
-
-                         EV<<" Slack is reduced to"<<logic->get_Slack()<<endl;
-                         //logic->set_local_branch_threshold(logic->get_Slack()); // new added
-                         EV<<" b now also "<<logic->get_Slack()<<endl;
-
-                         if(logic->get_Slack()==0){ // wenn hier durch der lokale ast threshold überschritten wurde
-                             ASSERT(counter==logic->get_local_branch_threshold());
-                             does_this_node_finished_these_round();
-                         }else
-                         {
-                          uint32_t new_local_threshold=logic->calc_local_threshold();
-                          logic->set_local_treshold(new_local_threshold);
-                         }
-                          EV<<" threshold "<<logic->get_local_threshold()<<endl;
-                     }else{
                           logic->run_var++;
                           counter+=logic->get_local_threshold();
 
                           if(logic->run_var==logic->get_k()){
+                              ASSERT(false); // dat ding kann hier wohl raus
                                     EV <<logic->run_var<<" times were this reached "<< logic->get_local_threshold() << "\n";
                                     logic->new_Round_c(0);
                                     logic->set_local_treshold(logic->calc_local_threshold());
@@ -649,12 +655,6 @@ void node_handler::handleIndication(DataIndication* msg) {
                                     EV <<"count is "<<counter<<endl;
                                     logic->run_var=0;
                                 }
-
-
-                     }
-
-
-
                  }
              }
 
@@ -669,13 +669,12 @@ void node_handler::handleIndication(DataIndication* msg) {
 
 
               // Distribute new Slack/threshold further
-             send_new_threshold((uint32_t)logic->get_local_threshold(),8);
+             send_new_threshold((uint32_t)logic->get_local_threshold(),8,read_uint32_t(msg,8));
 
              } // end of scope
 
 
-              // schau ob durch neues b vieleicht counter direkt erreicht ist
-             does_this_node_finished_these_round();
+
 
 
 
@@ -689,10 +688,13 @@ void node_handler::handleIndication(DataIndication* msg) {
 
 bool node_handler::does_this_node_finished_these_round(){
     bool fin=false;
-    if (counter >= threshold) {printResult();node_handler::running = false;} // Optimierung !!! (Spart bei Algo1+Line eine Nachricht, (Letzte nachricht um genau zu sein))
-    else
-    if(counter>=logic->get_local_branch_threshold()){
+//    if (counter >= threshold) {printResult();node_handler::running = false;} // Optimierung !!! (Spart bei Algo1+Line eine Nachricht, (Letzte nachricht um genau zu sein))
+//    else
+
             if(logic->isAlgo1()){
+                if(counter>=logic->get_local_branch_threshold()){ fin=true;
+
+
                 //ASSERT(counter==logic->get_local_branch_threshold()); // (kann der Fall sein siehe meine aufzeichnung bsp 42)
                 if(counter==1) {  send_event(palId_id()+sendCounter * amount_of_clients,2); counter-=1;}
                 else     {
@@ -702,12 +704,18 @@ bool node_handler::does_this_node_finished_these_round(){
                     }while(counter>=logic->get_local_branch_threshold());
                 }
 
+
+
+                }
             }
-            else {
+            else { if(counter>=logic->get_Slack()){ fin=true;
+
                 if(counter==1) {  send_event(palId_id()+sendCounter * amount_of_clients,2); counter-=1;  }
                 else {
-                do{ send_event(palId_id()+sendCounter * amount_of_clients,7,logic->get_local_branch_threshold()); counter-=logic->get_local_branch_threshold();
-                }while(counter>=logic->get_local_branch_threshold());
+                send_event(palId_id()+sendCounter * amount_of_clients,7,logic->get_local_branch_threshold()); counter-=logic->get_Slack();
+                while(counter>=logic->get_local_branch_threshold()){
+                send_event(palId_id()+sendCounter * amount_of_clients,7,logic->get_local_branch_threshold()); counter-=logic->get_local_branch_threshold();
+                };
                 }
 
             if(logic->get_local_branch_threshold()!=1) // wenn local_branch_threshold 1 ist, wird im folgenden der ganze ast jeden count direkt reporten
@@ -717,12 +725,13 @@ bool node_handler::does_this_node_finished_these_round(){
             logic->set_local_treshold(logic->calc_local_threshold());
              EV <<"we reached "<<logic->get_local_branch_threshold()<<endl;
              childs_local_threshold_reached_one=false;
-             send_new_threshold(logic->get_local_threshold(),8); // die nachricht müsste beim k-ten mal nicht gesendet werden, da denn eh ein neuer ini von oben kommt , aber ein node kennt nicht seine nachbarn !
+             send_new_threshold(logic->get_local_threshold(),8,1); // die nachricht müsste beim k-ten mal nicht gesendet werden, da denn eh ein neuer ini von oben kommt , aber ein node kennt nicht seine nachbarn !
+            }
+            }
             }
 
-            }
-            fin=true;
-    }
+
+
     return fin;
 };
 
@@ -779,7 +788,7 @@ void node_handler::send_event(uint32_t s,uint32_t status_code,uint32_t para) {
     WATCH(node_handler::messagesSend);
 }
 
-void node_handler::send_new_threshold(uint32_t new_local_threshold,uint32_t status_code){
+void node_handler::send_new_threshold(uint32_t new_local_threshold,uint32_t status_code,uint32_t restart){
 
     int size=(int) subs.getSize();
 
@@ -792,13 +801,14 @@ void node_handler::send_new_threshold(uint32_t new_local_threshold,uint32_t stat
                            (*frame) << status_code;
                            (*frame) << new_local_threshold;
 
-                 sendRequest(new DataRequest(subs[i], frame,createCallback(&node_handler::resp)));
-
                  if(status_code==4) {sendCounter++;node_handler::messagesSend++;
                                      EV << "neue runde an "<<subs[i]<<" (messages: "<<node_handler::messagesSend<< ")\n";}
                  if(status_code==8) {sendCounter++;node_handler::messagesSend++;
-                                                      EV << "neue runde an "<<subs[i]<<" (messages: "<<node_handler::messagesSend<< ")\n";}
+                                                      EV << "neue runde an "<<subs[i]<<" (messages: "<<node_handler::messagesSend<< ")\n";
+                                     (*frame) << restart;      }
                  if(status_code==6)  EV << "sending start observing further to "<<subs[i]<< endl;
+
+                 sendRequest(new DataRequest(subs[i], frame,createCallback(&node_handler::resp)));
 
                }
 }
