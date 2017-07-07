@@ -48,6 +48,10 @@ public:
 
 	static bool running;
 	static unsigned int messagesSend;
+	static unsigned int messages_sendCount;
+	static unsigned int messages_thresholdreached;
+	static unsigned int messages_newRound;
+	static unsigned int debug_val;
 	uint32_t last_sequencenumber;
 	uint32_t amount_of_clients;
 
@@ -64,6 +68,7 @@ public:
 	bool childs_local_threshold_reached_one;  //        |   X       |  X   | Every Node can have child nodes (not more in algo1)
 	unsigned long int last_threshold_send;
 	unsigned long int temp_count;
+
 
 	// fancy types
 	// timeOffset_t slf_msg_timer uint16
