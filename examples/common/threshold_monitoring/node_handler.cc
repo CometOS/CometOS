@@ -49,6 +49,7 @@ void node_handler::initialize() {
     sendCounter = 0;
     forwardCounter=0;
     last_sequencenumber = 0;
+    temp_count = 0;
     amount_of_clients = par("num_clients");
 
     out = BROADCAST; // broadcast ist 2^16 was vorzeichen behaftet minus eins ist
@@ -120,7 +121,7 @@ void node_handler::generate_events(Message *timer) {
         }else
         {
 
-       // if(palId_id()==3) {
+       // if(palId_id()==2 ) {
 
           // trivialer algo
           //  send_event(palId_id()+sendCounter * amount_of_clients);
@@ -259,12 +260,13 @@ void node_handler::handleIndication(DataIndication* msg) {
 
                        EV<<"new_local_threshold is: "<<new_local_threshold<<endl;
                        if(new_local_threshold!=1 && logic->isAlgo1() && counter<threshold)
-                           send_new_threshold(new_local_threshold,4);
+                       { send_new_threshold(new_local_threshold,4); } // ist möglich wenn am ende mehrere counts due to new round gesendet werden (e.g. t=10000 seed=5 concentric_19)
 
            }else
            {
-          //     send_event(read_uint32_t(msg,4)); // trivialer algo
-               if(logic->get_local_branch_threshold()==1)
+//               send_event(read_uint32_t(msg,4)); // trivialer algo
+               EV<<"temp_count"<<temp_count<<endl;
+               if(logic->get_local_branch_threshold()==1 && temp_count==0) // temp_count betrifft nur algo1
                send_event(read_uint32_t(msg,4));
                else{
 
@@ -331,6 +333,7 @@ void node_handler::handleIndication(DataIndication* msg) {
 
                 ASSERT(counter<logic->get_Slack());
                 logic->new_Round_c(counter); // reduziere slack
+                temp_count = counter;
                 counter=0;                  // mit max besprochen, dass counter vom slack direkt abgzogen wird
                 logic->set_local_branch_threshold(logic->get_Slack());
 
@@ -763,10 +766,10 @@ bool node_handler::does_this_node_finished_these_round(){
                 if(counter>=logic->get_local_branch_threshold()){ fin=true;
                  // ASSERT(logic->get_Slack()==0); muss net unbedingt der fall sein, es kann sein, das beim erhalten eienes neuen schwellenwertes, der breits überschritten ist sieh nachricht 4
                 //ASSERT(counter==logic->get_local_branch_threshold()); // (kann der Fall sein siehe meine aufzeichnung bsp 42)
-                if(counter==1) {  send_event(palId_id()+sendCounter * amount_of_clients,2); counter-=1;}
+                if(counter==1 && temp_count==0) {  send_event(palId_id()+sendCounter * amount_of_clients,2); counter-=1;}
                 else     {
                     do{
-                        send_event(palId_id()+sendCounter * amount_of_clients,5,logic->get_local_branch_threshold());
+                        send_event(palId_id()+sendCounter * amount_of_clients,5,logic->get_local_branch_threshold()+temp_count); temp_count=0;
                         counter-=logic->get_local_branch_threshold();
                     }while(counter>=logic->get_local_branch_threshold());
                 }

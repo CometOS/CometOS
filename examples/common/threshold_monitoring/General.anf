@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/cometos/examples/common/threshold_monitoring/results/General-*.vec"/>
+    <inputs name="/cometos/examples/common/threshold_monitoring/results/General-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="counts">
+      <items xsi:type="scave:Add" filterPattern="module(Network.node[*].handler)"/>
+      <items xsi:type="scave:Group" name="test_group">
+        <items xsi:type="scave:ComputeScalar" scalarName="all_counts" valueExpr="sum(Network.node[*].handler.sendCounter)" moduleExpr="Network.node[*]" groupByExpr="run"/>
+        <items xsi:type="scave:ComputeScalar" scalarName="conf_95" valueExpr="sum(Network.node[*].handler.sendCounter)" moduleExpr="Network.Node[*]" groupByExpr="run" averageReplications="true" computeConfidenceInterval="true" confidenceLevel="0.95"/>
+        <items xsi:type="scave:BarChart" name="test">
+          <properties name="Plot.Caching" value="false"/>
+          <properties name="Y.Axis.Title" value="Nachrichten"/>
+          <properties name="X.Axis.Title" value="Knoten"/>
+        </items>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets/>
+</scave:Analysis>
