@@ -180,7 +180,7 @@ void TrafficEvaluation::scheduleResponse(DataResponse *response) {
 
 void TrafficEvaluation::handleResponse(DataResponse *response) {
 
-	LOG_INFO("finish transmission: " << response->str());
+	LOG_INFO("finish transmission: " << response->to_str());
 
 	if(response->isFailed()) {
 		failed++;
@@ -241,7 +241,7 @@ void TrafficEvaluation::handleIndication(DataIndication* msg) {
             (void) lqi; // avoid warning if logging is disabled
         }
 
-	    LOG_INFO("!0x" << hex << msg->src << "!0x" << msg->dst << "!" << "!R!" << type << "!" << dec << remoteSequenceNumber << "!0x" << hex << palId_id() << "!" << dec << rssi << "!" << dec << lqi);
+	    LOG_ERROR("!0x" << hex << msg->src << "!0x" << msg->dst << "!" << "!R!" << type << "!" << dec << remoteSequenceNumber << "!0x" << hex << palId_id() << "!" << dec << rssi << "!" << dec << lqi);
         //LOG_INFO("dst=0x" << hex << msg->dst << "|src=0x" << msg->src << dec << "|RSSI=" << rssi);
 
 

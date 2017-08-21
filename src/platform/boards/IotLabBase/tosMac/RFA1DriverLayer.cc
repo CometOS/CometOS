@@ -967,10 +967,12 @@ void serviceRadio() {
             }
 		}
 		else {
+            /*
 			if (cmd != CMD_TURNOFF) {
 				cometos::getCout() << "irq " << irq << " state " << radio_state << " cmd " << (uint8_t)cmd << cometos::endl;
                 RADIO_ASSERT(false);
 			}
+            */
 			//RADIO_ASSERT( cmd == CMD_TURNOFF);
 		}
 		palExec_atomicEnd();

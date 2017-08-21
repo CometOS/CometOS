@@ -57,6 +57,9 @@ mac_result_t radioSend_send(message_t* msg);
 
 mac_result_t radioCCA_request();
 
+cometos_error_t radioState_turnOff();
+cometos_error_t radioState_turnOn();
+
 cometos_error_t radioState_setChannel(uint8_t c);
 cometos_error_t radioState_forceChannel(uint8_t c);
 

@@ -163,10 +163,12 @@ bool DSMEPlatform::sendDelayedAck(IDSMEMessage *ackMsg, IDSMEMessage *receivedMs
 }
 
 void DSMEPlatform::turnTransceiverOn() {
+    //radioState_turnOn();
     transceiverStateChanged(SRX);
 }
 
 void DSMEPlatform::turnTransceiverOff() {
+    //radioState_turnOff();
     transceiverStateChanged(OFF);
 }
 
