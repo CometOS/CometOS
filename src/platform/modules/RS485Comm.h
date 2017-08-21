@@ -66,8 +66,6 @@ public:
        		taskTx(*this),
        		taskSendUp(*this),
        		taskRx(*this),
-       		rxBufferRS485(NULL),
-        rxBufferSendUp(NULL),
 		txPending(false),
 		master(master),
 		slaveAddress(slaveAddress),
