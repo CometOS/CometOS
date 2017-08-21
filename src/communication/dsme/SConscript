@@ -39,7 +39,7 @@ env.add_sources(map(lambda x: 'openDSME/'+x, [
 'mac_services/pib/MAC_PIB.cc',
 'dsmeAdaptionLayer/GTSHelper.cc',
 'dsmeAdaptionLayer/ScanHelper.cc',
-'dsmeAdaptionLayer/GTSController.cc',
+'dsmeAdaptionLayer/scheduling/PIDScheduling.cc',
 'dsmeAdaptionLayer/AssociationHelper.cc',
 'dsmeAdaptionLayer/DSMEAdaptionLayer.cc',
 'dsmeLayer/messageDispatcher/MessageDispatcher.cc',

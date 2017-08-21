@@ -48,6 +48,7 @@
 
 #include "DSMEMessage.h"
 #include "openDSME/dsmeAdaptionLayer/DSMEAdaptionLayer.h"
+#include "openDSME/dsmeAdaptionLayer/scheduling/PIDScheduling.h"
 #include "openDSME/helper/DSMEDelegate.h"
 #include "openDSME/interfaces/IDSMEPlatform.h"
 #include "openDSME/mac_services/dataStructures/IEEE802154MacAddress.h"
@@ -141,6 +142,7 @@ protected:
     mlme_sap::MLME_SAP mlme_sap;
 
     DSMEAdaptionLayer dsmeAdaptionLayer;
+    PIDScheduling scheduling;
 
     uint16_t messagesInUse;
 

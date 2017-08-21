@@ -72,6 +72,7 @@ DSMEPlatformBase::DSMEPlatformBase(const char* service_name) :
                 mcps_sap(dsme),
                 mlme_sap(dsme),
                 dsmeAdaptionLayer(dsme),
+                scheduling(dsmeAdaptionLayer),
 
                 messagesInUse(0),
 
