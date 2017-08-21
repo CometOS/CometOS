@@ -92,7 +92,7 @@ public:
         return status != DataResponseStatus::SUCCESS;
     }
 
-    const char* str() const {
+    const char* to_str() const {
         switch(status) {
         case DataResponseStatus::SUCCESS:
             return "SUCCESS";
@@ -120,6 +120,16 @@ public:
             return "";
         }
     }
+
+private:
+#ifdef OMNETPP
+    std::string str() const {
+        // to_str() was str() before, but str() was newly
+        // introducted in OMNeT++ 5.1.1, so this can no
+        // longer be used.
+        return "";
+    }
+#endif
 };
 
 

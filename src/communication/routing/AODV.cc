@@ -358,12 +358,12 @@ void AODV::handleIndication(DataIndication* msg) {
 }
 
 void AODV::handleRrepResponse(DataResponse* resp) {
-    LOG_DEBUG(palId_id() << " finish rrep: " << resp->str());
+    LOG_DEBUG(palId_id() << " finish rrep: " << resp->to_str());
     delete resp;
 }
 
 void AODV::handleRreqResponse(DataResponse* resp) {
-    LOG_DEBUG(palId_id() << " finish rreq: " << resp->str());
+    LOG_DEBUG(palId_id() << " finish rreq: " << resp->to_str());
     delete resp;
 }
 

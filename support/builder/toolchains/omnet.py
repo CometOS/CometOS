@@ -57,7 +57,10 @@ class OmnetToolchain:
         self.env.Append(LINKFLAGS = "-u _tkenv_lib -Wl,--no-as-needed -u _cmdenv_lib -Wl,--no-as-needed")
 
         # Library paths
-        libpaths = os.environ['LD_LIBRARY_PATH'].split(':')+self.env['LIBPATH']
+        libpaths = []
+        if 'LD_LIBRARY_PATH' in os.environ:
+            libpaths += os.environ['LD_LIBRARY_PATH'].split(':')
+        libpaths += self.env['LIBPATH']
         self.env.Append(ENV = {'LD_LIBRARY_PATH': ':'.join(libpaths)})
 
         # Defines	

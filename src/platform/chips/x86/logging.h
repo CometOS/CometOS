@@ -73,6 +73,8 @@ std::ostream& operator<<(std::ostream& lhs, const cometos::Endl& rhs);
 
 const char * getName();
 
+#define PREFIX NetworkTime::get()<<"|"<<getName()<<"|"<<__func__<<"|"
+
 #define COMETOS_LOG_PREFIX(ss, level, channel) {\
     ss<<NetworkTime::get()<<"|"<<getName()<<"|"<<std::hex<<channel<<std::dec<<"|"<<__func__<<"|";\
 }
